@@ -1,0 +1,742 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+  
+  <meta content="en-us" http-equiv="Content-Language" />
+
+  
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+  <title>External Process Interface</title>
+
+  
+</head><body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span style="font-size: 24pt;"> <img src="LucretiaLogo.gif" alt="LucretiaLogo" style="border: 0px solid ; width: 80px; height: 90px;" align="right" hspace="20" /></span></a><span style="font-size: 24pt;"><br />
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span> Project</span><br />
+</div>
+<span style="font-size: 24pt;"><br />
+<small>Interface Routines to Access External Processes<br />
+<br />
+</small></span><br />
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;"> Interface routines between Lucretia and
+other modeling software tools are handled by the ExtProcess.m class and
+other class files in the src/ExtProcess directory. These provide tools
+to link the Lucretia data structures and underlying tracking engine to
+other modeling software, and also handle returning processed data back
+into the Lucretia Matlab environment. The ExtProcess library of classes
+perform this function by modifying and extending the functionality of
+the standard Lucretia data structures. The external codes which
+Lucretia currently supports are listed below:<br />
+<div> </div>
+<ul>
+  <li>
+    <div><a href="extProcess_geant4.html">GEANT4</a> </div>
+  </li>
+</ul>
+The upper-level classes define global interfaces which are ineherited
+by the underlying classes supportng the above external processes which
+provide interface support to the specific codes. These classes are
+designed to support tracking through material and/or EM fields beyond
+the scope of the principal Lucretia tracking engine.<br />
+<br />
+In general, control of tracking is passed to the external process if it
+is stopped by the Lucretia tracking engine in a BEAMLINE element which
+has an <b>ExtProcess</b> object assigned to it (e.g. as happens if a
+particle is deemed to strike a defined aperture and the 'Aper'
+TrackFlag field is set). Alternatively, particles are forced into being
+handled by the associated external process by setting the <b>ForceProcess</b>
+property of the <b>ExtProcess</b> object to true.<br />
+<br />
+<a href="#ExtProcess">ExtProcess</a> <a href="#ExtGeometry">ExtGeometry</a>
+<a href="#ExtPrimaryParticles">ExtPrimaryParticles</a> <a href="#ExtSecondaryParticles">ExtSecondaryParticles</a>
+<a href="#ExtEMField">ExtEMField</a> <a href="#ExtPhysics">ExtPhysics</a>
+<a href="#ExtMesh">ExtMesh</a> <a href="#ExtTunnelGeom">ExtTunnelGeom</a> 
+<br /> 
+<br />
+<a href="#GeometryTypes">Additional details for geometry types
+available below.<br />
+</a>
+<h3 style="color: rgb(51, 102, 255);"><a name="ExtProcess">ExtProcess.m<br />
+</a></h3>
+The public (Static) method <span style="font-style: italic;">new</span>
+is invoked to spawn a new external process of requested type and
+attaches this object to a BEAMLINE element to which it is associated.<br />
+<h4><u>Public properties</u></h4>
+<ul>
+  <li><b>MaxSecondaryParticles</b> = 0</li>
+  <ul>
+    <li>Controls the generation of secondary particles (not necessarily
+just electrons) from external processes. Setting &gt;0 will allow for
+the storage of this max number of secondary particles.<br />
+    </li>
+  </ul>
+  <li><b>MaxPrimaryParticles</b> = 1e4</li>
+  <ul>
+    <li>Controls the max number of Lucretia macro particles (from the
+Lucretia <a href="beam.html">Beam</a> structure) to be passed to the
+external process. If this number is &lt; the number of macro particles
+in the Lucretia Bunch under consideration, the default behaviour when
+using the <a href="tracking.html#Track">Track</a> class is to choose a
+selection of particles to pass to the external process using the
+SetPrimaryOrdering method of this class. If manually tracking with <a href="tracking.html#TrackThru">TrackThru</a> then either call this
+method directly on the instantiated process object or the default
+behaviour is to take the first <span style="font-style: italic;">MaxPrimaryParticles</span>
+in the bunch.<br />
+    </li>
+  </ul>
+  <li><b>MaxSecondaryParticlesPerPrimary</b> = 10</li>
+  <ul>
+    <li>Max number of secondary particles to allow per provided primary
+particle (overall limit of <span style="font-style: italic;">MaxSecondaryParticles</span>
+still applies)<br />
+    </li>
+  </ul>
+  <li><b>NumSecondariesStored</b> = 0 <br />
+  </li>
+  <ul>
+    <li>Number of secondary particles actually stored (set by the
+tracking code).</li>
+  </ul>
+  <li><span style="font-weight: bold;">SecondaryStorageCuts = </span>1</li>
+  <ul>
+    <li>Specify cut parameters under which secondary particles are
+stored. 1= only secondaries which reach d/s face of element. 0=all
+secondaries which pass any Energy cuts.<br />
+    </li>
+  </ul>
+  <li><b>PrimaryParticlesData / SecondaryParticlesData</b></li>
+  <ul>
+    <li>Storage area for data generated by Ext process reslated to
+primary particles (Lucretia Bunch rays) and secondary particles (if
+requested and cuts passed for storage criteria) respectively. These
+entries are objects of ExtPrimaryParticles and ExtSecondaryParticles
+classes respectively, an array of such objects is generated, one entry
+per bunch tracked if multi-bunch tracking performed.</li>
+  </ul>
+  <li><b>ForceProcess</b><b> </b>= false</li>
+  <ul>
+    <li>Set true to force passing of control over to external process
+for this BEAMLINE element (e.g regardless of aperture settings).</li>
+  </ul>
+  <li><span style="font-weight: bold;">TrackStoreMax</span> = 0</li>
+  <ul>
+    <li>If &gt;0, store vector of tracked primary particles (points
+along particle track are stored with granularity according to tracking
+settings internal to the external process). Max number of tracking
+points to store us given by TrackStoreMax property value.</li>
+  </ul>
+  <li><span style="font-weight: bold;">PrimaryType</span> = 'e-'</li>
+  <ul>
+    <li>By default, it is assumed electron particles from Lucretia are
+the primary tracked particles. Set this to one of the <span style="font-weight: bold;">supportedPrimaryParticles</span> supported
+particle types to track a different particle (e.g. if you want to track
+returned secondary particles from a previous run).</li>
+  </ul>
+  <li><span style="font-weight: bold;">TrackSecondaryAsPrimary</span> =
+0</li>
+  <ul>
+    <li>Set &gt;0 to treat the parsing of particles from Lucretia to
+external process differently when tracking previously returned
+secondary particles. e.g. z-location within element is properly kept.<br />
+    </li>
+  </ul>
+</ul>
+<h4><u>Public methods</u></h4>
+<ul>
+  <li><b>InitializeTracking / FinalizeTracking</b><span style="font-style: italic;" /></li>
+  <ul>
+    <li>Called automatically by Track object at the beginning and end
+of tracking to setup and move memory areas for storage of data from Ext
+process. If you wish to track manually using the TrackThru function,
+you need to call these methods yourself for all ExtProcess derived
+objects attached to the BEAMLINE array.<br />
+InitializeTracking sets the order of particles from the Lucretia <span style="font-style: italic;">primaryBeam</span> structure to sample
+macro-particles up to the limit set by <span style="font-style: italic;">MaxPrimaryParticles</span>. This sets the
+property <span style="font-style: italic;">PrimarySampleOrder</span>
+which is a cell array containing indices which point to the macro
+particles in the Bunches of the provided Beam structure. Each index
+vector is the order in which the primary beam particles are read into
+the external process up to the <span style="font-style: italic;">MaxPrimaryParticles</span>
+limit. The order is set so the highest weighted (charge)
+macro-particles are selected first, where multiple macro-particles have
+identical charge weight then these are randomized. This method is
+called automatically from the Track class. </li>
+  </ul>
+</ul>
+<h4><u>Static methods</u></h4>
+<ul>
+  <li><b>new</b>(<span style="font-style: italic;">processType,elemno,[parameter
+list...]</span>)</li>
+  <ul>
+    <li>Instantiate a new extProcess object of the type <span style="font-style: italic;">processType</span> (e.g. 'GEANT4') which
+associates to the BEAMLINE element <span style="font-style: italic;">elemno</span>.
+This attaches an object called 'ExtProcess' to the given BEAMLINE
+element of class given by<span style="font-style: italic;"><span style="font-style: italic;"><span style="font-style: italic;">
+processType. </span></span></span>Optionally pass a list of public
+property, value pairs which get applied to the instantiated object.<br />
+    </li>
+  </ul>
+</ul>
+<h3 style="color: rgb(51, 102, 255);"><a name="ExtGeometry">ExtGeometry.m</a></h3>
+Defines geometrical objects associated with external processes. The
+objects are assumed to have length determined by the associated
+BEAMLINE element and where available the other properties take their
+default values from properties of the BEAMLINE element. The <span style="font-style: italic;">GeometryType</span> property defines the
+cross-sectional shape, with provided thickess.<br />
+<h4><u>Properties</u> (Set Access protected: use Set* methods to change)<br />
+</h4>
+<ul>
+  <li><b>GeometryType</b>='Ellipse'<br />
+  </li>
+  <ul>
+    <li>Type of shape. Set with <span style="font-style: italic;">SetGeometry</span>
+method, choose from list in <span style="font-style: italic;">allowedGeometryTypes</span>
+('Ellipse', 'Rectangle' or 'Tapered') cell array list.<br />
+    </li>
+  </ul>
+  <li><b>AperX</b>=1</li>
+  <ul>
+    <li>Inside half-aperture of shape (m) - Horizontal dimension. Set
+with <span style="font-style: italic;">SetAper</span> method.<br />
+    </li>
+  </ul>
+  <li><b>AperY</b>=1</li>
+  <ul>
+    <li>Inside half-aperture of shape (m) - Vertical dimension. Set
+with <span style="font-style: italic;">SetAper</span> method.</li>
+  </ul>
+  <li><b>AperX2</b>=0 / <b>AperY2</b>=0 /<b> AperX3</b>=0 /<b> AperY3</b>=0</li>
+  <ul>
+    <li>Additional aperture descriptions for use with 'Tapered'
+geometry type. Values are fractions of CollDX/CollDY [value= 0:1].<br />
+    </li>
+  </ul>
+  <li><b>CollDX</b>=0<b> </b>/<b> CollDY</b>=0<b><br />
+    </b></li>
+  <ul>
+    <li>Horizontal and vertical material thickness parameters (m ) for
+use with 'Tapered' geometry type.</li>
+  </ul>
+  <li><b>CollLen2</b>=0</li>
+  <ul>
+    <li>Secondary length parameter for use with 'Tapered' Geometry
+type. Specified as fraction of BEAMLINE{N}.L overall geometry length
+parameter [value=0:1].<br />
+    </li>
+  </ul>
+  <li><b>Thickness</b>=1</li>
+  <ul>
+    <li>Geometry thickness (m). Set with <span style="font-style: italic;">SetThickness</span> method. Also specifies
+box half-width &amp; height for "World" volume which contains
+geometries.<br />
+    </li>
+  </ul>
+  <li><b>Material</b>='Vacuum'</li>
+  <ul>
+    <li>Material type. Choose from list in <span style="font-style: italic;">allowedMaterials </span>property. Set
+with <span style="font-style: italic;">SetMaterial</span> method. Type
+'Vacuum' always available, which is a perfect vacuum and generates no
+particle interactions.<br />
+    </li>
+  </ul>
+  <li><b>Material2</b>='Vacuum'</li>
+  <ul>
+    <li>Additional material type (for use with 'Tapered' geometry
+type). Type 'Vacuum' always available, which is a perfect vacuum and
+generates no particle interactions.</li>
+  </ul>
+  <li><b>VacuumMaterial</b>='Vacuum'</li>
+  <ul>
+    <li>Material to associate with the "World" volume (where the
+material does not exist and inside the aperture), usually a vacuum (no
+particle interactions generated), but can also supply an additional
+material type to use instead. This can be useful to e.g. supply a
+vacuum material definition with a specific pressure for beam-gas
+scattering studies.<br />
+    </li>
+  </ul>
+  <li><b>MaterialPressure</b>=0</li>
+  <ul>
+    <li>Specify gas pressure (pascals) of provided <i>Material</i>
+type. If =0 then STP and state assumed, if non-zero then assumed to be
+a gas. Use <i>SetMaterialPressure</i> method to set.<br />
+    </li>
+  </ul>
+  <li><b>MaterialTemperature</b>=0</li>
+  <ul>
+    <li>Specify gas temperature (Kelvin) of provided <i>Material</i>
+type. If =0 then STP and state assumed, if non-zero then assumed to be
+a gas. Use <i>SetMaterialTemperature</i> method to set.</li>
+  </ul>
+  <li><b>Material2Pressure</b>=0 / <b>Material2Temperature</b>=0</li>
+  <ul>
+    <li>As above but for Material2 type (for use with 'Tapered'
+geometry type). Use <i>SetMaterialPressure</i>/<i>SetMaterialTemperature</i>
+method to set.</li>
+  </ul>
+  <li><b>UserMaterial</b>=[]</li>
+  <ul>
+    <li>Container to hold user-defined material definitions (see
+SetUserMaterial and SetUserMaterialElement methods).<br />
+    </li>
+  </ul>
+</ul>
+<u><b>Methods</b></u><br />
+<ul>
+  <li><b>SetAper</b>(<i>X_aperture, Y_aperture</i>)</li>
+  <ul>
+    <li>Set horizontal and vertical aperture sizes (m).</li>
+  </ul>
+  <li><b>SetAper2</b>(<i>X_aperture_fraction, Y_aperture_fraction</i>)
+/ <b>SetAper3</b>(<i>X_aperture_fraction, Y_aperture</i><i>_fraction</i>)</li>
+  <ul>
+    <li>Set tapered apertures for 'Tapered' geometry type. Arguments
+are to be provided as a fraction of the <i>thickness</i> parameter.
+[0:1]<br />
+    </li>
+  </ul>
+  <li><b>SetGeometry</b>(<i>type</i>)</li>
+  <ul>
+    <li>Set geometry type (allowed types = 'rectangle', 'ellipse')</li>
+  </ul>
+  <li><b>SetMaterial</b>(<i>material_type</i>)</li>
+  <ul>
+    <li>Set material type (must be member of <b><i>allowedGeometryTypes</i></b>
+list)</li>
+  </ul>
+  <li><b>SetMaterial2</b>(<i>material_type</i>)</li>
+  <ul>
+    <li>As above for <i>Material2</i> parameter applied to central
+piece of 'Tapered' geometry type (can be same as <i>material</i>).</li>
+  </ul>
+  <li><b>SetVacuumMaterial</b>(<i>material_type</i>)</li>
+  <ul>
+    <li>Set the material used for the "World Volume" (where material is
+not located and inside defined aperture). (must be member of <b><i>allowedGeometryTypes</i></b>
+list)</li>
+  </ul>
+  <li><b>SetThickness</b>(<i>material_thickness</i>)</li>
+  <ul>
+    <li>Set thickness of material (m).</li>
+  </ul>
+  <li><b>SetCollDX</b>(<i>material_thickness)</i></li>
+  <ul>
+    <li>Thickness of material in horizontal plane for 'Tapered'
+geometry type (m). Must be &lt;= <i>thickness</i>.<br />
+    </li>
+  </ul>
+  <li><b>SetCollDX</b>(<i>material_thickness)</i></li>
+  <ul>
+    <li>Thickness of material in vertical plane for 'Tapered' geometry
+type (m). Must be &lt;= <i>thickness</i>.</li>
+  </ul>
+  <li><b>SetCollLen2</b>(<i>gemetry_length_fraction</i>)</li>
+  <ul>
+    <li>Length of central auxillary piece of 'Tapered' geometry type.
+Provide as a fraction of BEAMLINE{N}.L field [0:1]. If 0 then no
+central piece, just smooth taper from <i>Aper2</i> to <i>Aper(X/Y)</i><i>
+      </i>towards element center.<br />
+    </li>
+  </ul>
+  <li><b>SetMaterial</b><b>Pressure</b><b>(</b><i>pascals</i>)=0</li>
+  <ul>
+    <li>Set material pressure in pascals. If 0 then STP and default
+state assumed, else gas with provided pressure.</li>
+  </ul>
+  <li><b>SetMaterialTemperature</b>(<i>Kelvin</i>)=0</li>
+  <ul>
+    <li>Set material temperature in Kelvin. If 0 then STP and default
+state assumed, else gas with provided temerature.</li>
+  </ul>
+  <li><b>SetMaterial2Pressure</b>(<i>pascals</i>)/<b>SetMaterial2Temperature</b>(<i>Kelvin</i>)</li>
+  <ul>
+    <li>As above but as applies to <i>Material2</i>.<br />
+    </li>
+  </ul>
+  <li><b>SetUserMaterial</b>(<i>id,density,temperature,pressure</i><i>,state,num_components</i>)</li>
+  <ul>
+    <li>Define a custom material definition. Up to 3 definitions per
+ExtProcess object are allowed (<i>id</i>=[1,2,3]) which can be
+associated with geometries using the <i>material_type</i> 'User1',
+'User2' or 'User3' for id=1,2 or 3 respectively. Supply user-defined <i>density</i>
+(g/cm^3), <i>temerature</i> (Kelvin) and <i>pressure</i> (pascals)
+values for the material, also provide the required material <i>state</i>
+('Solid','Liquid' or 'Gas'). The material is composed of 1 or more
+user-defined elements (to be supplied by the <i>SetUserMaterialElement</i><i>s</i>
+method). The number of elements given by the <i>num_components</i>
+argument. By default a single Hydrogen element is defined.</li>
+  </ul>
+  <li><b>SetUserMaterialElements</b><b>(</b><i>id,names,symbols,Z,A,fraction_mass</i>)</li>
+  <ul>
+    <li>Set the parameters for the <i>UserMaterial</i><i> </i>definition
+corresponding to <i>id</i> ('User&lt;<i>id</i>&gt;' material type).
+Define any number of elements to associate with the material. All other
+arguments should have the same length, equal to the <i>num_components</i>
+defined for this material <i>id</i>. <i>names</i> and <i>symbols</i>
+should be cell arrays with strings giving each element a unique (amonst
+all defined elements for all materials) name and symbol (to identify
+materials listed by the (user selected) verbose output of the external
+process software. <i>Z</i> and <i>A</i> are vectors of atomic numbers
+and atomic masses (g/mole) for the list of elements. <i>fraction_mass</i>
+is the fraction of the material composition for each provided element
+(the provided vector should sum to 1).</li>
+  </ul>
+</ul>
+<h3 style="color: rgb(51, 102, 255);"><a name="ExtMesh">ExtMesh.m</a></h3>
+Generate and manage data mesh for statistics
+relating to external process. This allows 3d binning of the BEAMLINE
+element being tracked in the external process for storing hit
+denisities of tracks, optionally weighted by kinetic energy, momentum
+or depositied energy in the mesh volume. Add one or more scoring meshes
+to a given element using the AddMesh method (delete one with the
+DeleteMesh method).
+<h4><u>Public methods<br />
+</u></h4>
+<ul>
+  <li><b>AddMesh(ptypes,weight,nx,ny,nz)</b></li>
+  <ul>
+    <li>ptypes: char of particle type to bin data in mesh OR cell array
+ofmultiple particle types (see <span style="font-weight: bold;">meshParticleTypes</span>
+property)</li>
+    <li>weight: choose to weight binning by kinetic energy ('ke')
+(GeV), track momentum ('mom') (GeV/c), energy deposited in mesh cell
+(J) ('Edep') or just count tracks in cell ('N')</li>
+    <li>nx, ny, nz: number of cells in x, y and z dimensions (mesh is
+distributed as a box around element volume (max radius =
+aperture+thickness parameters) (Sizes are in m, energies in GeV<b>)</b></li>
+  </ul>
+  <li><b><span style="font-weight: bold;">DeleteMesh(mID)</span></b></li>
+</ul>
+<h3 style="color: rgb(51, 102, 255);"><a name="ExtPrimaryParticles">ExtPrimaryParticles.m</a></h3>
+Information regarding tracked primary particles (tracks transfered and
+tracked from Lucretia Beam). Rays are indexed according to position in
+Beam.Bunch.x array.<br />
+<h4><u>Public properties</u></h4>
+<ul>
+  <li><b>regeneratedID</b></li>
+  <ul>
+    <li>List of particles stopped by Lucretia (Aperture exceeded),
+passed to Ext process and then un-stopped and re-entered into Lucretia
+tracking routine by Ext process for a given BEAMLINE element location.</li>
+  </ul>
+  <li><span style="font-weight: bold;">TrackingData_x / TrackingData_y
+/ TrackingData_z</span></li>
+  <ul>
+    <li>Tracking data points (x,y,z) recorded by EXT process if
+requested with TrackStoreMax&gt;0</li>
+    <li>data is stored in 2d array: [bunch ID(1:nmacro_particles),
+track point ID(1:max # points recorded {&lt;=TrackStoreMax})]</li>
+  </ul>
+  <li><span style="font-weight: bold;">TrackingDataPointer</span></li>
+  <ul>
+    <li>Array of ray IDs with pointers to last index in TrackingData
+for that ray</li>
+  </ul>
+  <li><span style="font-weight: bold;">PrimaryTrackTime</span></li>
+  <ul>
+    <li>Total track time in element for primary ray / ns<span style="font-weight: bold;"><br />
+      </span></li>
+  </ul>
+</ul>
+<ul>
+  <ul>
+  </ul>
+</ul>
+<h3 style="color: rgb(51, 102, 255);"><a name="ExtSecondaryParticles">ExtSecondaryParticles.m</a></h3>
+Storage class for secondary particles generated by Ext process, only
+particles which pass defined cuts are stored up to the maximum
+requested.<br />
+<h4><u>Public properties</u></h4>
+<ul>
+  <li><b>NumStored</b></li>
+  <ul>
+    <li>Number of secondary particles for this element actually stored
+by Ext process code.<br />
+    </li>
+  </ul>
+  <li><b>Pos</b></li>
+  <ul>
+    <li>[6,<span style="font-style: italic;">NumStored</span>] array of
+stored secondary particle ray coordinates (in usual Lucretia <a href="beam.html">Beam</a> Bunch format). Co-ordinates of stored rays
+are relative to the element, in the reference frame of that element
+(i.e. it is up to the user to apply any reference frame offset implied
+by the BEAMLINE{N}.Offset field). Where the extent of the element: is
++/- (<i>X_aperture+thickness</i>) / 2; +/- (<i>Y_aperture+thickness</i>)/2;
++/- <i>element_Length</i>/2 [in x;y;z dimensions].<br />
+    </li>
+  </ul>
+  <li><b>PrimaryID</b></li>
+  <ul>
+    <li>Link to primary particle ID (Lucretia Beam Bunch ray index)
+that created this secondary (or parent theerof).</li>
+  </ul>
+  <li><b>ParticleType</b></li>
+  <ul>
+    <li>Cell array of particle type names.</li>
+  </ul>
+  <li><span style="font-weight: bold;">ProcType</span></li>
+  <ul>
+    <li>Link to physics process which generated secondary (list of
+processes in supportedProcessPhysics property)</li>
+  </ul>
+  <li><span style="font-weight: bold;">TrackStatus</span></li>
+  <ul>
+    <li>Status of secondary tracks when written out (proccess
+dependent, for GEANT: listed status options in G4TrackStatus property)</li>
+  </ul>
+  <li><span style="font-weight: bold;">SecondaryTrackTime</span></li>
+  <ul>
+    <li>Total track time in element for secondary rays (from ray
+generation to element exit) / ns<span style="font-weight: bold;"><br />
+      </span></li>
+  </ul>
+</ul>
+<h3><font color="#3366ff"><a name="ExtEMField">ExtEMField.m</a></font></h3>
+<p>Class to define electro-magnetic fields to associate with a given
+BEAMLINE element.</p>
+<p><span style="font-weight: bold;">Tracking Inside Apertures of
+Magnetic Element Types:</span><br />
+If tracking passed to external process inside element classes 'QUAD' or
+'SEXT' and <span style="font-weight: bold;">EnableEM</span>
+property is set to true, the Bx and By field values are calculated when
+tracking inside the magnet aperture and superimposed onto provided Bx
+&amp; By field values (if any). Other magnet element types will also be
+supported in future releases.<br />
+</p>
+<p><u><b>Public properties</b></u><br />
+</p>
+<ul>
+  <li><b>StepMethod</b></li>
+  <ul>
+    <li>Defines which choice of integration routine to use (from list
+in <i>StepMethods</i> populated by inhereting class). Set with <i>SetStepMethod</i>
+method.<br />
+    </li>
+  </ul>
+  <li><b>Interpolator</b></li>
+  <ul>
+    <li>Defines interpolation method to use for looking up EM field
+(from list in <i>Interpolators</i> populated by inhereting class). Set
+with <i>SetInterpolator</i> method.<br />
+    </li>
+  </ul>
+  <li><b>EnableEM</b></li>
+  <ul>
+    <li>Displays the on/off state for the application (or not) of the
+defined EM fields when tracking through the assoicated BEAMLINE
+element. Use the <i>EnableFieldCalc</i>() / <i>DisableFieldCalc</i>()
+methods to set.<br />
+    </li>
+  </ul>
+  <li><b>StepPrec</b> = 1e-5<br />
+  </li>
+  <ul>
+    <li>Precision parameter to pass to field stepper solver (m).<br />
+    </li>
+  </ul>
+  <li><b>Bx / By / Bz / Ex / Ey / Ez</b></li>
+  <ul>
+    <li>Properties defining electro-magnetic field vector (Tesla, kV/m
+units).</li>
+    <li>If all Ex/Ey/Ez or all Bx/By/Bz properties set = 0 (scalar)
+then purely magnetic or electric field assumed.</li>
+    <li>If field properties set to scalar values then a uniform field
+value for that component is assumed to permeate the element volume.</li>
+    <li>To define 3D potential, set using 3 dimension [N x N x N]
+array. The 3D array potential is constrained to span the element volume
+precisely (equally spatially distributed points).</li>
+    <li>The field volume spans the entire element volume: from 0,0,0
+being the centre of the volume to +/- (<i>Aper_x+thickness</i>)/2; (<i>Aper_y+thickness</i>)/2;
+      <i>element_</i><i>Length</i>/2. If it is required to set a finite
+field strength only within the material volume and not within (or
+vice-versa), the user can control this by manually setting the 3D field
+components as specified above.<br />
+    </li>
+  </ul>
+</ul>
+<u><b>Public Methods</b></u><br />
+<ul>
+  <li><b>SetInterpolator</b></li>
+  <li><b>SetStepMethod</b></li>
+  <li><b>EnableFieldCalc</b>()<b> / </b><b>DisableFieldCalc</b>()</li>
+</ul>
+<br />
+<h3><a name="ExtTunnelGeometry"><font><font color="#3366ff">ExtTunnelGeometry.m</font></font></a></h3>
+<h3 style="font-weight: normal;">Class for definining tunnel geometry
+surrounding a BEAMLINE element. Supports cube world volume of given
+material, and a main and service tunnel within. Geometry descriptions
+are provided by the <a href="http://geant4.web.cern.ch/geant4/UserDocumentation/UsersGuides/ForApplicationDeveloper/html/ch04.html#sect.Geom">GEANT4
+description of a generic trapezoid.</a></h3>
+By default, no tunnel volume exists and tracking in the external
+process takes place purely in the volume defined by the Lucretia
+BEAMLINE element. To define a tunnel volume, use the SetTunnelHeight
+and SetTunnelWidth methods to define the extent of the tunnel, using
+SetTunnelMaterial to define the material surrounding the tunnel. Then
+use SetBeamTunnelGeom to "carve out" the tunnel shape which is filled
+with "Air" material. Then use SetBeamTunnelPos to position the tunnel
+with respect to the beamline position.<br />
+Additionally, a "service" tunnel can be defined using
+SetServiceTunnelGeom and SetServiceTunnelPos methods in an identical
+way to the main tunnel described above.<br />
+<br />
+<h3><u><b>Public Methods</b></u><br />
+</h3>
+<ul>
+  <li><b>SetTunnelHeight(height)</b></li>
+  <ul>
+    <li>Extent of tunnel height / m<b><br />
+      </b></li>
+  </ul>
+  <li><b>SetTunnelWidth(width)</b></li>
+  <ul>
+    <li>Extent of tunnel width / m<b><br />
+      </b></li>
+  </ul>
+  <li><span style="font-weight: bold;">SetTunnelMaterial(mat)</span></li>
+  <ul>
+    <li>Fill in tunnel volume using mat material (char)<span style="font-weight: bold;"><br />
+      </span></li>
+  </ul>
+  <li><span style="font-weight: bold;">SetBeamTunnelGeom(trapArgs)</span></li>
+  <ul>
+    <li>trapArgs: [theta,phi,dy1,dx1,dx2,alp1,dy2,dx3,dx4,alp2] (dz
+given by element length)<span style="font-weight: bold;"><br />
+      </span></li>
+  </ul>
+  <li><span style="font-weight: bold;">SetBeamTunnelPos(pos)</span></li>
+  <ul>
+    <li>Beam tunnel position pos un m (relative to design beam
+trajectory)<span style="font-weight: bold;"><br />
+      </span></li>
+  </ul>
+  <li><span style="font-weight: bold;">SetServiceTunnelGeom(trapArgs)</span></li>
+  <ul>
+    <li>trapArgs: [theta,phi,dy1,dx1,dx2,alp1,dy2,dx3,dx4,alp2] (dz
+given by element length)</li>
+  </ul>
+  <li><span style="font-weight: bold;">SetServiceTunnelPos(pos)</span></li>
+  <ul>
+    <li>Service tunnel position pos un m (relative to design beam
+trajectory)</li>
+  </ul>
+</ul>
+<h3>
+</h3><h3><a name="ExtPhysics"><font color="#3366ff">ExtPhysics.m</font></a> </h3>
+Enables control over physics processes implemented in EXT
+process.&nbsp; ExtProcess.m inherits from this class, therefore the
+below are naturally included in the ExtProcess object found in the
+BEAMLINE element containing the ExtProcess definition.<br />
+<br />
+<u><b>Public Properties<br />
+</b></u>
+<ul>
+  <li><b>supportedProcessPhysics (read only)<br />
+    </b></li>
+  <ul>
+    <li>Current
+supported process list for GEANT4:
+{'msc', eIoni', 'eBrem', 'annihil', 'SynRad', 'phot', 'compt', 'conv',
+'Rayl', 'muIoni', 'muBrems', 'muPairProd', 'AnnihiToMuPair',
+'GammaToMuPair', 'ee2hadr', 'electronNuclear', 'positronNuclear',
+'photonNuclear', 'muonNuclear', 'Decay'}</li>
+    <li>See <a href="http://geant4.cern.ch/support/proc_mod_catalog/particles/">GEANT4
+documentation</a> for details on physics processes<br />
+    </li>
+  </ul>
+  <li><b>supportedParticleTypes</b> <b>(read only</b>)</li>
+  <ul>
+    <li>Current list of supported particle types: {'gamma' 'e-' 'e+'
+'mu-' 'mu+'}</li>
+  </ul>
+  <li><b>processSelection (read only)</b></li>
+  <ul>
+    <li>length(<b>supportedParticleTypes</b>) x length(<b>supportedProcessPhysics</b>)
+logical array encoding which process (by particle type) to include in
+ExtProcess</li>
+  </ul>
+  <li><b>particleCuts (read only)</b></li>
+  <ul>
+    <li>Cuts to apply to EM processes associated with [gamma, e-, e+]
+(1x3 double vector)</li>
+    <ul>
+      <li>For GEANT4, these are "Range Cuts" in mm (<a href="http://geant4.cern.ch/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/GettingStarted/particleDef.html">see
+relevent GEANT4 documentation</a>).</li>
+    </ul>
+  </ul>
+  <li><b>RandSeed (uint32)</b></li>
+  <ul>
+    <li>Random number seed to pass to external process. Gets generated
+upon construction using Matlab rand, thus linking external process
+random number sequence to that of Matlab. The user is free to override
+by setting RandSeed property to any integer value desired.</li>
+  </ul>
+  <li><span style="font-weight: bold;">Edep</span></li>
+  <ul>
+    <li>Total energy deposited in element / J<span style="font-weight: bold;"><br />
+      </span></li>
+  </ul>
+</ul>
+<u><b>Public Methods<br />
+</b></u>
+<ul>
+  <li><b>SelectProcess(ptype,proc,select)</b></li>
+  <ul>
+    <li>Select a process to be used by particle type</li>
+    <ul>
+      <li>ptype= char or cell array of chars selected from amongst <b>supportedParticleTypes</b>,
+'all' is a supported option.<br />
+      </li>
+      <li>proc= char or cell array of chars selected from amongst <b>supportedProcessPhysics</b>,
+'all' is a supported option.</li>
+      <li>select= true or false, use chose process in external process
+call or not.</li>
+    </ul>
+  </ul>
+  <li><b>SelectParticleCut(ptype,cut)</b></li>
+  <ul>
+    <li>Set particle cut parameter to pass to external process.</li>
+    <ul>
+      <li>ptype= 'gamma', 'e-' or 'e+'</li>
+      <li>cut = double to assign to chose particle type</li>
+      <ul>
+        <li>For GEANT4, these are "Range Cuts" in mm (<a href="http://geant4.cern.ch/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/GettingStarted/particleDef.html">see
+relevent GEANT4 documentation</a>).</li>
+      </ul>
+    </ul>
+  </ul>
+</ul>
+<ul>
+</ul>
+<hr size="2" width="100%" />
+<h2><a name="ExtEMField">Geometry Type Descriptions</a></h2>
+<a name="ExtEMField"><img alt="geometry for ellipse
+                    / rectangle type collimators" src="geom_ellipse_rectangle.jpg" height="540" width="720" /><br />
+<img alt="Tapered collimator geometry description" src="geom_tapered.jpg" height="540" width="720" /><br />
+<b>NB: AperX2/AperY2/AperX3/AperY3 are supplied as a fraction of CollDX
+or CollDY. CollLen2 is supplied as a fraction of BEAMLINE{N}.L (the
+beamline element length field). Setting AperX2 etc to 0 reduces the
+geometry to that of 'Rectangle' but with adjustable X and Y
+thicknesses. Setting CollLen2=0 allows for having just a simple tapered
+geometry with single material type. Also both materials can be defined
+to be of the same type if required.</b><br />
+</a><ul>
+</ul>
+<ul>
+<a name="ExtEMField">  </a><ul>
+<a name="ExtEMField">  </a></ul>
+</ul>
+<h4><a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br />
+</h4>
+4-August-2016<a href="http://www.slac.stanford.edu/detailed.html"><img src="SLAC_whitebkgd.jpg" title="Return to SLAC
+                    detailed home page" alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;" align="right" /></a></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

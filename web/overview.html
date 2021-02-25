@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>The Lucretia Project: Overview</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home" src="LucretiaLogo.gif"
+ align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Overview<br>
+</small></span><br>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">Lucretia is &quot;A Matlab based
+toolkit for the modelling and simulation of single-pass electron
+transport lines."<br>
+<br>
+Now, just what does that mean?<br>
+<br>
+"Single-pass electron transport lines" includes linacs, bunch
+compressors, linac-driven FELs, the Low Emittance Transport (LET) of a
+linear collider, and similar systems.&nbsp; The main point here is that
+the physics modelling in Lucretia is oriented towards the issues that
+are important for single-pass systems (such as short range and long
+range wakefields) and not so much towards the issues important for
+rings (like ensuring that the tracker is symplectic to the precision
+limits of the CPU).&nbsp; There is an implicit assumption used in the
+code that the particles have the rest mass of an electron, so
+simulating proton or ion (or muon!) transport is probably out of the
+question.<br>
+<br>
+"A Matlab-based toolkit" means that most of the work and complexity is
+contained in Matlab scripts and functions -- there's not a "program" in
+the sense that, for example, <a href="http://mad.home.cern.ch/mad/">MAD</a>
+or <a
+ href="http://www.slac.stanford.edu/accel/nlc/local/AccelPhysics/codes/liar/web/liar.htm">LIAR</a>
+is a program.&nbsp; This presents certain advantages and certain
+disadvantages:<br>
+<br>
+<div style="margin-left: 40px;">The key advantage is obvious:&nbsp;
+with a fully-contained program like MAD, one is basically constrained
+to perform operations which the developers have thought to incorporate
+into the program.&nbsp; For some operations (like Twiss parameter
+calculation), the operation can be done in a universally-applicable way
+so programs like MAD are great.&nbsp; For other operations (like
+modelling the effect of klystron power or phase variation) it's much
+harder, since the effect is tied so strongly to the idiosyncracies of
+the particular implementation (how many RF structures per
+klystron?&nbsp; Are the structures for a given klystron clustered or
+distributed?&nbsp; Are all the RF units identical or is there some
+variation in their design?).&nbsp; The added flexibility of the
+Lucretia approach makes it much easier to do studies that would be
+difficult or impossible in a more "enclosed" code like MAD.&nbsp;
+Furthermore, to the extent possible all of the working parts of
+Lucretia are written as Matlab scripts and functions (so-called
+"m-files"), which are interpreted at execution time, rather than as
+functions in a compiled language such as C.&nbsp; In principle there's
+not much difference between a Matlab toolkit for accelerators, like
+Lucretia or <a href="http://www-ssrl.slac.stanford.edu/at/">AT</a>,
+and a toolkit based on a library written in a compiled language, like <a
+ href="http://www.desy.de/%7Emerlin/">Merlin</a> or <a
+ href="http://www.lns.cornell.edu/%7Edcs/bmad/">BMAD</a>.&nbsp; In
+practice, I'm certainly more productive when I'm writing and modifying
+Matlab scripts than when I'm writing and modifying compiled code.&nbsp;
+Why that is I don't really know, but it was that observation that drove
+me to develop Lucretia in the way that I did.<br>
+<br>
+The key disadvantage, of course, is that the user is obligated to do
+more work at the start to assemble the accelerator model, etc.&nbsp; As
+opposed to MAD, where you just load the deck and start executing MAD
+commands, here the initial stage can be more cumbersome (this is
+sometimes referred to as the Ikea Model -- "Make the customer do all
+the work").&nbsp; To surmount this difficulty we have provided some
+<a href="function_index.html">scripts</a> which should (hopefully!)
+make
+life easier (if nothing else,
+they give the user a starting point, a set of tools which can be
+tweaked to accomodate the unusual features of the beamline in question).<br>
+</div>
+<br>
+Additional features of Lucretia which distinguish it from a crowded
+field
+of alternatives are the following:<br>
+<br>
+<ul>
+  <li>Interactivity.&nbsp; The user can directly examine and manipulate
+the data structures representing the beam, beamline, RF sources, etc.,
+in the Matlab environment.&nbsp; The barriers to such direct
+examination and manipulation are lower than in many other simulation
+codes.</li>
+  <li>Fixed relationships between elements.&nbsp; Lucretia's KLYSTRON, <a
+ href="data_elements.html#GIRDER">GIRDER</a>, and PS elements
+permit the user to represent fixed position or
+excitation relationships between elements (ie, the fact that several RF
+structures are supported by one klystron, so you can't change the
+phases of those structures wrt each other).&nbsp; For each of these
+devices finite step size adjustability is supported (ie, klystron
+phases which can only be adjusted in increments of 0.1 degrees,
+etc).&nbsp; Most importantly, the relationships between the elements
+are not "rule-driven", allowing a realistic diversity of relationships
+(ie, the user is not constrained to, say, combining RF structures in
+sets of 4, or combining consecutive RF structures, on a
+klystron).&nbsp; The downside of the "not-rule-driven" nature is that
+the user has to write a script to set up the KLYSTRON, GIRDER, and PS
+relationships.</li>
+  <li>Flexibility.&nbsp; The user can add any desired data fields to
+the Lucretia data structures -- any fields not needed by a given
+function will be ignored.&nbsp; If it's absolutely essential, there is
+no penalty to adding fields pertaining to a magnet's winding paint
+color (as opposed to the paint color used on the iron yoke, which is
+typically different...).</li>
+  <li>Built-in support for bunch trains and for colliding beams (ie,
+tracking beams from 2 distant injectors to a common IP).</li>
+  <li>Improved management of the "binning" of particles for short-range
+wakefield calculations.</li>
+  <li>Tracking can be performed by element, in which all bunches are
+tracked through an element before any bunches are tracked through the
+next element; or it can be performed by bunch, in which the first bunch
+is tracked through all requested elements before the second bunch is
+tracked through any of them.&nbsp; The former option is the default, as
+it is the most efficient in terms of memory usage, but the option to
+perform the latter allows simulations in which some tuning or feedback
+processing occurs between bunches.</li>
+  <li>Although Lucretia is not fully relativistically correct, effects
+up to the lowest order in m<sub>e</sub>c/p can be included.<br>
+  </li>
+  <li>Last but not least, the advantages of the Matlab/Octave
+environment are heavily exploited.&nbsp; Graphing, scripting,
+sophisticated numerical operations, etc., are handled by the
+environment (ie, somebody else writes and maintains your script parser,
+graphics engine, etc), leaving physicists free to concentrate on
+physics.<br>
+  </li>
+</ul>
+<div style="text-align: center;"><font size="+1">A Few Technical Details<br>
+<br>
+</font>
+<div style="text-align: left;">As described above, our goal is to
+maximize use of Matlab capabilities -- otherwise, why use Matlab at
+all?&nbsp; Included in this is Matlab's support for programming (in the
+form of scripts and functions).&nbsp; Wherever possible, we have used
+the scripting and function capabilities for Lucretia's programming
+needs.<br>
+<br>
+	The main place where this breaks down is in tracking.&nbsp; Tracking rays through 
+	a beamline is the most compute-intensive operation in most accelerator 
+	codes, and some simple tests quickly made it clear that the tracking 
+	operation would need to be relegated to a compiled kernel.&nbsp; Fortunately, 
+	Matlab has a
+straightforward method to build a compiled program unit and give it the
+"look and feel" of a conventional Matlab function interface (a
+"mexfile" ).&nbsp; The tracking
+function <a href="tracking.html#TrackThru">TrackThru</a> is implemented as a 
+	&quot;mexfile&quot;.<br>
+<br>
+In principle, it might have been acceptable from the point of view of
+execution speed to implement R-matrix operations (including Twiss
+function propagation) as interpreted functions.&nbsp; In this case,
+however, the transfer maps of each element had already been implemented
+in the compiled kernel used for tracking.&nbsp; Thus, to make code
+maintenance less brutal, we elected to implement R-matrix and Twiss
+propagation in "mexfile" form.&nbsp; For similar reasons, <a
+ href="lattice_verification.html">lattice verification</a> (ensuring
+that the
+lattice is free of errors and internally consistent) was implemented as
+a mexfile, <a href="lattice_verification.html#VerifyLattice">VerifyLattice</a>.<br>
+<br>
+	At this time, operations other than tracking, R-matrix propagation, Twiss 
+	propagation, and lattice verification are implemented as standard Matlab interpreted
+functions.<br>
+<br>
+<div style="text-align: center;"><font size="+1">Lucretia is Case
+Sensitive!<br>
+<br>
+</font>
+<div style="text-align: left;">The vast majority of the &quot;working parts&quot; of 
+	Lucretia are Matlab scripts and functions, and Matlab is by
+default case sensitive.&nbsp; The DLLs for tracking, matrix operations,
+and verification are written in C, and are also case-sensitive.&nbsp;
+In general, the user should assume that anything documented here is
+case-sensitive, and that typing "Beamline" or "beamline" instead of
+"BEAMLINE" is going to cause problems.<br>
+</div>
+</div>
+<br>
+<div style="text-align: center;"><font size="+1">What does the name
+"Lucretia" mean?<br>
+<br>
+</font>
+<div style="text-align: left;">If you're like me you've probably tired
+of accelerator simulations with tortured-acronym names (ie, "MAD" =
+"Methodical Accelerator Design," "LIAR" = "LInear Accelerator Research
+code", etc).&nbsp; After thinking about acronyms for about 1.4
+nanoseconds I decided to follow the example of Merlin, which is a name
+and not an acronym.<br>
+<br>
+More specifically, the name "Lucretia" was partially an homage to LIAR
+(thus the use of the "L" in the name and the logo), which I used
+extensively for almost everything from 1998 to 2004.&nbsp; Many of the
+concepts that became Lucretia were inspired by similar concepts in LIAR
+and the Matlab version, mat-LIAR.&nbsp; <br>
+<br>
+Even more specifically, "Lucretia" is named after a song by <a
+ href="http://www.the-sisters-of-mercy.com/">The Sisters of Mercy</a>, <a
+ href="http://www.the-sisters-of-mercy.com/lyrics/lucretia.htm">"Lucretia
+My Reflection,"</a> from their Floodland album.&nbsp; You can see the <a
+ href="http://www.youtube.com/watch?v=XBk8HzQp1Sg">video for this song</a>,
+courtesy of <a href="http://www.youtube.com">YouTube</a>.&nbsp; Like
+most rock videos, I don't think it really adds much to one's
+understanding of the song, but features some potentially interesting
+imagery.&nbsp; Alternately, YouTube has a <a
+ href="http://www.youtube.com/watch?v=bV0ii_ThWVI">live cover version
+by Anhedonia</a> -- it's sort of like what the song would have been
+like if originally recorded with Trent Reznor of Nine Inch Nails on
+vocals, and I think it does a better job conveying the intensity of the
+song in a live venue.<br>
+</div>
+</div>
+</div>
+</div>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+13-Feb-2007<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC detailed page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

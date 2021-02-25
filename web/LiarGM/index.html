@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0088)http://www.slac.stanford.edu/accel/nlc/local/AccelPhysics/codes/liar/web/liar_matlab.htm -->
+<HTML><HEAD><TITLE>Ground Motion Model</TITLE>
+<META content="text/html; charset=windows-1251" http-equiv=Content-Type>
+<META content="Microsoft FrontPage 4.0" name=GENERATOR></HEAD>
+<BODY background=Setup_files/FLECK.gif link=#0000ff vLink=#0000AA>
+<H2 align=center><a href="fodo_anime_3.gif" target="_blank"><img border="0" src="fodo0066.gif" width="560" height="420" alt="Click to see how it was actually moving. (300kB !)"></a> <BR></H2>
+<H1><STRONG>GROUND MOTION MODEL IN LIAR</STRONG></H1>
+<P><a href="http://www.slac.stanford.edu/accel/nlc/local/AccelPhysics/codes/liar/web/liar.htm" target="_blank">LIAR</a>
+and <a href="http://www.slac.stanford.edu/accel/nlc/local/AccelPhysics/codes/liar/web/liar_matlab.htm" target="_blank">Matlab-liar</a>
+allow to model ground motion as described by P(<font face="Symbol">w</font>,k) spectrum. Here
+<font face="Symbol"> w</font> is temporal
+frequency and k is spatial wave-number. Ground motion model is defined by a
+parameter file. Three examples are given here (<a href="gm_model_A.data">model A</a>,
+<a href="gm_model_B.data">model B</a>, <a href="gm_model_C.data">model C</a>).
+More description about the model and parameters will be provided soon. Still,
+quite detailed description exists, though it is spread through several articles.
+See for example the <a href="http://www.slac.stanford.edu/~seryi/gm/gm_papers/p5323_1.html" target="_blank">PRE</a>,
+<a href="http://www.slac.stanford.edu/~seryi/gm/gm_papers/slac-pub-8487.html" target="_blank">EPAC2000</a>
+and <a href="http://www.slac.stanford.edu/~seryi/gm/gm_papers/moa13.html" target="_blank">Linac2000</a>
+papers. For the source of the GM routines in LIAR go <a href="http://www.slac.stanford.edu/cgi-wrap/cvsweb/liar/src/?root=/afs/slac/g/nlc/codes">here</a>
+and look for the files named <i>gm_*.f .</i></P>
+<P>The model allows simulations of various things. Several different examples
+are placed on this web page to illustrate varius features.&nbsp;</P>
+<P>In the <b><u> first example</u></b>, two FODO linacs (for <b> e+</b> and <b>e-</b>) pointing to each other. The IP
+position is at s=0.&nbsp; The files used are Matlab-liar
+files (<a href="gm_two_fodo.m.txt">gm_two_fodo.m</a>, <a href="init_fodo100.m.txt">init_fodo100.m</a>,
+<a href="fodo_fig.m.txt">fodo_fig.m</a>), MAD file (<a href="fodo100.mad.txt">fodo100.mad</a>),
+and the <a href="gm_model_B.data">model B</a> input file. The beta functions for
+this beamline are <a href="fodo100.gif" target="_blank">shown here</a>. The <b> results</b> are shown on
+the picture placed on top of this page <b> (<a href="fodo_anime_3.gif" target="_blank">click
+to
+see animation of how it was actually moving</a>)</b>. Also check <a href="zoom_t01.gif"><b>this
+picture</b></a> to see that ground moves continuously around IP, while e+ and
+e- beams are (obviously) separated at the IP. &nbsp; See also the <a href="bb_vs_t.gif" target="_blank"><b>difference of
+position</b></a> of e+ and e- beams at the IP versus time. This example took
+250sec on 700MHz 128MB Pentium III laptop.&nbsp;</P>
+<P>In the <b><u> second example</u></b>, again, two (short) FODO linacs are considered. In this case
+the rms of the relative e+ e- beam offset at the IP versus time is compared with
+analytical calculations.&nbsp; The MatLiar and parameter files used in this
+example are <a href="gm_twofodo_ipbboff.m.txt">gm_twofodo_ipbboff.m</a>, <a href="init_fodo12.m.txt">init_fodo12.m</a>,
+<a href="fodo_ipoff_fig.m.txt">fodo_ipoff_fig.m</a>, <a href="fodo12.mad.txt">fodo12.mad</a>,
+<a href="gm_model_B2.data">gm_model_B2.data</a>.The <b> results</b> are shown in <a href="fodo12_liar_analytics.gif"><b>this
+plot</b></a>. Symbols correspond to <i> simulations</i> by LIAR. Solid curve corresponds to
+<i>
+analytical results</i>, obtained by integrating the <i> spectral response function</i> (see <a href="fodo12_Goff.gif"><b>plot</b></a>
+or <a href="y_kGoffGdis_fodo12.tap">data</a>) of the system with P(t,k) spectrum
+obtained from the P(<font face="Symbol">w</font>,k) (see the table resulted from this integration <a href="fodo12_G_pwk_int.dat">here</a>).
+The source of the program which allow such integration will be placed here
+later. One can see that LIAR and analytic results correspond to each other
+rather well, though the analytical results are ~30% higher. The reason for this
+(small) disagreement will be chased down. The
+spectral response function was calculated using FFADA program [by O.Napoly et
+al.]. This example took 690sec on the same laptop.&nbsp;&nbsp;&nbsp;</P>
+<P>In the <b><u>third example</u></b>, exactly the same case was considered as
+in the second one. The only difference is that tracking within LIAR was
+performed by DIMAD. The input and parameter files are <a href="dimad_gm_twofodo_ipbboff.m.txt">dimad_gm_twofodo_ipbboff.m</a>,
+<a href="fodo_ipoff_fig_dim.m.txt">fodo_ipoff_fig_dim.m</a>, <a href="fodo12dimad.mad.txt">fodo12dimad.mad</a>,
+<a href="init_fodo12dimad.m.txt">init_fodo12dimad.m</a>. The <b>results</b> are <a href="fodo12_liardimad_analytics.gif"><b>here</b></a>.
+This example took 1hour and 35min on the same laptop (in contrast to LIAR, DIMAD
+actually tracks particles, therefore it takes more time).</P>
+<P>In the <u><b>fourth example</b></u>, it is shown how to save from LIAR the
+amplitudes of ground motion harmonics (see <a href="gm_pwk_save.m.txt">gm_pwk_save.m</a>)
+into an ASCII file. Three saved files, corresponding to each of the models (see <a href="am_ams_A.out">am_ams_A.out</a>,
+<a href="am_ams_B.out">am_ams_B.out</a>, <a href="am_ams_C.out">am_ams_C.out</a>),
+can then be used to generate ground motion using a custom written code. The
+files <a href="gm_read_saved.m.txt">gm_read_saved.m</a>, <a href="gm_gen_from_file.m.txt">gm_gen_from_file.m</a>,
+<a href="gm_gen_fig.m.txt">gm_gen_fig.m</a> show an example of how to do this in
+Matlab. See here the Matlab generated&nbsp; <a href="gm_gen_x.gif"><b>horizontal</b></a>
+and <a href="gm_gen_y.gif"><b>vertical</b></a> ground motion. (Do not plan to
+use, though, such Matlab driven generator of ground motion. It is too much slow.
+The above given example took 54.5min, about 100 times longer than a Fortran or C
+code would do).&nbsp;&nbsp;</P>
+<P>In the <u><b>fifth example</b></u>, the spectra P(t,k) found from ground
+motion generated within LIAR are compared with the modeling theoretical spectra.
+The files used to generate ground motion are <a href="gm_fodo_fft_1.m.txt">gm_fodo_fft_1.m</a>,
+<a href="gm_fodo_fft_2.m.txt">gm_fodo_fft_2.m</a>, <a href="init_fodo.m.txt">init_fodo.m</a>,
+<a href="fodo.mad.txt">fodo.mad</a>. The files that creates spectra are <a href="plot_fft.m.txt">plot_fft.m</a>
+and <a href="gm_fodo_fft_fig.m.txt">gm_fodo_fft_fig.m</a>. The Fortran program
+which generates theoretical modeling P(t,k) (and also P(<font face="Symbol">w</font>,L))
+by integration of&nbsp; P(<font face="Symbol">w</font>,k) is <a href="pwk2p.f.txt">pwk2p.f</a>.
+Example of its input is <a href="pwk2p.inp.txt">here</a>. The <b>results</b> of
+these example are shown in <b>the following plots</b>, for different time: <a href="ptk_001s.gif"><b>t
+= 0.001 s</b></a>, <a href="ptk_01s.gif"><b>t = 0.01 s</b></a>, <a href="ptk_1s.gif"><b>t
+= 0.1 s</b></a>, <a href="ptk1s.gif"><b>t = 1 s</b></a>, <a href="ptk10s.gif"><b>t
+= 10 s</b></a>, <a href="ptk100s.gif"><b>t = 100 s</b></a>, <a href="ptk1000s.gif"><b>t
+= 1000 s</b></a>, <a href="ptk10000s.gif"><b>t = 10000 s</b></a>, <a href="ptk1e5s.gif"><b>t
+= 1e5 s</b></a>, <a href="ptk1e6s.gif"><b>t = 1e6 s</b></a>, <a href="ptk1e7s.gif"><b>t
+= 1e7 s</b></a>. You can see that in spite of the huge range of time (ten orders
+of magnitude), the difference of generated and modeled spectra is rather
+small.&nbsp;</P>
+<P>In the <b><u>sixth example</u></b>, the spectra P(<font face="Symbol">w</font>,L)
+are calculated from ground
+motion generated within LIAR and are compared with the modeling theoretical spectra.
+The Mat-Liar files are <a href="gm_fodo_fft_w.m.txt">gm_fodo_fft_w.m</a>, <a href="init_line.m.txt">init_line.m</a>,
+<a href="line.mad.txt">line.mad</a>, and the spectra and pictures are generated
+by <a href="gm_fodo_wfft2_fig.m.txt">gm_fodo_wfft2_fig.m</a>.This example took
+59min on the same laptop. The <b>resulting spectra</b> are shown in <b>the
+following plots</b>, for different spatial separation: <a href="pwl10m.gif"><b>dS
+= 10 m</b></a>, <a href="pwl30m.gif"><b>dS = 30 m</b></a>, <a href="pwl100m.gif"><b>dS
+= 100 m</b></a>. You can see that the model agrees quite will with the generated
+motion.&nbsp;</P>
+<P>In the <b><u>seventh example</u></b>, it is shown how to include a transfer
+function (TF) between ground motion and a particular focusing element. Either
+'standard' or arbitrary TF can be assigned to a particular girder. The X and Y
+planes can have different TF. The 'standard' TF is defined by the resonance
+frequency and quality factor. Arbitrary TF can be given by a file.&nbsp; There
+is also a possibility to artificially displace position at which support is mounted on the ground.&nbsp;The Mat-Liar files showing use of 'standard' TF are <a href="gm_fodo_fft_w_tf.m.txt">gm_fodo_fft_w_tf.m</a>
+and <a href="gm_fodo_wfft_tf_fig.m.txt">gm_fodo_wfft_tf_fig.m</a>, and the
+beamline is the same as in the sixth example. The <b>results</b> are shown in <b>the
+following plots</b> (<a href="spectra_tf_stdt.gif"><b>spectra</b></a> and their <a href="tf_stdt.gif"><b>ratio
+in comparison with 'standard' TF</b></a>).&nbsp;The Mat-Liar files showing use of arbitrary TF&nbsp; (given by file <a href="girder_tf.dat.txt">girder_tf.dat</a>)&nbsp;
+are&nbsp; <a href="gm_fodo_fft_w_tf2.m.txt">gm_fodo_fft_w_tf2.m</a> and <a href="gm_fodo_wfft_tf_fig2.m.txt">gm_fodo_wfft_tf_fig2.m</a>.
+The <b>resulting plots</b> are here (<a href="spectra_tf_arbtr.gif"><b>spectra</b></a>
+and their <a href="tf_arbtr.gif"><b>ratio in comparison with TF</b></a>).&nbsp;<br>
+</P>
+<P>In the <b><u>eighth example,</u></b> it is shown how to include additional
+technical noises. These noises are uncorrelated with ground motion and can be
+assigned to a particular girder. Arbitrary number of noises can be used, the
+vertical and horizontal planes can have different or no noises. Noises are
+defined by its power spectrum p(<font face="Symbol">w</font>). Transfer
+functions can be used in addition to noises (TF only affect ground motion, not
+the noises). The Mat-Liar files showing use of noises and TF are <a href="gm_tf_noise.m.txt">gm_tf_noise.m</a>
+and <a href="gm_tf_noise_fig.m.txt">gm_tf_noise_fig.m</a>. In this case the same
+beamline was used as in the example 6, and the <b>results</b> for power spectrum
+of relative motion (dL=30m in all cases) are shown <b>in the following plots</b>.
+See <a href="gm_noise_tf1.gif"><b>plot where only ground motion and noises are
+present</b></a>, and the <a href="gm_noise_tf2.gif"><b>case when transfer
+function was used in addition to noises</b></a>. On the last plot, note that
+relative motion of two quadrupoles, when one of them is on perfect girder and
+another one is on imperfect girder (given by a&nbsp; transfer function),
+considerably increase even at quite low frequency (down to 1/50 of the girder
+resonance) .&nbsp;
+</P>
+<P> &nbsp;</P>
+<P> Other examples will be placed here later.&nbsp;</P>
+<P> &nbsp;</P>
+<HR>
+
+<DIV align=center>
+<CENTER>
+<ADDRESS><strong><small><a href="http://www.slac.stanford.edu/">SLAC</a>
+  ,&nbsp;&nbsp;&nbsp; <a href="http://www-project.slac.stanford.edu/lc/nlc.html">Next
+  Linear Collider</a></small></strong> 
+</ADDRESS></CENTER></DIV>
+
+<DIV align=center>
+<CENTER>
+<ADDRESS><small>The URL of this page is <a href="http://www.slac.stanford.edu/~seryi/gm/model/">http://www.slac.stanford.edu/~seryi/gm/model/</a></small> 
+</ADDRESS></CENTER></DIV>
+
+<DIV align=center>
+<CENTER>
+<ADDRESS><small>This page is accessible from <a href="http://www-project.slac.stanford.edu/lc/NLC-tech.html">NLC-tech</a>
+  web pages (go to <a href="http://www-project.slac.stanford.edu/lc/local/AccelPhysics/Accel_Physics_index.htm">Accelerator
+  Physics</a> , then to <a href="http://www-project.slac.stanford.edu/lc/local/AccelPhysics/GroundMotion/">Ground
+  Motion</a> , look for modeling)</small><a href="http://www.slac.stanford.edu/~seryi" target="_blank"><BR></a><BR><STRONG><SMALL>Pages
+  created: October 2000.&nbsp; Last 
+updated: <!--webbot bot="Timestamp" s-type="EDITED" s-format="%B %d, %Y" startspan -->January 31, 2002<!--webbot bot="Timestamp" i-CheckSum="31073" endspan -->
+  by </SMALL></STRONG><a href="http://www.slac.stanford.edu/~seryi" target="_blank">Andrei Seryi</a> 
+</ADDRESS></CENTER></DIV></BODY></HTML>

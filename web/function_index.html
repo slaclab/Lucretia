@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Script and Function Index</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img alt="LucretiaLogo"
+ title="Lucretia home page" src="LucretiaLogo.gif"
+ style="border: 0px solid ; width: 80px; height: 90px;" align="right"
+ hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Script, Function and Class Documentation<br>
+<br>
+</small></span>
+<div style="text-align: left;">A wide variety of scripts, functions and classes
+have been written for use in Lucretia, in a number of categories.&nbsp;
+Note that all functions are somewhat self-documented, and the
+documentation can be seen via the Matlab help operation:&nbsp; type
+"help functionname" at the Matlab prompt. Additionally, classes have further 
+	documentation which can be accessed by typing &quot;doc classname&quot;. This gives 
+	more documentation on the public methods and properties of the class.<br>
+<br>
+<a href="function_status.html">Function Status and Error Messages:</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="function_status.html#InitializeMessageStack">InitializeMessageStack</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="function_status.html#AddMessageToStack">AddMessageToStack</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="function_status.html#AddStackToStack">AddStackToStack</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="function_status.html#AddStackToMasterStack">AddStackToMasterStack</a><br>
+<br>
+<a href="tracking.html">Tracking:</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;<a href="tracking.html#TrackThru">
+TrackThru</a><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Track<br>
+<br>
+<a href="rmat.html">R-matrix and Operations:</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a href="rmat.html#GetRmats">GetRmats</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a href="rmat.html#RmatAtoB">RmatAtoB</a><br>
+<br>
+<a href="twiss.html">Twiss Parameter Calculation</a>:<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a href="twiss.html#GetTwiss">GetTwiss</a><br>
+<br>
+<a href="lattice_generation.html">Lattice Generation:</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#AddBPMToLcav">AddBPMToLcav</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#AddMoverToGirder">AddMoverToGirder</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#AssignToGirder">AssignToGirder</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#AssignToKlystron">AssignToKlystron</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#AssignToPS">AssignToPS</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#BPMStruc">BPMStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#CollStruc">CollStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#CoordStruc">CoordStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#ConvertGirderToLong">ConvertGirderToLong</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#CorrectorStruc">CorrectorStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#DrifStruc">DrifStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#DualPSGradientBend">DualPSGradientBend</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#findcells">findcells</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#GetIndicesBySPosition">GetIndicesBySPosition</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#GetKlystronsInRange">GetKlystronsInRange</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#GetPSInRange">GetPSInRange</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#GirderStruc">GirderStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#InstStruc">InstStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#MarkerStruc">MarkerStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#MovePhysicsVarsToKlystron">MovePhysicsVarsToKlystron</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#MovePhysicsVarsToPS">MovePhysicsVarsToPS</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#MultStruc">MultStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#OctuStruc">OctuStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#ParseFrequencyDomainTLR">ParseFrequencyDomainTLR</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#ParseSRWF">ParseSRWF</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#QuadStruc">QuadStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#RenormalizeKlystron">RenormalizeKlystron</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#RenormalizePS">RenormalizePS</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#RFStruc">RFStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SBendStruc">SBendStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SetElementBlocks">SetElementBlocks</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SetElementSlices">SetElementSlices</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SetFloorCoordinates">SetFloorCoordinates</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SetGirderByBlock">SetGirderByBlock</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SetGirderBySPos">SetGirderBySPos</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SetIndependentPS">SetIndependentPS</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SetKlystrons">SetKlystrons</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SetSPositions">SetSPositions</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SetTrackFlags">SetTrackFlags</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#SextStruc">SextStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation#SolenoidStruc">SolenoidStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_generation.html#XSIFToLucretia">XSIFToLucretia</a><br>
+<br>
+<a href="lattice_verification.html">Lattice Verification:</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_verification.html#VerifyLattice">VerifyLattice</a><br>
+<br>
+<a href="beam_generation.html">Beam Generation</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="beam_generation.html#CheckBeamMomenta">CheckBeamMomenta</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="beam_generation.html#CoupledTwissFromInitial">CoupledTwissFromInitial</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="beam_generation.html#CreateBlankBeam">CreateBlankBeam</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="beam_generation.html#InitCondStruc">InitCondStruc</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="beam_generation.html#MakeBeam6DGauss">MakeBeam6DGauss</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="beam_generation.html#MakeBeam6DSparse">MakeBeam6DSparse</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="beam_generation.html#MakeBeamPZGauss">MakeBeamPZGauss</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="beam_generation.html#MakeBeamPZGrid">MakeBeamPZGrid</a><br>
+<br>
+<a href="momentum_profile.html">Momentum Profile Management:</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="momentum_profile.html#CalculateSR">CalculateSR</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="momentum_profile.html#ComputeMomentumProfile">ComputeMomentumProfile</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="momentum_profile.html#SetDesignMomentumProfile">SetDesignMomentumProfile</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="momentum_profile.html#UpdateKlystronStatus">UpdateKlystronStatus</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="momentum_profile.html#UpdateMomentumProfile">UpdateMomentumProfile</a><br>
+<br>
+<a href="lattice_errors.html">Errors and Misalignments:</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_errors.html#ErrorGroupGaussErrors">ErrorGroupGaussErrors</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_errors.html#MakeErrorGroup">MakeErrorGroup</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="lattice_errors.html#SetGaussianErrors">SetGaussianErrors</a><br>
+</div>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;"><br>
+<a href="tuning_analysis.html">Tuning and Analysis:</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#AddMagnetPlot">AddMagnetPlot</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#BeamHistogram">BeamHistogram</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a href="tuning_analysis.html#BPMZPlot">BPMZPlot</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#ComputeSRIntegrals">ComputeSRIntegrals</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#GetBeamPars">GetBeamPars</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#GetBPMvsS">GetBPMvsS</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#GetNEmitFromBeam">GetNEmitFromBeam</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#GetNEmitFromBPMData">GetNEmitFromBPMData</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#GetNEmitFromSigmaMatrix">GetNEmitFromSigmaMatrix</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#GetTruePhase">GetTruePhase</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#GetTrueStrength">GetTrueStrength</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#GetTrueVoltave">GetTrueVoltage</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#IncrementMultiKnob">IncrementMultiKnob</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#KlystronTrim">KlystronTrim</a><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+	Match<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#MakeMultiKnob">MakeMultiKnob</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#MoverTrim">MoverTrim</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#PlotOrbit">PlotOrbit</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#PlotTwiss">PlotTwiss</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a href="tuning_analysis.html#PSTrim">PSTrim</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#RestoreMultiKnob">RestoreMultiKnob</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#ReturnMatchedTwiss">ReturnMatchedTwiss</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="tuning_analysis.html#SetMultiKnob">SetMultiKnob</a><br>
+<br>
+<a href="gui.html">Graphical User Interface:</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <a href="gui.html#BeamlineViewer">BeamlineViewer</a><br>
+	<br>Distributed Lucretia<br><br>Ground Motion<br><br>Floodland<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a>
+<a
+ href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+	21-Sept-2011<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

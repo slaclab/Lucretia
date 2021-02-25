@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Twiss Parameters</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="home.html"><span
+ style="font-size: 24pt;"><img
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"
+ align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Twiss Parameters<br>
+<br>
+</small></span></div>
+Lucretia has one function for the computation of Twiss functions.&nbsp;
+Like the <a href="rmat.html">R-matrix</a> functions, the Twiss
+function calculation ignores offsets and errors and computes the
+functions assuming that the momentum at each element is given by its
+design momentum BEAMLINE{}.P.&nbsp; Also, the dispersion functions are
+computed with conventional dimensions of m/momentum fractional error
+and radians/momentum fractional error, and so they cannot be directly
+used in operations with <a href="beam.html">beam</a> rays (which use
+total momentum in GeV/c, not momentum error, as their sixth coordinate).<br>
+<br>
+<span style="font-weight: bold;"></span><br>
+<span style="font-weight: bold;"><a name="GetTwiss"></a>GetTwiss:</span><br>
+<br>
+Function GetTwiss computes the Twiss parameters from one point to
+another given a set of initial values:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat, T] = GetTwiss(
+elem1, elem2, TwissX0, TwissY0 ) ;<br>
+<br>
+computes the Twiss parameters from the upstream face of elem1 to the
+downstream face of elem2.&nbsp; Arguments TwissX0 and TwissY0 are
+structures with fields beta, alpha, eta, etap, and nu (where the latter
+uses the "American convention" that 360 degrees of phase advance = 1
+unit of nu).&nbsp; Returned data structure T has the following fields,
+each with length (elem2-elem1+2):<br>
+<ul>
+  <li>S:&nbsp; s position [m]</li>
+  <li>P:&nbsp; design momentum [GeV/c]</li>
+  <li>betax: horizontal beta function [m]</li>
+  <li>alphax: horizontal alpha function [-]</li>
+  <li>etax: horizontal dispersion [m]</li>
+  <li>etapx: slope of horizontal dispersion [-]</li>
+  <li>nux: horizontal phase [rad/2pi]</li>
+  <li>betay: vertical beta function [m]</li>
+  <li>alphay: vertical alpha function [-]</li>
+  <li>etay: vertical dispersion [m]</li>
+  <li>etapy: slope of vertical dispersion [-]</li>
+  <li>nuy: vertical phase [rad/2pi]</li>
+</ul>
+The data structure includes values at the upstream face of each element
+in the range, plus a set of values at the downstream face of the last
+element.<br>
+<br>
+The twiss calculation as called above is explictly uncoupled, and will
+do strange
+things in the presence of design xy coupling.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat, CTwiss] = GetTwiss(
+elem1, elem2, CTwiss0 )<br>
+<br>
+performs a coupled Twiss calculation using Wolski's parameterization of
+the coupled Twiss.&nbsp; The Wolski parameterization is documented <a
+ href="http://prst-ab.aps.org/abstract/PRSTAB/v9/i2/e024001">here</a>.&nbsp;
+Arguments elem1 and elem2 have the same meaning as in the uncoupled
+case, while CTwiss0 is a 6 x 6 x n matrix of the coupled Twiss
+parameters in Wolski formulation; n can be 1, 2, or 3.&nbsp; The
+function <a href="beam_generation.html#CoupledTwissFromInitial">CoupledTwissFromInitial</a>
+will generate CTwiss0 from an initial beam-data structure.&nbsp; The
+return variable CTwiss is a data structure with the following fields:<br>
+<br>
+<ul>
+  <li>S:&nbsp; Row vector of S positions [m]<br>
+  </li>
+  <li>P:&nbsp; Row vector of design momenta [GeV/c]</li>
+  <li>beta:&nbsp; 6 x 6 x n x | elem2 - elem1 + 2 | matrix of coupled
+Twiss parameters at each element's upstream face, plus the downstream
+face of the last element.<br>
+  </li>
+</ul>
+If GetTwiss is called with elem2 &lt; elem1, the CTwiss0 or TwssX0 /
+TwissY0 parameters will be interpreted as the final Twiss parameters
+and not the initial ones.&nbsp; The output results will still be in
+increasing-S order, and there is no need to invert the signs of alpha
+and eta' (unlike doing inverse Twiss propagation with a reversed
+beamline in some codes we could name, but won't).<br>
+<br>
+Return argument stat is a Lucretia status cell array (see <a
+ href="function_status.html">here</a> for more information).&nbsp; A
+returned value stat{1} == 1 indicates success.&nbsp; If any element is
+invalid or ill-defined, stat{1} == 0 and no parameters will be returned.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; GetTwiss('version')<br>
+<br>
+returns version information for the components used to build GetTwiss.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+21-Apr-2006<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</body>
+</html>

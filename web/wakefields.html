@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Wakefields</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Wakefields<br>
+<br>
+</small></span>
+<div style="text-align: left;">The storage of wakefield data in the WF
+global structure is described in the <a href="data_elements.html#WF">wakefield</a>
+section of the <a href="data_elements.html">data elements</a>
+page.&nbsp; Here we describe the algorithms which are used to simulate
+the effects of the wakefields on the beam.<br>
+<br>
+<div style="text-align: center;"><big>Short-Range Longitudinal
+Wakefields (WF.ZSR)</big><br>
+<br>
+<div style="text-align: left;"><br>
+</div>
+</div>
+</div>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">The short-range longitudinal wakefield
+is stored in WF in the time-domain:&nbsp; the decelerating voltage
+generated behind a driving particle, in V/C/m.&nbsp; Thus the stored
+wake must be convolved with the longitudinal distribution of each bunch
+in the beam, which is accomplished as follows:<br>
+<br>
+<ul>
+  <li>When a bunch reaches an element with a longitudinal short-range
+wake, and that element's SRWF_Z <a
+ href="element_classes.html#TrackFlag">tracking flag</a> is set to
+enable the longitudinal wake, the longitudinal coordinates of the rays
+are examined to find the ray which is at the median position and to
+find the z range about the median which contains 68% of the ray's total
+charge.&nbsp; Half of this width is used as the "effective RMS" of the
+bunch.</li>
+  <li>The rays are then binned.&nbsp; The bin width used is the
+effective RMS calculated in the previous step multiplied by the
+BinWidth value for the given WF.ZSR entry (ie, if WF.ZSR(j).BinWidth ==
+0.1, then bins with a width of 0.1 * the effective RMS are used).&nbsp;
+The total charge and the actual electrical center of each bin is then
+determined (since it is not guaranteed that the rays in a given bin are
+uniformly distributed in z).&nbsp; Bins which contain no actual charge
+are deleted.<br>
+  </li>
+  <li>The wakefield data in WF.ZSR is used to determine the
+deceleration (in V/m) at each bin n due to the wakefield driven by each
+bin m which is upstream of bin n:&nbsp; V(n,m) = Q(m) *
+K[z(n)-z(m)].&nbsp; The wakefield K is determined by cubic spline
+interpolation of the data in WF.ZSR.&nbsp; Per the fundamental theorem
+of beam loading, V(n,n) = Q(n)*K[0]/2.<br>
+  </li>
+  <li>The total deceleration at each bin n, V(n) [dimensions of V/m] is
+the sum over m of V(n,m).&nbsp; This sum is calculated and stored.</li>
+  <li>When tracking the rays of the bunch through the element with a
+longitudinal short-range wake, the energy gain of each ray is
+calculated with the decelerating voltage taken into account:&nbsp;
+Delta E = V_element * cos(phi + kz) - L_element * V(n), where n is the
+bin that contains the given ray.</li>
+  <li>In a typical accelerator, a given wakefield is used by more than
+one element.&nbsp; After a given wakefield is convolved with the charge
+distribution of a given bunch, that convolved wakefield is kept around
+so that it can be used if and when the bunch encounters another element
+which points to the same wakefield.</li>
+  <li>All convolved wakefields associated with a bunch are deleted if
+one of the following things
+happen:
+    <ul>
+      <li> The bunch encounters a sector bend magnet (since the
+momentum compaction of a sector bend changes the longitudinal charge
+distribution
+in non-trivial ways)</li>
+      <li>One or more rays in the bunch is stopped (encounters an
+aperture, decelerated to zero momentum, deflected &gt; 90 degrees)</li>
+      <li>The tracking operation is completed and execution is passed
+back to Matlab.</li>
+    </ul>
+If the bunch later encounters a new element which points at a
+wakefield, the wakefield is convolved with the new longitudinal charge
+distribution of the bunch.<br>
+  </li>
+</ul>
+<br>
+Note that it is not strictly accurate to use
+the same convolved wake for all structures that point at a given wake
+in WF.ZSR, since there are high-order phase slip terms in the transfer
+map for a quadrupole or even a drift space.&nbsp; Since these terms are
+typically small, Lucretia assumes that it does not need to re-convolve
+the wakefields unless the bunch passes through a bend magnet.&nbsp; If
+you suspect that in your particular application the high-order phase
+slip in drifts and/or quads is significant, you can take advantage of
+the fact that the convolved short-range wakes are deleted at the end of
+a tracking operation:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; for elemno = elem1:elem2<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat,Beam] =
+TrackThru(elemno,elemno,Beam,1,length(Beam.Bunch),0) ;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; end<br>
+<br>
+will do the same thing as<br>
+<br>
+&nbsp;&nbsp;&nbsp; [stat,Beam] =
+TrackThru(elem1,elem2,Beam,1,length(Beam.Bunch),0) ;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <br>
+except that it will reconvolve the SRWFs on each element which uses
+them.<br>
+<br>
+Note that each bunch in a beam is separately convolved with the
+short-range longitudinal wakefield of a given element, so that
+reasonable accuracy can be achieved even if the bunches in the beam
+have substantially different longitudinal distributions.<br>
+<br>
+<div style="text-align: center;"><big>Short-Range Transverse Wakefields
+(WF.TSR)</big><br>
+</div>
+<br>
+The short-range transverse wakes are quite similar to the short-range
+longitudinal wakes, except that the time-domain wake function has
+dimensions of V/C/m^2.&nbsp; The same technique is used for wakefield
+convolution except that it is necessary to keep the matrix V(n,m) which
+here has dimensions of V/m^2.&nbsp; During tracking the bunch is first
+tracked to the center of the element with a wakefield, and at the
+center the horizontal and vertical positions of each bin are
+computed.&nbsp; The deflections for each bin are computed using this
+information, and applied to each element in the bin.&nbsp; The bunch is
+then tracked through the second half of the element.<br>
+<br>
+<div style="text-align: center;"><big>Long-Range Transverse Wakefields
+(WF.TLR)</big><br>
+</div>
+<br>
+At this time only a frequency-domain representation of the multibunch
+transverse wakefield is supported.&nbsp; A frequency domain
+representation is most appropriate for elements which have a small
+number of modes which are far apart compared to their Q factors (this
+is, for example, the typical situation in a superconducting RF
+structure).&nbsp; A frequency domain wakefield consists of one or more
+modes; each mode has 2 polarizations (nominally x and y), and each
+polarization of each mode has a frequency and a Q factor.&nbsp; In
+principle each polarization also has a kick factor (in V/C/m^2), but in
+practice the kick factors for the 2 modes are quite close to one
+another so Lucretia models a mode as having 2 frequencies, 2 Q factors,
+and 1 kick factor.&nbsp; Each
+wakefield also has a BinWidth.<br>
+<br>
+The way long-range wakefields work in Lucretia is as follows:<br>
+<br>
+<ul>
+  <li>All the rays in each bunch are binned according to the bunch
+length and the BinWidth parameter, just as they are for short-range
+wakes.&nbsp; This allows some simulation of the effect of the
+variation&nbsp; in the wakefield over the length of the bunch (if this
+variation is judged to be uninteresting, set BinWidth == 0).&nbsp; <br>
+  </li>
+  <li>As a bunch passes through the center of a structure, any kicks
+excited by previous bunches are propagated forward in time to the bunch
+arrival time using the structure's mode frequencies and Q values, and
+the bunch spacing in the beam which is being tracked.&nbsp; <br>
+  </li>
+  <li>The kicks are applied to the bins of the bunch.</li>
+  <li>The additional excitation from the bunch's passage through the
+structure is added to the existing excitation (taking into account the
+different phases of the existing and new excitation).&nbsp; <br>
+  </li>
+  <li>Transverse long-range wakefields can be turned on or off in any
+LCAV by setting its LRWF_T flag to 1 or 0, respectively.<br>
+  </li>
+</ul>
+The Tilt parameter allows the user to specify that
+the axes of the 2 polarizations are different from the element's
+nominal x and y axes.&nbsp; The combination of unequal frequencies for
+the 2 polarizations and
+mode rotation angle can allow jitter in one plane to excite modes that
+will ultimately deflect the beam in the other plane.<br>
+<br>
+<span style="font-weight: bold;">Multibunch Tracking Modes:</span>&nbsp;
+<br>
+<br>
+Lucretia allows 2 modes of multibunch tracking:&nbsp; element-wise
+tracking and bunch-wise tracking.&nbsp; In element-wise tracking, all
+bunches are tracked through a particular element before any bunches are
+tracked through the next element.&nbsp; This is the most efficient way
+to track multibunch beams, and is selected by either leaving out the
+6th argument in function <a href="tracking.html#TrackThru">TrackThru</a>
+or
+else selecting a value of 0 for the sixth argument.<br>
+<br>
+Bunchwise tracking is the opposite:&nbsp; each bunch will be tracked
+through all the selected elements before the next bunch is tracked
+through any elements.&nbsp; Bunchwise tracking permits the user to
+track a multi-bunch beam with long-range wakefields and perform
+operations in Matlab between bunches, to simulate tuning or feedback on
+an intra-train time scale.<br>
+<br>
+This leads to an interesting question:&nbsp; how does Lucretia figure
+out whether a given tracking operation is a continuation&nbsp; of a
+previous operation (in which case it needs to remember the long-range
+wake kicks from earlier operations), as opposed to a new operation --
+tracking of a whole&nbsp; new bunch train after all the wakes have died
+out (in which case it needs to forget the long range wake kicks from
+previous operations)?&nbsp; The answer is the following:<br>
+<br>
+<ul>
+  <li>Any and all differentiation between continuations of existing
+trains and new trains is performed on an element-by-element basis, so
+any tracking that is done through one set of elements will not cause
+other elements to delete their wakefield kick data.</li>
+  <li>Any elementwise tracking is automatically treated as a new and
+complete bunch train:&nbsp; when you track a train elementwise through
+an LCAV, the LCAV kicks are deleted at the start and at the end of
+elementwise tracking.</li>
+  <li>Any bunchwise tracking is treated as a new and complete bunch
+train when the bunch number of the first bunch to be tracked in the
+current operation is lower than that of the last bunch tracked on the
+previous operation (ie, if the previous operation tracked bunches
+1--100, then if you track bunch 101 or 102 or etc it will be treated as
+a continuation with the existing wake kicks, if you track bunch 1 or 2
+or etc it will be treated as a new bunch train and old wake kicks are
+deleted).</li>
+  <li>If TrackThru is instructed to clear its memory (ie,
+TrackThru("clear")), all existing wake kicks on all elements will be
+deleted.</li>
+  <li>If the maximum number of modes needed to represent the wakefields
+in WF.TLR or WF.TLRErr is increased, all existing wake kicks on all
+elements will be deleted.<br>
+  </li>
+</ul>
+<br>
+<div style="text-align: center;"><big>Long-Range Transverse Error
+Wakefields
+(WF.TLRErr)</big><br>
+</div>
+<br>
+A long-range error wakefield is a deflecting field which is present
+even when the beam passes on-axis through the RF structure.&nbsp;
+Typically this is due to some internal deformation of the structure
+(for example if the structure is bowed so that when the beam passes
+through the "center" as indicated by its fiducials it does not pass
+through the mean electrical center of the element).&nbsp; <br>
+<br>
+Lucretia's management and formalism for long-range transverse error
+wakes is identical to its handling of standard long-range transverse
+wakes, with one exception:&nbsp; each mode in an error wake has 2 kick
+factors, one for the horizontal polarization and one for the vertical
+polarization.&nbsp; Also, as the description above indicates, the error
+wake kicks a beam even if it goes down the center of the structure, and
+thus the error wakes are in V/C/m and not V/C/m^2.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+14-Apr-2005<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

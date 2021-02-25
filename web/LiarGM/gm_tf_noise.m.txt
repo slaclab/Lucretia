@@ -1,0 +1,141 @@
+%================================================================
+%  Simple FODO line with ground motion
+%  MAT-LIAR simulation
+%   example how to use Technical Noises in addition to ground motion
+%
+%  A.S. Jan.30, 2002
+%================================================================
+tbeg=cputime;
+%
+%
+%  Initialize LIAR with a beamline beamline
+init_line;
+%
+% Number of iterations to average each sample
+niter=256;
+tsample=0.0:0.01:10.23;
+nsample=length(tsample);
+%
+% Settings for getting the beam parameters.
+[ierr,sbpm] = mat_liar('MAT_INFO_BPMS');
+nbpm=length(sbpm);
+bpm_indx=1:1:nbpm;
+mat_liar('MAT_INIT_XBPM',nbpm,bpm_indx);
+mat_liar('MAT_INIT_YBPM',nbpm,bpm_indx);
+% Empty arrays for storing the data.
+mislx=zeros(nbpm,nsample,niter);
+misly=zeros(nbpm,nsample,niter);
+%
+% Set up the ground motion model 
+mat_liar('define_gm_model,');
+mat_liar('pwkfile = ''gm_model_B.data'' , Tmin = 0.001, Tmax = 100. ');
+mat_liar('print_pwk_param');
+%
+%
+% Set up BPM resolution, no other errors.
+mat_liar('error_gauss_bpm, name = ''*'','); % Name to be matched
+mat_liar('x_sigma = 0.e-6,  '); % Sigma misalignment
+mat_liar('x_cut   = 3,      '); % Cut for Gaussian  
+mat_liar('y_sigma = 0.e-6,  '); % Sigma misalignment
+mat_liar('y_cut   = 3,      '); % Cut for Gaussian
+mat_liar('resol = 1.0e-15,  '); % bpm res, meters
+mat_liar('reset = .t.       '); % reset previous misalignm.
+%
+%
+% Create three Transfer Functions
+mat_liar('create_gm2elt_tf, number_of_tf=3');
+
+% Create three different Tech Noises
+mat_liar('create_gm_tech_noise, number_of_noises = 2');
+
+% Ground motion harmonics should be prepared 
+%   before TF or Noises will be defined
+mat_liar('prepare_gm_harmonics');
+
+% Define Transfer functions
+mat_liar('define_gm2elt_tf, id_tf = 1, f0_tf = 3.0, q_tf = 0.2, ');
+mat_liar('  tfsavefile = ''tf_1.out'' ');
+
+% use this to look up how the elements are assigned to supports 
+% and to decide which TF should be assigned to which support
+mat_liar('show_support');
+
+% Tech noises are defined by its p(w) spectrum which 
+% may contain 3 peaks. Below we define parameters for 
+% tech noises (amplitudes, frequency and width factor for three peaks)
+% units are: f [Hz] , a [m**2/Hz] , d [1]
+mat_liar('define_gm_tech_noise, id_noise=1,     ');
+mat_liar('  f1 = 2.50 , a1 = 1.00E-18 , d1 = 1.5 ,');
+mat_liar('  f2 = 10.0 , a2 = 3.00E-19 , d2 = 3.5 ,');
+mat_liar('  f3 = 50.0 , a3 = 1.00E-19 , d3 = 1.5  ');
+
+mat_liar('define_gm_tech_noise, id_noise=2, ');
+mat_liar('  f1 = 2.50 , a1 = 1.00E-18 , d1 = 1.5 ,');
+mat_liar('  f2 = 10.0 , a2 = 3.00E-19 , d2 = 3.5 ,');
+mat_liar('  f3 = 50.0 , a3 = 1.00E-19 , d3 = 1.5  ');
+
+% Assign TF to a particular support
+mat_liar('assign_gm2elt_tf, i_of_support = 3, id_tfx = 1 , ');
+mat_liar('    id_tfy = 1  ');
+mat_liar('assign_gm2elt_tf, i_of_support = 4,  id_tfy = 1 ');
+
+% Assign tech noises to particular supports
+% x and y planes can be assigned independently 
+mat_liar('assign_gm_tech_noise, i_of_support = 1, idx = 1 ');
+mat_liar('assign_gm_tech_noise, i_of_support = 2, idx = 2 ');
+
+mat_liar('assign_gm_tech_noise, i_of_support = 3, idx=1, idy=1');
+mat_liar('assign_gm_tech_noise, i_of_support = 4, idx=2, idy=2');
+
+
+% Similarly as for ground motion, for the tech noises to be used
+% one need to prepare theis harmonics (frequencies, random phases, etc.)
+mat_liar('prepare_noises_harmonics');
+
+% then move it 
+mat_liar('set_gm_abs_time, timeabs = 0  ');
+mat_liar('gm_move, dt = 0.0, reset=.t. ');
+%
+
+%
+% loop over iterations, each time will refresh harmonics
+%
+for iter=1:niter
+%
+mat_liar('refresh_gm_harmonics');
+
+% similarly as for ground motion, noises harmonics can be refreshed
+mat_liar('refresh_noises_harmonics');
+
+mat_liar('set_gm_abs_time, timeabs = 0  ');
+mat_liar('gm_move, dt = 0.0, reset=.t. ' );
+%
+%mat_liar('  track, dolog = .f. ');
+% Get initial beam parameters and logbook, without misalignment
+%mat_liar('logbook, process = .f.,');
+%mat_liar('print = .f.');
+[iss,mislx(:,1,iter),misly(:,1,iter)] = mat_liar('MAT_GET_BPMD',nbpm); % misalignments of BPMs
+%
+for isample=2:nsample
+    dtsample=tsample(isample)-tsample(isample-1);
+    dtstr=num2str(dtsample);
+        gmstr1=['gm_move, dt = ',dtstr,' , silent = .t. ']; 
+    gmstr2=['increase_gm_abs_time, dtime = ',dtstr];
+    mat_liar(gmstr1); 
+    mat_liar(gmstr2); 
+%    mat_liar('  track, dolog = .f. ');
+     [iss,mislx(:,isample,iter),misly(:,isample,iter)] = mat_liar('MAT_GET_BPMD',nbpm);
+%    
+end ;
+% loop of isample
+%
+%iter
+end ;% loop of iter
+
+%
+% Save output in Matlab format
+telap=cputime-tbeg;
+%
+clear ierr isample iter 
+save gm_tf_noise_save
+%

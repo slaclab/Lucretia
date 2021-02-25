@@ -1,0 +1,14 @@
+'Range of k to write out to ptk.dat:   kmin (1/m)' 5.E-4
+'                                      kmax (1/m)' 3.e-1
+'Number of points to write:            Nout =    '  100 
+'Range of w to integrate P(w,k) over   wmin (1/s)' 1.E-05
+'                                      wmax (1/s)' 1000.0   
+'Number of divisions in integral on w  Ndivw =   ' 10000 
+'Find P(t,k) at time t                 t (s)=    ' 1e7   
+'Range of w to write out to pwl.dat    wmin (1/s)' 1.0E-04    
+'                                      wmax (1/s)' 1000.0  
+'Number of points to write:            Nout =    '  100  
+'Range of k to integrate P(w,k) over   kmin (1/m)' 1.0E-04 
+'                                      kmax (1/m)' 1000.0
+'Number of divisions in integral on k  Ndivk =   '  5000 
+'Find P(w,L) at delta distance L       L (m)=    ' 100.0

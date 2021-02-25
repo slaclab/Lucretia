@@ -1,0 +1,28 @@
+! FODO linac
+!
+LH  : DRIF, L = 4.900
+BPM : MONITOR
+!
+! halh cell
+HLFCLL(Q):LINE=(LH,Q,BPM,Q,LH)
+!
+! Attention: as of 12/21/01 LIAR did not move quads unless they were 
+! split in two halves. Needs to be fixed.  
+!
+! length of quad
+LQ  = 0.2/2
+! strength of quad
+KQ  = 0.5033672
+!
+QF:QUAD,L=LQ,K1= KQ
+QD:QUAD,L=LQ,K1=-KQ
+!
+Q0:QUAD,L=1.E-6,K1=0.0
+!
+! full cell
+FLCLL:LINE=(HLFCLL(QF),HLFCLL(QD))
+!
+FODO:LINE=(12*FLCLL,Q0,BPM,Q0)
+!
+RETURN
+!

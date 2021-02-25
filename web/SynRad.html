@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=windows-1252">
+    <title>Lucretia: Synchrotron Radiation</title>
+    <meta name="author" content="Peter Tenenbaum">
+  </head>
+  <body>
+    <div style="text-align: center;"><a href="home.html"><span
+          style="font-size: 24pt;"><img style="border: 0px solid ;
+            width: 80px; height: 90px;" alt="LucretiaLogo"
+            title="Lucretia home page" src="LucretiaLogo.gif"
+            align="right" hspace="20"></span></a><span style="font-size:
+        24pt;"><br>
+      </span>
+      <div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The
+          <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+          Project</span><br>
+      </div>
+      <span style="font-size: 24pt;"><br>
+        <small>Synchrotron Radiation<br>
+          <br>
+        </small></span></div>
+    <h2><strong>ISR</strong></h2>
+    <br>
+    Lucretia allows the user to simulate incoherent synchrotron
+    radiation losses in
+    dipole correctors, sector bends, quads, sextupoles, octupoles,
+    multipoles, and transverse-mode cavities.&nbsp; During tracking,
+    there
+    are four possible methods of synchrotron radiation simulation, which
+    are determined by the SynRad tracking flag of each element:<br>
+    <br>
+    <span style="font-weight: bold;">TrackFlag.SynRad == 0:</span>&nbsp;
+    Synchrotron radiation is completely ignored.&nbsp; This is the
+    default
+    settting of the SynRad tracking flag for all elements at
+    instantiation
+    time.<br>
+    <br>
+    <span style="font-weight: bold;">TrackFlag.SynRad == 1:</span>&nbsp;
+    For each particle, the mean energy loss from synchrotron radiation
+    is
+    calculated, taking into account the particle's momentum and the
+    actual
+    field that it encounters (ie, particles which are far from the
+    center
+    of a quad or other multipole magnet will have larger losses than
+    particles which are near the center of the magnet).&nbsp; Half of
+    the
+    loss is applied at the upstream face of the element (ie, before
+    tracking), and half at the downstream face of the element (ie, after
+    tracking).&nbsp; In this way, the effect of the energy variation on
+    the
+    particle's trajectory is approximately taken into account.<br>
+    <br>
+    <span style="font-weight: bold;">TrackFlag.SynRad == 2:</span>&nbsp;
+    For each particle, both the mean and the quantum-fluctuation
+    components
+    of the synchrotron radiation are calculated.&nbsp; This is
+    accomplished
+    by computing the photon critical energy (u_c) and mean number of
+    photons emitted (nphot) for each particle; for each particle
+    generating
+    a Poisson-distribued random number with mean nphot to indicate the
+    actual number of photons emitted; and finally generating the actual
+    energy of each photon emitted by each particle according to the
+    incoherent synchrotron radiation spectrum.&nbsp; As with the
+    previous
+    option, half the energy loss is applied pre-tracking and half is
+    applied post-tracking; the opening angle of the photon is
+    ignored.&nbsp; The spectrum generation uses a fast method developed
+    by
+    A. Wolski; this method agrees very well with the
+    analytically-expected
+    mean particle energy loss, and produces a spectrum of particle
+    energy
+    losses which is a few percent wider than the analytically-expected
+    one.<br>
+    <br>
+    <span style="font-weight: bold;">TrackFlag.SynRad == 3:</span>&nbsp;
+    Both the mean and quantum-fluctuation components of the synchrotron
+    radiation are calculated in exactly the method described above,
+    except
+    that the generation of the photons uses H. Burkhardt's method.&nbsp;
+    In
+    this case both the mean and the standard deviation of the particle
+    energy loss agree with the analytically-expected values to within
+    statistical errors, but the method is much slower than Wolski's.<br>
+    <br>
+    Methods 2 and 3 make use of Matlab's flat-distributed random number
+    generator, rand, in the generation of the Poisson-distributed random
+    numbers and also in the generation of the photon energies.&nbsp; All
+    of
+    the methods make the thin-lens approximation:&nbsp; the magnetic
+    field
+    experienced by a particle at the upstream face of an element, along
+    with its effective length, are assumed to be all that is needed to
+    compute the emitted radiation.&nbsp; Put another way, the fact that
+    the
+    particle changes its transverse offset in a quad or other multipole
+    magnet, and thus changes the magnetic field that it samples as it
+    passes through the element, is ignored.&nbsp; If this is deemed to
+    be
+    critical to correctly computing the synchrotron radiation, and its
+    effects on the beam dynamics, one can divide the magnets into
+    longitudinal slices which will more accurately emulate thin lens
+    elements for this purpose.<br>
+    <br>
+    The <a href="momentum_profile.html">momentum profile</a> tools will
+    also change their behavior based on the SynRad track flag:&nbsp; if
+    SynRad != 0, the
+    mean SR loss will be included in the momentum profile for bends,
+    correctors, TCAVs, and multipoles with a nonzero dipole field.&nbsp;
+    <br>
+    <br>
+    <h2><strong>CSR</strong></h2>
+    Both a 1d and 2d (in z and bend plane)
+    implementation of Coherent Synchrotron Radiation is supported. The
+    default is to use the 1d formalism unless the 2d option is switched
+    on
+    using the CSR_2D tracking flag. The 2d calculation is only for the
+    steady-state wakes inside bend magnets, the 1d formalism is used to
+    calculate the transient effects at the magnet edges still.<br>
+    <br>
+    The implementation of 1d CSR in Lucretia uses the formulism
+    developed in the paper by G. Stupakov and P. Emma in the EPAC2002
+    paper "<a
+      href="http://accelconf.web.cern.ch/AccelConf/e02/PAPERS/WEPRI029.pdf">CSR
+      Wake for a Short Magnet in Ultrarelativistic Limit</a>". The
+    implementation in Lucretia closely follows the method by which CSR
+    was implemented in<a
+href="http://www.aps.anl.gov/Accelerator_Systems_Division/Accelerator_Operations_Physics/manuals/elegant_latest/elegant.pdf">
+      Elegant</a>. The Elegant implementation very well described
+    measurement data taken during the commissioning of LCLS. The
+    implementation here has been cross-checked against the example case
+    in the Stupakov/Emma paper. It has also been cross-checked against
+    Elegant for the specific case of FACET at SLAC.<br>
+    <br>
+    CSR can be turned on through the use of the BEAMLINE <strong>TrackFlags.CSR
+    </strong>field (see below) on an SBEN element. When the tracking
+    engine reaches an SBEN element with CSR track flag set, it slices up
+    the element (according to defaults specified below), tracks through
+    each slice and calculates an energy loss per beam slice (beam
+    longitudinal slices also setable by user), applies the energy loss
+    and continues. Upon exiting from the bend, further elements are also
+    optionally split with the CSR field applied as calculated from the
+    preceding bend. The cutoff distance from the bend for application of
+    CSR effects is determined as per the description in the
+    Stupakov/Emma paper. CSR effects are considered in all elements
+    downstream from the bend up to the cutoff with the exception of RF
+    and other bend elements. The CSR calculation relies upon a Matlab
+    function which resides inside the src/Tracking directory
+    (applyCSR.m) which should exist on your Matlab search path.<br>
+    <br>
+    The 2d steady-state CSR fields are calculated according to Y. Cai:
+    PR-AB 23, 014402 (2020). Their use requires ellipic integral
+    functions
+    included in the utils/ directory of Lucretia and requires them to be
+    on
+    the Matlab search path. The 2d field equations are much slower to
+    calculate than the 1d equivalents and should only be used when
+    necessary. As a guideline, 1d calculations should be sufficient if
+    sigma_x * (1/R*sigma_z^2)^(1/3)&nbsp; &lt;&lt; 1, where R is the
+    bend
+    radius. If using the 2d option, it is suggested to start with the
+    default options and a low number of bins (say &lt;30) and slices
+    (say,
+    2), then examine the 2d gridding performance and calculation time
+    using
+    the Diagnostics tracking flag set to true.<br>
+    <br>
+    CSR tracking options (set through TrackFlag field on SBEN elements
+    in BEAMLINE array, default values shown):<br>
+    <strong><br>
+      TrackFlag.CSR = 0</strong><br>
+    A setting of 0 means no CSR tracking to take place. An integer value
+    &gt;0 switches on CSR effects in the corresponding SBEN element. The
+    integer value set indicates the number of longitudinal slices
+    (histogram bins) to use for the beam description in the CSR
+    calculation. The optimal number depends upon the topology and number
+    of macro particles within the tracked bunch. It is always advised to
+    experiment with this setting to find a value which produces stable
+    results without too much of a time overhead.<br>
+    If TrackFlag.CSR = -1 then the CSR algorithm automatically
+    calculates
+    the number of bins to use based on the number of macro particles and
+    the distribution (using either the Matlab histcounts or histcounts2
+    algorithm- see Matlab documentation for details).<br>
+    For 2d caclulations, the CSR setting determines the number of bins
+    in
+    both planes unless the CSR_2D_NX flag is set in which case this flag
+    sets the number of bins in the Z dimension.<br>
+    <br>
+    <strong>TrackFlag.CSR_SmoothFactor = 0<br>
+    </strong>The
+    longitudinal charge profile is smoothed after binning. This
+    parameter
+    (integer &gt;= 0) controls the degree of smoothing. The optimal
+    value
+    depends upon the number of bins used (.CSR field above) and the
+    'spikiness' of the longitudinal beam profile. The larger the value,
+    the
+    more smoothing is applied. See "help smoothn" for more details on
+    the
+    smotthing algorithm used.<br>
+    If SmoothFactor = 0: the smoothing algorithm automatically
+    determines
+    the smoothing parameter to apply (see "help smoothn" for more
+    details-
+    the 'robust' smoothing option is applied in this case).<br>
+    To apply no smoothing, select a SmoothFactor of 1.<br>
+    <br>
+    <strong>TrackFlag.Split</strong> =
+    <strong>10<br>
+    </strong>The number of slices to split the SBEN element into. This
+    tracking flag is also independent of the CSR fields, it can be set
+    independently- in which case the tracking engine treats the element
+    as N sequential identical elements with lengths and strengths scaled
+    appropriately. More splitting more closely represents reality but
+    will slow down the tracking.<br>
+    <br>
+    <strong>
+      TrackFlag.CSR_DriftSplit = 10<br>
+    </strong>If set to 0, then no CSR treatment is applied beyond the
+    downstream face of the SBEN. If integer &gt;0, then CSR is applied
+    to the tracked beam downstream of the bend to a point downstream
+    determined internally where the CSR field ceases to have a
+    significant effect. The following elements are usually drifts (hence
+    the flag name, but can include any element class other than LCAV or
+    TCAV). The value of the CSR_DriftSplit flag determines the number of
+    slices between the downstream SBEN face and the cutoff point to use.
+    Depending on the number of downstream elements between bend and
+    cutoff point, the elements are split so that the total number of
+    tracking slices is at least this value. Note if the tracking engine
+    encounters another SBEN element before the cutoff distance, it
+    simply stops the calculation and starts again with the new SBEN (if
+    CSR switched on in this bend), no effort is made to convolve the CSR
+    fields from multiple bends. The slices are made according to a
+    logarithmic distribution, with more slices closer to the bend where
+    the CSR fields are changing most rapidly. A value of &gt;50 is
+    recommended and experimentation suggested.<br>
+    <br>
+    <span style="font-weight: bold;">TrackFlag.CSR_USEGPU = false<br>
+    </span>Use GPU for CSR calculations to speed up computation time.
+    Currently only supported for 2D calculation. Requires NVidia GPU
+    with
+    compute capability &gt;=2.0 and CUDA 8.0+ installed and Matlab
+    Parallel
+    Toolbox.<br>
+    <br>
+    <span style="font-weight: bold;">TrackFlag.Diagnostics = false<br>
+    </span>Switch on diagnostics output and plots if Diagnostics=true.
+    Shows intermediate details of CSR calculation for helping in
+    determining optimal CSR parameter settings.<br>
+    <br>
+    <span style="font-weight: bold;">TrackFlag.CSR_2D = 0<br>
+    </span>Perform 2D CSR calculation if =1 for steady-state case inside
+    bend magnet.<br>
+    <br>
+    <span style="font-weight: bold;">TrackFlag.CSR_2D_NX = []<br>
+    </span>If this flag is defined, then use this number of bins in the
+    X
+    (or bend plane) dimension, then the number of bins in the Z
+    dimension
+    is set by the CSR flag. If not set, then the number of bins is
+    either
+    set automatically (if CSR=-1) or with the number of bins set in the
+    CSR
+    flag in both dimensions.<br>
+    <br>
+    <span style="font-weight: bold;">TrackFlag.CSR_2D_GSCALE = [1 1]<br>
+    </span>Scales granularity of 2d grids used for wake calculations. To
+    perform the requried 2d overlap integral, the problem is subdivided
+    into a number of sub-grids to optimize the compute time by providing
+    higher-detail grids for the portions of the 2d integral with
+    fast-changing wake potentials. The gridding requirements change non
+    trivially with bend angle, beam energy and bunch distributions. The
+    CSR
+    algorithm attempts to sensibly auto-scale the integral grids, but a
+    specific problem may benefit from finer gridding or speed up without
+    accuracy loss with coarser gridding depending on the specifics.<br>
+    The first GSCALE element scales the number of grids used for the
+    fine-detail areas of the 2d integration.<br>
+    The second GSCALE element scales the number of grids used for the
+    coarser areas of the 2d integration.<br>
+    The computation time scales approximately as the square of each
+    GSCALE element.<br>
+    <span style="font-weight: bold;"></span><br>
+    <a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a>
+    <a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+    2-Aug-2012<br>
+    <a href="http://www.slac.stanford.edu/detailed.html"><img
+        src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home
+        Page" alt="SLAC-logo" style="border: 0px solid ; width: 100px;
+        height: 39px;" align="right"></a><br>
+  </body>
+</html>

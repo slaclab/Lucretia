@@ -1,0 +1,58 @@
+Note: If you got this as part of the Lucretia package, you may already have the exectuable
+on your system.  As of 11th May, 2008, this includes only the 64 bit linux exectuable.
+
+Installing on Linux
+===================
+
+To install Lucretia2AML, first we need to install UAP, and to install UAP we
+need to install C++ Xerces from Apache.
+
+Installing UAP requires a C++ and a Fortran compiler.  I use g++ and ifort.  The
+UAP Makefile can be altered to allow the use of g95, but I couldn't get it to work!
+
+Apache's Xerces C++ libraries
+=============================
+Download the latest version of the Apache Xerces C++ libraries from here,
+http://xerces.apache.org/xerces-c/download.cgi
+
+Follow the installation instructions found here,
+http://xerces.apache.org/xerces-c/install.html
+
+Once installed, you need to add $XERCESCROOT/lib (which you set during the installation phase
+as instructed, right?) to the end of LD_LIBRARY_PATH.  Use .bashrc or .cshrc (or whatever
+is appropriate).
+
+Universal Accelerator Parser
+============================
+Download the latest version of the parser from sourceforge using the following,
+(Keeping this in a script or alias is a good idea, cos you might be calling it a lot!)
+svn co https://accelerator-ml.svn.sourceforge.net/svnroot/accelerator-ml accelerator-ml
+
+Navigate to accelerator-ml/uap/trunk and execute 'make all'.  If you've got your paths set
+up properly, this should go compile everything.  Common errors are,
+1/ Not having a fortran compiler.  I recommend downloading and installing the intel compiler 
+since I never had much luck with g95.  If you're using g95, did you alter the top of the Makefile
+to let 'make' know this?
+2/ Not having set $XERCESCROOT to point to the root directory of your Xerces C++ installation.
+
+Lucretia2AML
+============
+Open Matlab from the L2AML directory.
+
+Open mexify.m in an editting window, and edit the XERCESCROOT and UAPROOT variables to point to
+your XERCES-C and UAP installations.  Also, note the advice to set up your LD_LIBRARY_PATH
+correctly.
+
+Run 'mexify'.
+
+You now have a Matlab executable called 'Lucretia2AML'.
+
+
+
+
+
+Good luck!!!
+
+
+Stephen Molloy, 28th March, 2008
+

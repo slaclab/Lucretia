@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Examples</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+	</span><font size="5">Parallel Use of Lucretia and/or Deployment of Lucretia 
+	Code Without Matlab</font><span style="font-size: 24pt;"><small><br>
+<br>
+</small></span></div>
+If you don't care about parallel deployment of Lucretia and are just interested 
+in Matlab-free running of your Lucretia code, skip to the section on the 
+<a href="pLucretia_compiler.html">Matlab 
+Compiler</a>, else continue reading below.<p>To get the maximum performance benefits 
+from modern multi-core processors, or to run multiple simultaneous instances of 
+Lucretia code (Monte Carlo style analysis) it may be necessary to think about 
+ways to parallelise code written in the Lucretia environment. This currently 
+means running parallel Matlab jobs. At the moment, there is no easy, out-of-the 
+box way of doing these kind of things. This is getting better; for example 
+R2007a of Matlab is now multi-threaded and many of the built-in Matlab functions 
+will recognise and use up to 4 CPU cores. And there are other improvements in 
+the Matlab development pipeline that address usability issues for parallel 
+computing. The idea of this section is to share experiences of using Lucretia in 
+a parallel fashion which will hopefully provide a useful starting point if you 
+have desires to move in this direction.<br><br>There are, broadly speaking, 2 
+types of parallel behaviour you can build into your simulation codes:</p>
+<ul>
+	<li>The first fits into the category of 'embarrassingly parallel', that is 
+	simply taking a Lucretia simulation that runs serially and running N 
+	instances with minor differences between instances (e.g. different random 
+	seeds for each instance). This is by far the easiest way of parallelising 
+	code, you should have a good reason to do anything else! To do this in 
+	Matlab, because of licensing restrictions, means one of three things: Buying 
+	N licenses and running a separate simulation seed on each (expensive); using 
+	the Matlab Distributed Computing Toolbox (DCT) and Distributed Computing 
+	Engine (DCE) (less expensive, but still not cheap!); using the Matlab 
+	Compiler (cheapest). The main reason you may choose to use multi-licenses or 
+	the DCT/DCE approach to this kind of parallelisation is if the Compiler 
+	doesn't support a toolbox you are dependent on (Simulink is the best 
+	example). Otherwise, using the Compiler is the cheapest and most flexible 
+	option (it is, for example, currently the only realistic way you could get a 
+	Lucretia simulation to run as a Grid application).</li>
+	<li>If you have a simulation which can benefit from parallelising parts of 
+	it (which are too slow), you have a more difficult task ahead of you but 
+	there are a variety of tools available, some of these listed in decreasing 
+	difficulty of implementation are: Write the time-consuming piece of code as 
+	a compiled mex-function using a parallel toolkit (for example
+	<a href="http://www.open-mpi.org/">Open MPI</a> or
+	<a href="http://www-unix.mcs.anl.gov/mpi/mpich/">MPICH2</a>) (if you are not 
+	experienced with compiled languages or parallel computing constructs there 
+	is a large learning-curve associated with this approach) and then compile 
+	the simulation using the Matlab Compiler; use an open-source parallel 
+	toolkit for Matlab- many available from the
+	<a href="http://www.mathworks.com/matlabcentral/fileexchange/loadCategory.do?objectId=111&objectType=Category">
+	Matlab Central pages</a> (big disadvantage is these solutions are not very 
+	well supported and require multiple Matlab licenses); R2006b and later of 
+	Matlab and the corresponding DCT/DCE implements parallel constructs such as 
+	message passing (these ship with MPICH2) which allows parallel tasks 
+	to be created including inter-process communication within the Matlab 
+	computing environment, where parallel tasks are carried out on different CPU 
+	cores and/or separate compute nodes connected over a network.</li>
+</ul>
+<p>Listed below are links to pages which discuss, with examples, the different 
+mechanisms for parallelising your Lucretia simulations:</p>
+<ul>
+	<li><a href="pLucretia_batch.html">Running Matlab in batch mode with multiple licenses.</a></li>
+	<li><a href="pLucretia_compiler.html">Using the Matlab Compiler with Lucretia.</a></li>
+	<li><a href="pLucretia_dct.html">Lucretia and the Matlab Distributed Computing Toolbox and the 
+	Distributed Computing Engine.</a></li>
+</ul>
+<p><a href="pLucretia_hints+tips.html">General hints and tips for parallelising your simulation</a>.</p>
+<p><a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+24-May-2007<br><a href="http://www.slac.stanford.edu/detailed.html">
+<img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br></p>
+</body>
+</html>

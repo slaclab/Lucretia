@@ -1,0 +1,41 @@
+! ==============================================================================
+! 25-jul-2003, PT
+!    add L18M and GB3 definition.
+! 23-jul-2003, PT
+!    Move BPMQ079 and BPMMB079 to nlc_common parameters.
+! 21-MAY-2003, M. Woodley
+!    Consolidate common parameters and element definitions in order to avoid
+!    redefinitions when using multiple decks
+! 03-APR-2003, M. Woodley
+!    NLC2003 configuration; add 4 cm bore BPM definition
+! ------------------------------------------------------------------------------
+
+! global parameters
+
+  Brho := Cb*Ef !magnetic rigidity (kG-m)
+
+! element class parameters
+
+  L12MM := 0.012
+  L50CM := 0.5
+  L1M   := 1.0
+  L2M   := 2.0
+  L18M  := 18.0
+
+  GB3 := 0.03
+
+  QBDS1 : QUAD, TYPE="QBDS1", L=L50CM/2, APER=L12MM/2
+  QBDS2 : QUAD, TYPE="QBDS2", L=L1M/2,   APER=L12MM/2
+  QBDS3 : QUAD, TYPE="QBDS3", L=L2M/2,   APER=L12MM/2
+
+  QFACT1 := 1/(QBDS1[APER]*Brho) !convert pole-tip field (kG) to K1 (1/m^2)
+  QFACT2 := 1/(QBDS2[APER]*Brho) !convert pole-tip field (kG) to K1 (1/m^2)
+  QFACT3 := 1/(QBDS3[APER]*Brho) !convert pole-tip field (kG) to K1 (1/m^2)
+
+! diagnostic/correction devices, etc.
+
+  BPMQ157  : MONI, TYPE="BPMQ_1.57"  !"Q" bpm (4 cm bore)
+
+! ==============================================================================
+
+  RETURN

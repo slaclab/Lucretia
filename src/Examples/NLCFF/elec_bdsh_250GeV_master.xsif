@@ -1,0 +1,55 @@
+! ==============================================================================
+! Master deck for BDSH -- 250 GeV/beam configuration
+!
+! Pre-requisites:  none.  This file will read in all files necessary to 
+!     perform simulations from the start of the EBSY to the EFFH IP.
+!
+!
+! ------------------------------------------------------------------------------
+! 23-apr-2005, PT:
+!    Lucretia example version.
+! 24-jul-2003, PT:
+!    first version.
+! ------------------------------------------------------------------------------
+!
+! global parameters
+!
+  CALL, FILENAME = "nlc000.nlc_common.xsif"
+! 
+! electron parameters
+! 
+  CALL, FILENAME = "nlc001.elec_common.xsif"
+!
+! BDS common parameters
+!
+  CALL, FILENAME = "nlc040.bds_common.xsif"
+!
+! BDS 250 GeV/beam parameters
+!
+  CALL, FILENAME = "nlc041.bds_250GeV.xsif"
+!
+! BDS 250 GeV/beam configuration
+!
+  CALL, FILENAME = "effh_250GeV_patch.xsif"
+!
+! ------------------------------------------------------------------------------
+!
+! beam switch yard
+!
+  CALL, FILENAME = "nlc601.ebsy.xsif"
+!
+! interaction region transport
+!
+  CALL, FILENAME = "nlc611.eirth.xsif"
+!
+! final focus
+!
+  CALL, FILENAME = "nlc612.effh.xsif"
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+! line definition
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+  BDSH250 : LINE = (EBSY, EIRTH, TO_RAYS, EFFH)
+
+  RETURN

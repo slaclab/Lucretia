@@ -1,0 +1,1390 @@
+<laboratory>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "COLL">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "OTR1X">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QS1X">
+    <quadrupole>
+      <k_u design = "25.4227" err = "0" />
+    </quadrupole>
+    <length design = "0.07867" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0.785398" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element name = "QF1X">
+    <quadrupole>
+      <k_u design = "23.3667" err = "0" />
+    </quadrupole>
+    <length design = "0.19861" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "MS1X">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QD2X">
+    <quadrupole>
+      <k_u design = "-20.5442" err = "0" />
+    </quadrupole>
+    <length design = "0.19861" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QF3X">
+    <quadrupole>
+      <k_u design = "14.6189" err = "0" />
+    </quadrupole>
+    <length design = "0.19861" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "MID">
+    <marker />
+  </element>
+  <element />
+  <element name = "QF4X">
+    <quadrupole>
+      <k_u design = "14.935" err = "0" />
+    </quadrupole>
+    <length design = "0.19861" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QD5X">
+    <quadrupole>
+      <k_u design = "-20.2532" err = "0" />
+    </quadrupole>
+    <length design = "0.19861" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF6X">
+    <quadrupole>
+      <k_u design = "24.5942" err = "0" />
+    </quadrupole>
+    <length design = "0.19861" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element name = "QS2X">
+    <quadrupole>
+      <k_u design = "25.4227" err = "0" />
+    </quadrupole>
+    <length design = "0.07867" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0.785398" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QF7X">
+    <quadrupole>
+      <k_u design = "20.6741" err = "0" />
+    </quadrupole>
+    <length design = "0.07867" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QD8X">
+    <quadrupole>
+      <k_u design = "-12.9858" err = "0" />
+    </quadrupole>
+    <length design = "0.19861" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF9X">
+    <quadrupole>
+      <k_u design = "16.0398" err = "0" />
+    </quadrupole>
+    <length design = "0.19861" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QK1X">
+    <quadrupole>
+      <k_u design = "25.4227" err = "0" />
+    </quadrupole>
+    <length design = "0.07867" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0.785398" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element name = "QD10X">
+    <quadrupole>
+      <k_u design = "-22.3563" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MSKEW" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF11X">
+    <quadrupole>
+      <k_u design = "22.3563" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QK2X">
+    <quadrupole>
+      <k_u design = "25.4227" err = "0" />
+    </quadrupole>
+    <length design = "0.07867" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0.785398" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element name = "QD12X">
+    <quadrupole>
+      <k_u design = "-22.3563" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF13X">
+    <quadrupole>
+      <k_u design = "29.853" err = "0" />
+    </quadrupole>
+    <length design = "0.198745" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "FX1COR">
+    <marker />
+  </element>
+  <element />
+  <element name = "QD14X">
+    <quadrupole>
+      <k_u design = "-22.1554" err = "0" />
+    </quadrupole>
+    <length design = "0.198745" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "FIT180" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF15X">
+    <quadrupole>
+      <k_u design = "29.853" err = "0" />
+    </quadrupole>
+    <length design = "0.198745" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QK3X">
+    <quadrupole>
+      <k_u design = "25.4227" err = "0" />
+    </quadrupole>
+    <length design = "0.07867" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0.785398" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element name = "QD16X">
+    <quadrupole>
+      <k_u design = "-22.3563" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF17X">
+    <quadrupole>
+      <k_u design = "22.3563" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QK4X">
+    <quadrupole>
+      <k_u design = "25.4227" err = "0" />
+    </quadrupole>
+    <length design = "0.07867" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0.785398" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QD18X">
+    <quadrupole>
+      <k_u design = "-14.9883" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF19X">
+    <quadrupole>
+      <k_u design = "14.3132" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "LW1X">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "RC1X">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QD20X">
+    <quadrupole>
+      <k_u design = "-16.6613" err = "0" />
+    </quadrupole>
+    <length design = "0.07867" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MEMIT" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element name = "LW2X">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "MC1X">
+    <marker />
+  </element>
+  <element />
+  <element name = "QF21X">
+    <quadrupole>
+      <k_u design = "16.6148" err = "0" />
+    </quadrupole>
+    <length design = "0.07867" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QM16FF">
+    <quadrupole>
+      <k_u design = "12.7166" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM1FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QM15FF">
+    <quadrupole>
+      <k_u design = "-6.98383" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM2FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QM14FF">
+    <quadrupole>
+      <k_u design = "-24.4682" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM3FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QM13FF">
+    <quadrupole>
+      <k_u design = "19.8928" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM4FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QM12FF">
+    <quadrupole>
+      <k_u design = "7.33837" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM5FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QM11FF">
+    <quadrupole>
+      <k_u design = "10.0761" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM6FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "IPBPM">
+    <marker />
+  </element>
+  <element />
+  <element name = "QD10BFF">
+    <quadrupole>
+      <k_u design = "-6.33594" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM7FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QD10AFF">
+    <quadrupole>
+      <k_u design = "-6.33594" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM8FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "MS1FF">
+    <marker />
+  </element>
+  <element />
+  <element name = "QF9BFF">
+    <quadrupole>
+      <k_u design = "8.27222" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM9FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF9AFF">
+    <quadrupole>
+      <k_u design = "8.27222" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM11FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QD8FF">
+    <quadrupole>
+      <k_u design = "-13.2031" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM12FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QF7FF">
+    <quadrupole>
+      <k_u design = "12.0192" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM13FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QD6FF">
+    <quadrupole>
+      <k_u design = "-13.1588" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM14FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QF5BFF">
+    <quadrupole>
+      <k_u design = "8.21556" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM15FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF5AFF">
+    <quadrupole>
+      <k_u design = "8.21556" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM17FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "RC1FF">
+    <marker />
+  </element>
+  <element />
+  <element name = "QD4BFF">
+    <quadrupole>
+      <k_u design = "-6.4839" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM18FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QD4AFF">
+    <quadrupole>
+      <k_u design = "-6.4839" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM20FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "RC2FF">
+    <marker />
+  </element>
+  <element />
+  <element name = "QF3FF">
+    <quadrupole>
+      <k_u design = "12.0751" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM21FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "RC3FF">
+    <marker />
+  </element>
+  <element />
+  <element name = "QD2BFF">
+    <quadrupole>
+      <k_u design = "-4.3412" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM22FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "QD2AFF">
+    <quadrupole>
+      <k_u design = "-6.32958" err = "0" />
+    </quadrupole>
+    <length design = "0.19849" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+    <marker name = "MM23FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.016" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "MS2FF">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QF1FF">
+    <quadrupole>
+      <k_u design = "6.77187" err = "0" />
+      <scaled_multipole>
+        <a_u_coef n = "2" design = "0.163864" />
+        <b_u_coef n = "2" design = "-0.0230258" />
+        <a_u_coef n = "3" design = "3.98674" />
+        <b_u_coef n = "3" design = "37.9385" />
+        <a_u_coef n = "4" design = "43490.1" />
+        <b_u_coef n = "4" design = "-7662.68" />
+        <a_u_coef n = "5" design = "1.25914e+07" />
+        <b_u_coef n = "5" design = "-2.18093e+07" />
+        <a_u_coef n = "9" design = "0" />
+        <b_u_coef n = "9" design = "6.22926e+17" />
+      </scaled_multipole>
+    </quadrupole>
+    <length design = "0.475" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.025" />
+    </aperture>
+    <marker name = "MM25FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.025" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "QD0FF">
+    <quadrupole>
+      <k_u design = "-12.4518" err = "0" />
+      <scaled_multipole>
+        <a_u_coef n = "2" design = "0.320639" />
+        <b_u_coef n = "2" design = "0.0450555" />
+        <a_u_coef n = "3" design = "3.91746" />
+        <b_u_coef n = "3" design = "-74.5498" />
+        <a_u_coef n = "4" design = "85105.9" />
+        <b_u_coef n = "4" design = "14995.1" />
+        <a_u_coef n = "5" design = "2.46408e+07" />
+        <b_u_coef n = "5" design = "4.26797e+07" />
+        <a_u_coef n = "9" design = "0" />
+        <b_u_coef n = "9" design = "-1.21905e+18" />
+      </scaled_multipole>
+    </quadrupole>
+    <length design = "0.475" />
+    <orientation origin = "CENTER">
+      <x_offset design = "0" />
+      <x_pitch design = "0" />
+      <y_offset design = "0" />
+      <y_pitch design = "0" />
+      <s_offset design = "0" />
+      <tilt design = "0" />
+    </orientation>
+    <aperture at = "ENTRANCE" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.025" />
+    </aperture>
+    <marker name = "MM27FF" />
+    <aperture at = "EXIT" shape = "CIRCLE" orientation_dependent = "TRUE" side = "BOTH">
+      <xy_limit design = "0.025" />
+    </aperture>
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "SWEEP">
+    <marker />
+  </element>
+  <element />
+  <element name = "HONDA">
+    <marker />
+  </element>
+  <element />
+  <element name = "BEGBSM">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "ENDBSM">
+    <marker />
+  </element>
+  <element />
+  <element name = "MW1FF">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element name = "MS3FF">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+  <element />
+  <element />
+  <element name = "RC4FF">
+    <marker />
+  </element>
+  <element />
+  <element name = "MC1FF">
+    <marker />
+  </element>
+  <element />
+  <element />
+  <element />
+</laboratory>

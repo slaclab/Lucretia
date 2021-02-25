@@ -1,0 +1,47 @@
+%================================================================
+%  MAT-LIAR simulation; 
+%     read ascii file with saved amplitudes of ground motion 
+%     harmonics am(i,j) and ams(j), then save as matlab file
+%
+%  A.S. Dec.29, 2001
+%================================================================
+%
+fname='am_ams_B.out';
+%
+fid = fopen(fname);
+%
+Nw   = fscanf(fid,'%i',1);
+Nk   = fscanf(fid,'%i',1);
+wmin = fscanf(fid,'%g',1);
+wmax = fscanf(fid,'%g',1);
+kmin = fscanf(fid,'%g',1);
+kmax = fscanf(fid,'%g',1);
+%
+% GM harmonics
+%
+am=zeros(Nw,Nk);
+for n=1:Nw*Nk
+  i    = fscanf(fid,'%i',1);
+  j    = fscanf(fid,'%i',1);
+  ampl = fscanf(fid,'%g',1);
+  am(i,j)=ampl;
+end
+%
+% Harmonics of systematic motion
+%
+Nks   = fscanf(fid,'%i',1);
+kmins = fscanf(fid,'%g',1);
+kmaxs = fscanf(fid,'%g',1);
+%
+ams=zeros(Nks,1);
+for n=1:Nks
+  j    = fscanf(fid,'%i',1);
+  ampl = fscanf(fid,'%g',1);
+  ams(j)=ampl;    
+end
+%
+fclose(fid);
+%
+clear i j n fid ampl
+save am_ams_B_save
+%

@@ -1,0 +1,15 @@
+Lucretia
+--------
+Lucretia is a physics toolbox for the simulation of  high-performance single-pass electron beam transport systems.  It is designed to support studies of linear collider Low Emittance Transport (bunch compressor, linear accelerator, final focus), and also the transport and acceleration system of linac-driven free electron lasers.
+
+The src directory contains all the m-file source code as well as binaries for supported platforms for the current production version of Matlab.
+
+To rebuild the mex binaries, go to src/mexsrc, edit and run the Makefile or Matlab build.m (some help available in Makefile or build.m file). The supported compiler is the system gcc compiler.
+To build ground motion and/or xsif parser binaries, go into the mexsrc/matgm and/or mexsrc/xsif direcories. These have fortran source files and the supported compiler is the system gfortran compiler.
+
+The main source code of Lucretia exists as Matlab functions and mex files inside the src directory sub-directories. To use, copy Lucretia directory to desired installation location. From within Matlab, add the Lucretia/src/* directories to your search path.
+
+To use the mex files (e.g. for the main tracking routine "TrackThru"), you should add the relevent shared object files to your shared library search path. e.g. for 32-bit linux set LD_LIBRARY_PATH environment variable to Lucretia/sr/Libs/linux-x86, for 64-bit linux add the path .../linux-x86_64.
+
+The documentation exists as web html files, launch home.html in your browser to view.
+

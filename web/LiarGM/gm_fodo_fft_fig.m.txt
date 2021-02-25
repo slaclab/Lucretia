@@ -1,0 +1,94 @@
+%================================================================
+%  Simple FODO line with ground motion
+%  MAT-LIAR simulation
+%     Calculate spectra p(t,k) 
+%
+%  A.S. Jan.1, 2002
+%================================================================
+%
+% this routine is called by plot_fft.m
+%
+nfou=nbpm/2;
+stot=sbpm(nbpm)-sbpm(1);
+ds=stot/(nbpm-1);
+df=1./stot;
+  fr=zeros(nfou,1);
+  xx=zeros(nfou,1);
+  xxav=zeros(nfou,1);
+for i=1:nfou
+    fr(i)=df*i;
+end
+%
+%
+%
+for isample=2:nsample
+   
+    xxav=0;
+    
+for ihorzvert=1:2    
+
+for iter=1:niter
+
+if ihorzvert==1
+    x=mislx(:,isample,iter);
+else
+    x=misly(:,isample,iter);
+end
+    
+x=x-mean(x);
+
+%x2in=var(x);
+
+for i=1:nbpm
+    x(i)=x(i)*(1-cos((i-1)/(nbpm-1)*2*pi));
+end
+% filter
+
+ff=fft(x);
+
+for i=1:nfou-1
+    xx(i)=abs(ff(i+1))^2;
+end
+xx(nfou)=2*abs(ff(nfou+1))^2;
+
+xx=xx/df/nfou^2 /2;
+
+%x2fi=0.0;
+%for i=1:nfou
+%    x2fi=x2fi+xx(i)*df;
+%end
+%x2fi
+%x2fi/x2in
+
+xxav=xxav + xx;
+
+end % loop of iter
+
+end % loop of ihorzvert
+
+xxav=xxav/niter/2;
+% /2 because of horiz and vertical 
+
+xxav=xxav*1.e12;
+% convert to micron^2/(1/m)
+
+ws=2*pi*fr;
+% this is k (wavenumber)
+
+figure;
+hs=loglog(ws,xxav);
+
+strr=num2str(tsample(isample));
+timestr= ['time (s) = ',strr];
+
+hc=title('Spectra of ground motion generated in LIAR');
+    set(hc,'FontSize',14);  
+  hc=ylabel('spectrum, micron**2/(1/m)');
+    set(hc,'FontSize',12);
+  hc=xlabel('k, 1/m');
+    set(hc,'FontSize',12);  
+  text(ws(4),xxav(4),timestr);
+  
+
+end % loop of isample
+

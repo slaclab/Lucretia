@@ -1,0 +1,5 @@
+-Xbootclasspath/p:/afs/slac/package/iona/orbacus/prod/JOB/lib/OB.jar
+-DAIDA_DATABASE_USERID=AIDA_PROD
+-DAIDA_NAMESERVER_IOR_URL=http://www.slac.stanford.edu/grp/cd/soft/slaconly/aida/NameServerPROD.ior
+-DAIDA_CLIENT_TIMEOUT=30
+-Dapple.awt.graphics.UseQuartz=true

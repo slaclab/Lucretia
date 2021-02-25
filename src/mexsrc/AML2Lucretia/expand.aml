@@ -1,0 +1,92 @@
+<laboratory>
+
+  <controller name = "c0" attribute = "@design" design = "3">
+    <slave target = "con1"/>
+  </controller>
+
+  <controller name = "con1" attribute = "sextupole:k(n=2)" design = "2">
+    <slave target = "S01" expression = "2.3 * con1" />
+  </controller>
+
+  <set attribute = "con1[@design]" value = "3" />
+
+  <girder name = "g1" />
+
+  <sector ref = "r2" repeat = "2" reflection = "true" tag = "R#COUNT" />
+
+  <sector name = "root" args = "A, B">
+    <element ref = "S01" />
+    <element ref = "A" tag = "Z"/>
+    <element ref = "B" />
+    <sector girder = "g1">
+      <element ref = "Q03" />
+    </sector>
+  </sector>
+
+  <global name = "god">
+    <aaa />
+  </global>
+
+  <machine name =  "FIRST">
+    <beam>
+      <abc design = "7" />
+    </beam>
+    <sector>
+      <element ref = "Q02" />
+    </sector>
+  </machine>
+
+  <machine name = "CESR">
+    <beam>
+      <n_particles err = "3.e2" />
+    </beam>
+    <sector ref = "root" args = "S01, Q02" />
+  </machine>
+  
+  <machine name = "sum">
+    <machine ref = "CESR" />
+    <machine ref = "FIRST" />
+  </machine>
+
+  <element name = "S01">
+    <length design = "1.0" />
+    <sextupole>
+      <k n = "2" design = "1.5" err = "0.1" />
+    </sextupole>
+  </element>
+
+  <element name = "Q02">
+    <length design = "2.0" />
+  </element>
+
+  <element name = "MARK1">
+    <superimpose ref_element = "Q03" offset = "-1" ref_origin = "EXIT" />
+  </element>
+
+  <element name = "MARK2">
+    <superimpose ref_element = "Q03" offset = "-0.5" ref_origin = "EXIT" />
+    <length design = "0.1" />
+  </element>
+
+  <element name = "Q03">
+    <length design = "2 * S01[sextupole:k(n=2)]" />
+  </element>
+
+  <set attribute = "S01[length]" value = "1.1" />
+
+  <beam name = "global_beam">
+    <n_particles design = "3.0e7" />
+    <total_energy design = "1.0e10" err = "0.1e10" />
+    <position>
+      <p_y design = "2.0e-4" />
+    </position>
+  </beam>
+
+  <lattice>
+    <floor>
+      <x design = "0.345" />
+      <phi design = ".555" />
+    </floor>
+  </lattice>
+
+</laboratory>

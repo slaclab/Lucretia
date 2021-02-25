@@ -1,0 +1,274 @@
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Deck for the quad per module ILC linac optics, 90 degree phase advance per
+! cell.  This deck will not run unless the caller first calls
+!
+!        module8cav.xsif
+!
+! resident in the let2005/linac_test subdirectory.  
+!
+! Note on wakefields:  for short bunches (~600 um RMS length or less), users
+! should use the files
+! 
+!         ilc2005.lwake.sr.data
+!         ilc2005.twake.sr.data
+!
+! which are in the linac_test subdirectory.  For longer bunches it is
+! recommended to use
+!
+!         ilc2005.lwake.sr.longbunch.data
+!         ilc2005.twake.sr.longbunch.data
+!
+! which are in the let2005 directory.
+!
+! AUTH:    PT, 18-FEB-2005
+! MOD:
+!          PT, 11-MAR-2005
+!             Add final BPM to line.
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+! Design gradient is 30.0 MV / m
+
+  LINAC_GRADIENT := 30.0
+  PHI_MAIN       := -5.1/360
+  PHI_BNS        := 30.0/360
+
+! linac standard RF structures
+
+  LINAC_MAINRF : TTFCAV, PHI0 = PHI_MAIN, DELTAE = LINAC_GRADIENT * L_CAV
+  LINAC_BNSRF  : TTFCAV, PHI0 = PHI_BNS , DELTAE = LINAC_GRADIENT * L_CAV
+  LINAC_SPARE  : TTFCAV, PHI0 = PHI_MAIN, DELTAE = 0.
+
+! Standard quads for /1 lattice
+
+  QFBY1    : QTTF, K1 =  0.206615
+  QDBY1    : QTTF, K1 = -0.206615
+  QFBY1PKG : LINE = (QPKG(QFBY1))
+  QDBY1PKG : LINE = (QPKG(QDBY1))
+
+! Standard quads for /2 lattice
+
+  QFBY2    : QTTF, K1 =  0.10248448664665
+  QDBY2    : QTTF, K1 = -0.10248448664665  
+  QFBY2PKG : LINE = (QPKG(QFBY2))
+  QDBY2PKG : LINE = (QPKG(QDBY2))
+
+! Standard quads for /3 lattice
+
+  QFBY3    : QTTF, K1 =  0.06814270735703
+  QDBY3    : QTTF, K1 = -0.06814270735703
+  QFBY3PKG : LINE = (QPKG(QFBY3))
+  QDBY3PKG : LINE = (QPKG(QDBY3))
+
+! last BPM in the linac
+
+  BPMFINAL : MONI
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+! Quads for matching from the wiggler into the /1 lattice, and drifts
+! These are warm, 0.5 meter quads with the nominal 78 mm full bore
+
+  LQMATCH_PT := 0.5
+  QMATCH_PT : QUAD, L = LQMATCH_PT/2, APERTURE = QUAD_APER
+
+  QMW1F1 : QMATCH_PT, K1 =  0.21370693819574
+  QMW1D1 : QMATCH_PT, K1 = -0.20936380311972
+  QMW1F2 : QMATCH_PT, K1 =  0.21829333398245
+  QMW1D2 : QMATCH_PT, K1 = -0.19840013164395
+
+  XCMW1 : HKICK
+  YCMW1 : VKICK
+  BPMW1 : MONI
+
+  DMINSPACE : DRIFT, L = 0.5 ! minimum inter-magnet space
+  DMODLEN   : DRIFT, L = L_MODULE - 2*QMATCH_PT[L]
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+! Matching from /1 to /2 lattice:  This is accomplished with 8 quads in 8
+! RF modules, but the quad spacing is tapered from the /1 to the /2 
+! spacing through use of drift spaces and an additional module; so there
+! are drift spaces involved as well
+
+  Q1TO2_F1 : QTTF,  K1 = 0.20501986866626
+  Q1TO2_D1 : QTTF, K1 = -0.19963346196403
+  Q1TO2_F2 : QTTF, K1 =  0.16800814483121
+  Q1TO2_D2 : QTTF, K1 = -0.15385544636037
+  Q1TO2_F3 : QTTF, K1 =  0.14103259122595
+  Q1TO2_D3 : QTTF, K1 = -0.12876298429529
+  Q1TO2_F4 : QTTF, K1 =  0.12415567218847
+  Q1TO2_D4 : QTTF, K1 = -0.11640349898342
+  Q1TO2_F1PKG : LINE = (QPKG(Q1TO2_F1))
+  Q1TO2_D1PKG : LINE = (QPKG(Q1TO2_D1))
+  Q1TO2_F2PKG : LINE = (QPKG(Q1TO2_F2))
+  Q1TO2_D2PKG : LINE = (QPKG(Q1TO2_D2))
+  Q1TO2_F3PKG : LINE = (QPKG(Q1TO2_F3))
+  Q1TO2_D3PKG : LINE = (QPKG(Q1TO2_D3))
+  Q1TO2_F4PKG : LINE = (QPKG(Q1TO2_F4))
+  Q1TO2_D4PKG : LINE = (QPKG(Q1TO2_D4))
+
+! Additional drift spaces needed for tapered spacing
+
+  LWTOC := 0.5
+  L1to2 := 13.3 ; LD1to2 = L1to2 - L_MODULE - 2*LWTOC
+  L2to3 := 14.5 ; LD2to3 = L2to3 - L_MODULE - 2*LWTOC
+  L3to4 := 15.8 ; LD3to4 = L3to4 - L_MODULE - 2*LWTOC
+  L4to5 := 17.3 ; LD4to5 = L4to5 - L_MODULE - 2*LWTOC
+  L5to6 := 18.8 ; LD5to6 = L5to6 - L_MODULE - 2*LWTOC
+  L6to7 := 20.5 ; LD6to7 = L6to7 - L_MODULE - 2*LWTOC
+  L7to8 := 22.4 ; LD7to8 = L7to8 - L_MODULE - 2*LWTOC
+
+! build the drifts
+
+  DWTOC : DRIFT, L = LWTOC
+  D1TO2 : DRIFT, L = LD1to2
+  D2TO3 : DRIFT, L = LD2to3
+  D3TO4 : DRIFT, L = LD3to4
+  D4TO5 : DRIFT, L = LD4to5
+  D5TO6 : DRIFT, L = LD5to6
+  D6TO7 : DRIFT, L = LD6to7
+  D7TO8 : DRIFT, L = LD7to8
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+! Matching from /2 to /3 is accomplished with 8 quads (4 FODO cells) in
+! RF modules with /2 spacing
+
+  QFBY2_1    : QTTF, K1 =  0.10858103876198
+  QDBY2_1    : QTTF, K1 = -0.10562899586951
+  QFBY2_2    : QTTF, K1 =  0.09346343762809
+  QDBY2_2    : QTTF, K1 = -0.09811558768544
+  QFBY2_3    : QTTF, K1 =  0.10788854510214
+  QDBY2_3    : QTTF, K1 = -0.10340663363645
+  QFBY2_4    : QTTF, K1 =  0.10112316559713
+  QDBY2_4    : QTTF, K1 = -0.10237962337627
+  QFBY2_1PKG : LINE = (QPKG(QFBY2_1))
+  QDBY2_1PKG : LINE = (QPKG(QDBY2_1))
+  QFBY2_2PKG : LINE = (QPKG(QFBY2_2))
+  QDBY2_2PKG : LINE = (QPKG(QDBY2_2))
+  QFBY2_3PKG : LINE = (QPKG(QFBY2_3))
+  QDBY2_3PKG : LINE = (QPKG(QDBY2_3))
+  QFBY2_4PKG : LINE = (QPKG(QFBY2_4))
+  QDBY2_4PKG : LINE = (QPKG(QDBY2_4))
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Line definitions 
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+! We here assume that there are 3 modules to a klystron, so it is convenient
+! to have a number of modules which is divisible by 3.  Furthermore, the
+! first 18 modules (or 6 klystrons) are phased to produce the BNS energy
+! spread.
+
+! Finally, we note that at 30 MV/m, 1.038 m/structure, 8 structures per
+! module, the energy gain per module is about 249 MV, or 4 modules per GeV.
+
+! Matching line from wiggler to /1 module
+
+  MATCHW1 : LINE = ( DMINSPACE, QMW1F1, XCMW1, BPMW1, YCMW1, QMW1F1, &
+                     DMODLEN,   QMW1D1, XCMW1, BPMW1, YCMW1, QMW1D1, &
+                     DMODLEN,   QMW1F2, XCMW1, BPMW1, YCMW1, QMW1F2, &
+                     DMODLEN,   QMW1D2, XCMW1, BPMW1, YCMW1, QMW1D2, &
+                     DMINSPACE, DWTOC )
+
+! First linac region:  5 GeV of linac, with 18 modules dedicated to BNS
+
+  ELIN1A : LINE = ( 9*( MODULE(LINAC_BNSRF,QFBY1PKG),    &
+                        MODULE(LINAC_BNSRF,QDBY1PKG) ),  &
+!
+! now 6 modules of linac at the standard phase, for 24 total (first
+! linac region needs extra because it needs to make up BNS offset plus
+! energy droop from backphased compressor stations)
+!
+                    3*( MODULE(LINAC_MAINRF,QFBY1PKG),   &
+                        MODULE(LINAC_MAINRF,QDBY1PKG) )    )
+
+! second linac region:  5 GeV of linac in /1 spacing, 24 modules of which
+! one is spare
+
+  ELIN1B : LINE = ( 11*( MODULE(LINAC_MAINRF,QFBY1PKG),   &
+                         MODULE(LINAC_MAINRF,QDBY1PKG) ), &
+                         MODULE(LINAC_MAINRF,QFBY1PKG),   &
+                         MODULE(LINAC_SPARE ,QDBY1PKG)      )
+
+! third linac region is identical to the second
+
+  ELIN1C : LINE = ( ELIN1B )
+
+! match from the /1 to the /2 lattice at 20 GeV/c
+
+  MATCH12 : LINE = ( DWTOC,D1TO2,DWTOC, MODULE(LINAC_MAINRF, Q1TO2_F1PKG), &
+                     DWTOC,D1TO2,DWTOC, MODULE(LINAC_MAINRF, Q1TO2_D1PKG), &
+                     DWTOC,D2TO3,DWTOC, MODULE(LINAC_MAINRF, Q1TO2_F2PKG), &
+                     DWTOC,D3TO4,DWTOC, MODULE(LINAC_MAINRF, Q1TO2_D2PKG), &
+                     DWTOC,D4TO5,DWTOC, MODULE(LINAC_MAINRF, Q1TO2_F3PKG), &
+                     DWTOC,D5TO6,DWTOC, MODULE(LINAC_MAINRF, Q1TO2_D3PKG), &
+                     DWTOC,D6TO7,DWTOC, MODULE(LINAC_MAINRF, Q1TO2_F4PKG), &
+                     DWTOC,D7TO8,DWTOC, MODULE(LINAC_MAINRF, Q1TO2_D4PKG), &
+                                       DRIFMOD(LINAC_MAINRF             )    )
+
+! Linac with /2 spacing from 20 GeV/c to 100 GeV/c requires 320 modules, 
+! of which 9 are in the matching region.  We will therefore use 312
+! modules (78 FODO cells, 104 klystrons)
+
+  ELIN2 : LINE = ( 78*(  MODULE(LINAC_MAINRF, QFBY2PKG),  & 
+                        DRIFMOD(LINAC_MAINRF          ),  &
+                         MODULE(LINAC_MAINRF, QDBY2PKG),  & 
+                        DRIFMOD(LINAC_MAINRF          ) )   )
+
+! Match from /2 spacing to /3 spacing at 100 GeV/c
+
+  MATCH23 : LINE = (  MODULE(LINAC_MAINRF, QFBY2_1PKG), &
+                     DRIFMOD(LINAC_MAINRF            ), &
+                      MODULE(LINAC_MAINRF, QDBY2_1PKG), &
+                     DRIFMOD(LINAC_MAINRF            ), &
+                      MODULE(LINAC_MAINRF, QFBY2_2PKG), &
+                     DRIFMOD(LINAC_MAINRF            ), &
+                      MODULE(LINAC_MAINRF, QDBY2_2PKG), &
+                     DRIFMOD(LINAC_MAINRF            ), &
+                      MODULE(LINAC_MAINRF, QFBY2_3PKG), &
+                     DRIFMOD(LINAC_MAINRF            ), &
+                      MODULE(LINAC_MAINRF, QDBY2_3PKG), &
+                     DRIFMOD(LINAC_MAINRF            ), &
+                      MODULE(LINAC_MAINRF, QFBY2_4PKG), &
+                     DRIFMOD(LINAC_MAINRF            ), &
+                      MODULE(LINAC_MAINRF, QDBY2_4PKG), &
+                     DRIFMOD(LINAC_MAINRF            )     )
+
+! Linac with /3 spacing from 100 GeV/c to 250 GeV/c requires 600 modules, of
+! which 16 are in the matching region.  We will use 98 FODO cells to make up
+! the total, and the last one will be odd (only 2 modules in the last half
+! cell so that the total number of modules is a multiple of 3).
+
+  ELIN3 : LINE = ( 97*(  MODULE(LINAC_MAINRF,QFBY3PKG),  &
+                        DRIFMOD(LINAC_MAINRF         ),  &
+                        DRIFMOD(LINAC_MAINRF         ),  &
+                         MODULE(LINAC_MAINRF,QDBY3PKG),  &
+                        DRIFMOD(LINAC_MAINRF         ),  &
+                        DRIFMOD(LINAC_MAINRF         ) ),&
+!
+                         MODULE(LINAC_MAINRF,QFBY3PKG),  &
+                        DRIFMOD(LINAC_MAINRF         ),  &
+                        DRIFMOD(LINAC_MAINRF         ),  &
+                         MODULE(LINAC_MAINRF,QDBY3PKG),  &
+                        DRIFMOD(LINAC_MAINRF         ),  &
+                        BPMFINAL                           )
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Initial conditions
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+! From A. Wolski's wiggler output:
+
+  TWISS_WIGEXIT : BETA0, BETX = 40.0, ALFX = -2.4, &
+                         BETY =  7.0, ALFY =  0.2
+!
+!
+!
+RETURN                      

@@ -1,0 +1,116 @@
+%================================================================
+%  Simple FODO line with ground motion
+%  MAT-LIAR simulation
+%     find spectra and plot them 
+%
+%  A.S. Jan.30, 2002
+%================================================================
+%
+close all;
+clear all;
+load gm_tf_noise_save;
+%
+nfou=nsample/2;
+ttot=tsample(nsample)-tsample(1);
+dt=ttot/(nbpm-1);
+df=1./ttot;
+  fr=zeros(nfou,1);
+  
+  nvar=6;
+  
+  x=zeros(niter,1);
+  xx=zeros(nfou,1);
+  xxav=zeros(nfou,nvar);
+
+for i=1:nfou
+    fr(i)=df*i;
+end
+
+for ivar=1:nvar
+
+xxav(:,ivar)=0;
+
+
+for iter=1:niter
+    
+% pairs  1 & 2   and  3 & 4   and   4 & 5   are 30m apart
+if ivar == 1
+    x=mislx(1,:,iter) - mislx(2,:,iter);
+elseif ivar == 2
+    x=misly(1,:,iter) - misly(2,:,iter); 
+elseif ivar == 3
+    x=mislx(3,:,iter) - mislx(4,:,iter); 
+elseif ivar == 4
+    x=misly(3,:,iter) - misly(4,:,iter); 
+elseif ivar == 5
+    x=mislx(4,:,iter) - mislx(5,:,iter); 
+elseif ivar == 6
+    x=misly(4,:,iter) - misly(5,:,iter); 
+end
+        
+x=x-mean(x);
+
+for i=1:nsample
+    x(i)=x(i)*(1-cos((i-1)/(nsample-1)*2*pi));
+end
+% filter
+
+ffx=fft(x);
+
+for i=1:nfou-1
+    xx(i)=abs(ffx(i+1))^2;
+end
+xx(nfou)=2*abs(ffx(nfou+1))^2;
+
+xx=xx/df/nfou^2 /2;
+
+xxav(:,ivar)=xxav(:,ivar) + xx;
+
+end % loop of iter
+
+xxav(:,ivar)=xxav(:,ivar)/niter*1.e12;
+% convert to micron^2/(1/m)
+
+end % loop of ivar
+
+
+
+figure(1);
+hs=loglog(fr,xxav(:,2),'g');
+hold on
+hs=loglog(fr,xxav(:,5),'b');
+hs=loglog(fr,xxav(:,1),'r');
+
+hc=title('Ground motion + Additional Tech Noise + girder Transfer Function');
+    set(hc,'FontSize',14);  
+  hc=ylabel('spectra, micron**2/Hz');
+    set(hc,'FontSize',12);
+  hc=xlabel('F, Hz');
+    set(hc,'FontSize',12);   
+legend('GM_{S}   -  GM_{S+dL}', ...
+        'GM_{S}+Noise_{2}   -  GM_{S+dL}', ... 
+        'GM_{S}+Noise_{1}   -  GM_{S+dL}+Noise_{2}', 3)
+    axis tight;
+
+
+
+figure(2);
+hs=loglog(fr,xxav(:,2),'g');
+hold on
+hs=loglog(fr,xxav(:,6),'b');
+hs=loglog(fr,xxav(:,3),'r');
+hs=loglog(fr,xxav(:,4),'m');
+
+
+hc=title('Ground motion + Additional Tech Noise + girder Transfer Function');
+    set(hc,'FontSize',14);  
+  hc=ylabel('spectra, micron**2/Hz');
+    set(hc,'FontSize',12);
+  hc=xlabel('F, Hz');
+    set(hc,'FontSize',12);   
+legend('GM_{S}   -  GM_{S+dL}', ...
+        'GM_{S}* TF_{1}+Noise_{2}   -  GM_{S+dL}', ... 
+        'GM_{S}* TF_{1}+Noise_{1}   -  GM_{S+dL}+Noise_{2}', ...
+        'GM_{S}* TF_{1}+Noise_{1}   -  GM_{S+dL}* TF_{1}+Noise_{2}',2);
+    axis tight;
+

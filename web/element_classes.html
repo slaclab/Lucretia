@@ -1,0 +1,3038 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+
+
+
+
+
+  
+    <meta http-equiv="content-type" content="text/html;
+      charset=windows-1252"><title>Lucretia: Supported Element Classes</title>
+    
+    <meta name="author" content="Peter Tenenbaum"></head><body>
+    <div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span style="font-size: 24pt;"><img alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif" style="border: 0px solid ; width: 80px; height: 90px;" align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+      </span>
+      <div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The
+
+          <span style="color: rgb(214, 0, 147);">LUCRETIA</span> Project</span><br>
+      </div>
+      <span style="font-size: 24pt;"><br>
+        <small>Supported Element Classes<br>
+          <br>
+          <small>Overview<br>
+            <br>
+          </small></small></span>
+      <div style="text-align: left;">As mentioned on the <a href="data_elements.html">Data Elements</a> page, Lucretia
+        stores all of its element data in fully-instantiated form in the
+        <a href="data_elements.html#BEAMLINE">BEAMLINE</a> cell
+        array.&nbsp; Each element is represented by a 1 x 1 data
+        structure in the BEAMLINE array (ie, BEAMLINE{1} is a Matlab
+        structure, as is BEAMLINE{2}, etc).&nbsp; Because BEAMLINE is a
+        cell array, the structures which make up BEAMLINE can be
+        completely heterogeneous, which permits the different element
+        classes to have only the fields they truly need in their
+        structures.&nbsp; It also implies that, if desired, non-required
+        fields can be left out of the structure representing an element,
+        or all of the fields can be included, or extra fields added, so
+        long as every element has all of the required fields for its
+        class.<br>
+        <br>
+        Element classes are identified by a Class field, which uses a
+        Matlab string to identify the element class ("MARK" for marker,
+        "QUAD" for quadrupole magnet, etc).<br>
+        <br>
+        <div style="text-align: center;"><span style="font-size: 24pt;"><small><small><a name="TrackFlag"></a>TrackingFlags</small></small></span></div>
+        <br>
+        Each element also has a set of "switches," stored in a field
+        named TrackFlag.&nbsp; As the name suggests, these are flags
+        which indicate to the tracker whether or not to simulate some
+        optional behavior; the one exception is that the synchrotron
+        radiation flags are used by the <a href="momentum_profile.html">momentum
+
+          profile tools</a>.&nbsp; A brief description of the tracking
+        flags is given below:<br>
+        <br>
+        <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+          <tbody>
+            <tr>
+              <th style="vertical-align: top; text-align: center;">Flag
+                Name<br>
+              </th>
+              <th style="vertical-align: top; text-align: center;">Values<br>
+              </th>
+              <th style="vertical-align: top;">Description<br>
+              </th>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">SynRad<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+                2<br>
+                3<br>
+              </td>
+              <td style="vertical-align: top;">Incoherent SR effects are
+                ignored<br>
+                Mean SR losses are calculated and applied<br>
+                SR losses are calculated and applied, including quantum
+                effects, using Wolski's Method<br>
+                SR losses are calculated and applied, including quantum
+                effects, using Burkhardt's Method<br>
+                (Note:&nbsp; for more detailed description of the SR
+                calculations, see the <a href="SynRad.html">Lucretia SR
+                  page</a>).<br>
+                <span style="font-weight: bold;"><span style="font-weight: bold;"><span style="font-weight: bold;"></span></span></span> </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">Aper<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">Rays will not be stopped
+                if they exceed the element aperture<br>
+                Rays will be stopped if they exceed the element aperture<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">GetBPMData<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">This BPM will not return
+                readings after tracking<br>
+                This BPM will return readings after tracking<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">GetBPMBeamPars<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">This BPM will not return
+                beam centroid and sigma matrix data<br>
+                This BPM will return beam centroid and sigma matrix data<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">MultiBunch<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">This BPM or instrument
+                will return 1 set of readings and beam data per bunch
+                train<br>
+                This BPM or instrument will return separate readings for
+                each bunch in a train<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">GetInstData<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">This instrument wil not
+                return readings after tracking<br>
+                This instrument will return readings after tracking<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">SRWF_T<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">Short-range transverse
+                wakefields are not enabled in this element<br>
+                Short-range transverse wakefields are enabled in this
+                element<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">SRWF_Z<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">Short-range longitudinal
+                wakefields are not enabled in this element<br>
+                Short-range longitudinal wakefields are enabled in this
+                element<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">LRWF_T<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">Long-range transverse
+                wakefields are not enabled in this element<br>
+                Long-range transverse wakefields are enabled in this
+                element <br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">LRWF_ERR<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">Long-range transverse
+                error wakefields are not enabled in this element<br>
+                Long-range transverse error wakefields are enabled in
+                this element <br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">ZMotion<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">Change in z position
+                proportional to the square of the transverse momentum is
+                ignored<br>
+                Change in z position proportional to the square of the
+                transverse momentum is included<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">LorentzDelay<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">Change in z position due
+                to (m/p)^2&nbsp; &gt; 0 is ignored<br>
+                Change in z position due to (m/p)^2 &gt; 0 is
+                calculated, and the difference between this and the
+                design value of the Lorentz delay (computed using the
+                element's design P value) is included in tracking<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">GetSBPMData<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">HOM BPM readings in this
+                RF unit are not returned after tracking<br>
+                HOM BPM readings in this RF unit are returned after
+                tracking<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">CSR<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                N<br>
+              </td>
+              <td style="vertical-align: top;">Coherent synchrotron
+                radiation disabled in this element.<br>
+                Coherent synchrotron radiation enabled using N histogram
+                bins (<a href="SynRad.html">more details and other
+                  TrackFlag elements pertaining to CSR)</a><br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;">LSC<br>
+              </td>
+              <td style="vertical-align: top; text-align: center;">0<br>
+                1<br>
+              </td>
+              <td style="vertical-align: top;">Disable simulation of
+                longitudinal space charge in this element [default]<br>
+                Longitudinal space charge enabled in this element (<a href="LSC.html">more details and other TrackFlag
+                  elements pertaining to LSC)</a> </td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+      </div>
+      <div style="text-align: left;">Note that tracking flags can be set
+        element by element, so that effects which are generally small
+        can be turned off except in the small number of elements where
+        they matter (for example, the LorentzDelay probably only matters
+        at places in the beamline where the design momentum is a few
+        MeV/c).&nbsp; To set tracking flags over a large stretch of
+        BEAMLINE, use the function <a href="lattice_generation.html#SetTrackFlags">SetTrackFlags</a>.<br>
+        <br>
+        <div style="text-align: center;"><span style="font-size: 24pt;"><small><small>Supported
+
+                Elements<br>
+                <br>
+              </small></small></span>
+          <div style="text-align: left;">Below is a description of each
+            element class which is currently supported in Lucretia, a
+            summary of its parameter fields and valid tracking flags,
+            and a short discussion of the physics and modelling for each
+            element.&nbsp; The list of supported elements includes:<br>
+            <br>
+            <a href="#Mark">Marker</a>, <a href="#Drift">drift</a>, <a href="#Quad">quadrupole</a>, <a href="#Sext">sextupole</a>,
+            <a href="#Octu">octupole</a>, <a href="#Mult">multipole</a>,
+            <a href="#SBend">sector bend</a>, <a href="#Solenoid">solenoid</a>,
+            <a href="#Lcav">linear accelerator structure</a>, <a href="#TCAV">dipole mode RF structure</a>,&nbsp; <a href="#XYCor">dipole corrector</a>, <a href="#BPM">beam
+              position monitor</a>, <a href="#Inst">beam instrument</a>,
+            <a href="#Coll">collimator</a>, <a href="#coord">coordinate
+              change</a>, <a href="#TMAP">transport map</a>.<br>
+            <br>
+            
+<h3><span style="font-size: 24pt;"><small><small><b><a name="Mark"></a></b><b>Marker</b> -- <small>zero-length
+                    drift used as a, er, marker of some kind.</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                    <br>
+                  </small></small></small></span>
+            <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "MARK"</small></small></small></span><br>
+            </div>
+            <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag
+                      fields:&nbsp; none.<br>
+                      <br>
+                    </small></small></small></span></div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align: left;">
+        <div style="text-align: center;">
+          <div style="text-align: left;">
+            <div style="text-align: center;">
+              <div style="text-align: left;">Fields:<br>
+                <br>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <br>
+                
+<h3><span style="font-size: 24pt;"><small><small><b><a name="Drift"></a></b><b>Drift</b> -- <small>field-free
+                        region between other, more interesting elements</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                      </small></small></small></span>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "DRIF"</small></small></small></span><br>
+                </div>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag
+                          fields:&nbsp; ZMotion, LorentzDelay</small></small></small></span><br>
+                </div>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Length<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>In tracking the
+                linear optics behavior of the drift magnet (ie, dx = L
+                Px) is always calculated.&nbsp; If ZMotion is requested,
+                the second-order dependence on the transverse momentum
+                (ie, dz = L/2 (Px^2+Py^2)) will be calculated, and if
+                LorentzDelay is requested the second-order dependence on
+                the total momentum (ie, dz = L/2 (Pdes^2 - P^2)&nbsp; /
+                (m^2 c^2) will be calculated.<br>
+                <br>
+                
+<h3><span style="font-size: 24pt;"><small><small><b><a name="Quad"></a></b><b>Quadrupole</b> -- <small>linear
+                        focusing magnet</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                        &nbsp;&nbsp;&nbsp; Class = "QUAD"<br>
+                        &nbsp;&nbsp;&nbsp; Valid TrackFlag fields:&nbsp;
+                        SynRad, Aper, ZMotion, LorentzDelay<br>
+                        <br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Effective length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">B<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">T<br>
+                      </td>
+                      <td style="vertical-align: top;">Integrated
+                        gradient = B'L<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Tilt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                      </td>
+                      <td style="vertical-align: top;">Design xy
+                        rotation angle<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">PS<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer to power
+                        supply in PS<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">pointer to girder
+                        in GIRDER<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Error offset wrt
+                        girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dB<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Fractional
+                        strength error<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">aper<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">bore radius<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>In tracking, the
+                quad's linear thick-lens transfer matrix is dynamically
+                calculated given its integrated strengtth B, length L,
+                rotation angle Tilt, error parameters dB and dTilt, and
+                the momentum of the particle being tracked (so the
+                quadrupole chromaticity is correct to all orders).&nbsp;
+                If ZMotion is selected, the longitudinal T-matrix terms
+                (T_5xx) are also calculated; if LorentzDelay is
+                selected, velocity effects are included as discussed for
+                <a href="#Drift">drifts</a>, above.&nbsp; Fringe fields
+                and map terms at higher orders (U-matrix and above) are
+                always neglected.&nbsp; <br>
+                <br>
+                
+<h3><span style="font-size: 24pt;"><small><small><a name="Sext"></a><b>Sextupole</b> -- <small>nonlinear
+                        focusing magnet</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                        &nbsp;&nbsp;&nbsp; Class = "SEXT"<br>
+                        &nbsp;&nbsp;&nbsp; Valid TrackFlag fields:&nbsp;
+                        SynRad, Aper, ZMotion, LorentzDelay<br>
+                        <br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Effective length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">B<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">T/m<br>
+                      </td>
+                      <td style="vertical-align: top;">Integrated
+                        gradient = B''L<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Tilt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                      </td>
+                      <td style="vertical-align: top;">Design xy
+                        rotation angle<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">PS<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer to power
+                        supply in PS<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">pointer to girder
+                        in GIRDER<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Error offset wrt
+                        girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dB<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Fractional
+                        strength error<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">aper<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">bore radius<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>In tracking, the
+                sextupole's linear and second-order (T-matrix) transfer
+                maps are dynamically calculated given its integrated
+                strengtth B, length L, rotation angle Tilt, error
+                parameters dB and dTilt, and the momentum of the
+                particle being tracked.&nbsp; If ZMotion is selected,
+                the drift-like longitudinal T-matrix terms (T_5xx) are
+                also calculated; if LorentzDelay is selected, velocity
+                effects are included as discussed for <a href="file:///C:/PT%20Files/NLC%20and%20ILC/SW+Tools/lucretia/web/element_classes.html#Drift">drifts</a>,
+                above.&nbsp; Fringe fields and map terms at higher
+                orders (U-matrix and above) are always neglected.&nbsp;
+                The convention for the sextupole strength is that
+                BEAMLINE{}.B = L d^2B/dr^2, ie the MAD convention for
+                use of factorials is observed.<br>
+                <br>
+                
+<h3><span style="font-size: 24pt;"><small><small><b><a name="Octu"></a></b><b>Octupole</b> -- <small>nonlinear
+                        focusing magnet</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                        &nbsp;&nbsp;&nbsp; Class = "OCTU"<br>
+                        &nbsp;&nbsp;&nbsp; Valid TrackFlag fields:&nbsp;
+                        SynRad, Aper, ZMotion, LorentzDelay<br>
+                        <br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Effective length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">B<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">T/m^2<br>
+                      </td>
+                      <td style="vertical-align: top;">Integrated
+                        gradient = B'''L<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Tilt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                      </td>
+                      <td style="vertical-align: top;">Design xy
+                        rotation angle<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">PS<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer to power
+                        supply in PS<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">pointer to girder
+                        in GIRDER<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Error offset wrt
+                        girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dB<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Fractional
+                        strength error<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">aper<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">bore radius<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>The octupole is
+                treated as a thin-lens multipole where only the
+                third-order multipole is present:&nbsp; particles are
+                tracked to the center of the octupole, a thin-lens kick
+                of the correct strength is applied, and the particle is
+                tracked to the end of the element.&nbsp; As with quads
+                and sextupoles, flags LorentzDelay and ZMotion are
+                supported.&nbsp; As with the sextupole, the magnetic
+                field follows the MAD convention for placement of the
+                pole index exponent.<br>
+                <br>
+                
+<h3><span style="font-size: 24pt;"><small><small><b><a name="Mult"></a></b><b>Multipole</b> -- <small>General
+                        thin lens multipole</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                        &nbsp;&nbsp;&nbsp; Class = "MULT"<br>
+                        &nbsp;&nbsp;&nbsp; Valid TrackFlag fields:&nbsp;
+                        SynRad, Aper, ZMotion, LorentzDelay<br>
+                        <br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Effective length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Lrad<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1x1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Length to be used
+                        in calculating radiation effects<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">B<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x n<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">T, T/m, T/m^2,...<br>
+                      </td>
+                      <td style="vertical-align: top;">Integrated field
+                        of the multipole components<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Tilt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x n<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                      </td>
+                      <td style="vertical-align: top;">Design xy
+                        rotation angles of the components<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">PoleIndex<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x n<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Index of
+                        multipoles (0 == dipole, 1 == quad, 2 == sext,
+                        etc)<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Angle<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                      </td>
+                      <td style="vertical-align: top;">Design bending
+                        angle of the element<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">PS<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer to power
+                        supply in PS<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">pointer to girder
+                        in GIRDER<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Error offset wrt
+                        girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dB<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Fractional
+                        strength error<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">aper<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">bore radius<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>The multipole kick
+                is thin-lens:&nbsp; rays are propagated to the
+                longitudinal center of the element, the multipole kicks
+                are applied (with proper scaling to the momentum of each
+                ray), and the rays are then propagated to the downstream
+                end of the element.&nbsp; The ordering of the multipole
+                terms is arbitrary -- during execution the PoleIndex
+                vector is used to determine the ordering of the
+                different terms (so the PoleIndex order, the Tilt order,
+                and the B order must all correspond to one
+                another).&nbsp; The thin lens quadrupole kick&nbsp; and
+                dispersion are included in calculation of the MULT's
+                R-matrix.&nbsp; The Angle field contains the design
+                bending angle of the element in the x and y planes; if
+                Angle == [0 0] then the dipole component of B (if any)
+                is treated as a corrector magnet; if the Angle and the
+                dipole component of B correspond, then the dipole
+                component is treated as a pure bending field; if Angle
+                != [0 0] but the dipole component of B does not
+                correspond to the values in Angle, then the dipole
+                component is treated as a combination of steering dipole
+                and bend magnet field.&nbsp; When synchrotron radiation
+                is selected in a multipole, Lrad will be used as the
+                length of the element to be used for calculating the
+                energy loss unless Lrad is zero or missing, in which
+                case L will be used; if both L and Lrad are zero or
+                missing, tracking will return with bad status.<br>
+                <br>
+                
+<h3><span style="font-size: 24pt;"><small><small><a name="SBend"></a><b>Sector Bend</b> -- <small>bending
+                        magnet</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                      </small></small></small></span>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "SBEN"</small></small></small></span><br>
+                </div>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag fields =
+                          SynRad, Aper, LorentzDelay</small></small></small></span><br>
+                </div>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="width: 5%; vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Design path
+                        length through the magnet (<span style="font-weight: bold;">NOT</span>
+                        rectangular length!)<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">B<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">T.m<br>
+                        [T.m T]<br>
+                      </td>
+                      <td style="vertical-align: top;">Integrated
+                        bending field B.L<br>
+                        Integrated bending and focusing fields, B.L and
+                        B'.L<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Angle<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                      </td>
+                      <td style="vertical-align: top;">Design bend angle<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Tilt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                      </td>
+                      <td style="vertical-align: top;">Design xy
+                        rotation<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">EdgeAngle<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                        [rad rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Entry and exit
+                        face angles wrt the design trajectory; if 1
+                        value is specified it is used at both faces<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">EdgeCurvature<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                        [m m]<br>
+                      </td>
+                      <td style="vertical-align: top;">Entry and exit
+                        pole face curvatures wrt the design trajectory;
+                        if 1 value is specified it is used at both faces</td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">HGAP<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                        [m m]<br>
+                      </td>
+                      <td style="vertical-align: top;">Entry and exit
+                        half-gap size; if 1 value is specified it is
+                        used at both faces</td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">FINT<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                        [- -]<br>
+                      </td>
+                      <td style="vertical-align: top;">Entry and exit
+                        fringe-field integrals; if 1 value is specified
+                        it is used at both faces.<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">PS<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer to
+                        magnet's power supply or supplies in PS array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer to
+                        magnet's girder in GIRDER array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Error offset wrt
+                        girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dB<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                        [--]<br>
+                      </td>
+                      <td style="vertical-align: top;">Fractional
+                        strength error<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>The sector bend
+                magnet follows the conventions of the sector bend in MAD
+                (ie L = arc length through the bend, etc).&nbsp; During
+                tracking it calculates the following physics:<br>
+                <ul>
+                  <li>Transfer map in the transverse degrees of freedom,
+                    taking into acount the bending and focusing fields,
+                    xy rotation, errors in the fields and rotation, and
+                    the total momentum of the ray being tracked</li>
+                  <li>Path length error for the given momentum <br>
+                  </li>
+                  <li>Transverse offsets for the given momentum</li>
+                  <li>Fringe-field focusing at R- and T-matrix order,
+                    given the bending, focusing, fringe field, gap size,
+                    and pole-face angle terms</li>
+                </ul>
+                If LorentzDelay is selected, velocity effects are
+                included in the same manner as for <a href="#Drift">drifts</a>.&nbsp;
+                The sextupole-like T-matrix body terms which are present
+                in a bend magnet (especially a gradient bend) are not
+                included.<br>
+                <br>
+                The sector bend map used in Lucretia is computed from a
+                Hamiltonian which has been expanded to second order in
+                the transverse degrees of freedom.&nbsp; The resulting
+                map is exact to all orders, but is based on a
+                Hamiltonian which is only approximate.&nbsp; As a result
+                of this the calculation of the longitudinal motion is
+                extremely good, the calculation of all energy-related
+                effects (dispersion, chromaticity, etc), is very good,
+                but the transverse motion does not include the purely
+                geometric T-matrix terms usually found in the body of a
+                sector bend.&nbsp; These terms are usually small
+                compared to the bending and focusing terms, so the
+                Lucretia sector bend map should be acceptable for most
+                applications.<br>
+                <br>
+                By default a gradient bend is instantiated by <a href="lattice_generation.html#SBendStruc">SBendStruc</a>
+                with slots for a single power supply and a single value
+                for its fractional strength error, dB.&nbsp; In some
+                cases, however, it is desirable to simulate a sector
+                bend with separate power supplies for its bending and
+                focusing terms, and to permit different errors in these
+                two terms.&nbsp; Lucretia now supports such radical
+                options.&nbsp; Use the function <a href="lattice_generation.html#DualPSGradientBend">DualPSGradientBend</a>
+                to convert a normal gradient bend to one with dual power
+                supplies and separate dB values for the two components;
+                one can also have a gradient bend with a single power
+                supply and separate dB values by simply setting dB equal
+                to a 1 x 2 vector of reals.&nbsp; See the documentation
+                on <a href="lattice_generation.html#AssignToPS">assigning
+
+                  power supplies</a> and <a href="lattice_errors.html">defining
+
+                  errors</a> for more information on how to use these
+                features.<br>
+                <br>
+                
+<h3><span style="font-weight: bold;"><a name="Solenoid"></a>Solenoid
+
+                  -- </span>Representation of, er, a solenoid magnet.</h3>
+
+                <br>
+                &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; Class =
+                "SOLENOID"<br>
+                &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; Valid
+                TrackFlag fields:&nbsp; <span style="font-size: 24pt;"><small><small><small>SynRad,
+Aper,
+
+                        ZMotion, LorentzDelay<br>
+                        <br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Effective length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">B<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">T.m<br>
+                      </td>
+                      <td style="vertical-align: top;">Integrated
+                        longitudinal field = BL<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">PS<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer to power
+                        supply in PS<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">pointer to girder
+                        in GIRDER<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Error offset wrt
+                        girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dB<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Fractional
+                        strength error<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">aper<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">bore radius<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>In tracking, the
+                solenoid's linear thick-lens transfer matrix is
+                dynamically calculated given its integrated strengtth B,
+                length L, strength error parameter dB, and the momentum
+                of the particle being tracked.&nbsp; If ZMotion is
+                selected, the longitudinal T-matrix terms (T_5xx) are
+                also calculated; if LorentzDelay is selected, velocity
+                effects are included as discussed for <a href="element_classes.html#Drift">drifts</a>,
+                above.&nbsp; Map terms at higher orders (U-matrix and
+                above) are always neglected.&nbsp; The solenoid fringe
+                fields are included.<br>
+                <br>
+                
+<h3><span style="font-size: 24pt;"><small><small><a name="Lcav"></a><b>Linear Accelerator Structure</b>
+                      -- <small>RF-driven accelerating device</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                      </small></small></small></span>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "LCAV"</small></small></small></span><br>
+                </div>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag
+                          fields:&nbsp; Aper, SRWF_T, SRWF_T, LRWF_T,
+                          LRWF_ERR, ZMotion, LorentzDelay, GetSBPMData</small></small></small></span><br>
+                </div>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S psition in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Volt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">MV<br>
+                      </td>
+                      <td style="vertical-align: top;">On-crest unloaded
+                        energy gain<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Egain<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">MeV<br>
+                      </td>
+                      <td style="vertical-align: top;">On-crest energy
+                        gain including SRWF loading<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Phase<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">Degrees<br>
+                      </td>
+                      <td style="vertical-align: top;">Phase offset<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Freq<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">MHz<br>
+                      </td>
+                      <td style="vertical-align: top;">Frequency<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Klystron<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer into
+                        KLYSTRON array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer into
+                        GIRDER array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Offset wrt girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Aper<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Aperture radius<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Wakes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x (1--4)</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointers into WF
+                        structure for ZSR, TSR, TLR, TLRErr data<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Kloss<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">V/C/m<br>
+                      </td>
+                      <td style="vertical-align: top;">Mean loss factor<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dV<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Fractional error
+                        in voltage<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dPhase<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">degrees<br>
+                      </td>
+                      <td style="vertical-align: top;">Phase error<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">NBPM<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Number of HOM BPM
+                        readouts<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">BPMOffset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">2 x NBPM<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">x and y offsets
+                        of each HOM BPM readout<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">BPMResolution<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">RMS resolution of
+                        HOM BPM readouts<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                        The linac accelerator structure behaves rather
+                        differently in tracking than it does in R-matrix
+                        calculations.&nbsp; This is because during
+                        tracking it is possible to correctly compute the
+                        energy loss of each ray by convolving each bunch
+                        with the short-range longitudinal wakefields,
+                        but for R-matrix calculation it is not possible
+                        to do this (since there's no bunch to
+                        convolve).&nbsp; Therefore the following
+                        approach is taken:<br>
+                        <br>
+                      </small></small></small></span>
+                <ul>
+                  <li>The LCAV is initially instantiated with its Volt,
+                    Phase, and Kloss parameters set but Egain == 0</li>
+                  <li>The Egain parameter is set by the <a href="momentum_profile.html">momentum profile
+                      tools</a> using the parameters above, the
+                    structure length, and the desired bunch charge
+                    (supplied as an argument for momentum profile
+                    tools).&nbsp; This is essentially Volt * cos(Phase)
+                    - L * Q * Kloss.</li>
+                  <li>For R-matrix calculation the design initial
+                    momentum P, the loaded voltage Egain, and the Phase
+                    are used to calculate the structure transfer map
+                    including focusing from the structure fringe fields,
+                    adiabatic damping of the body, and the linear
+                    momentum-z correlation (R_65).</li>
+                  <li>During tracking the energy loss of each particle
+                    is computed directly from the bunch distribution,
+                    bunch charge, and the short-range longitudinal
+                    wakefield; the estimated mean loss and Egain
+                    parameter are ignored.&nbsp; Each particle's energy
+                    gain from the voltage and phase of the structure is
+                    also calculated.<br>
+                  </li>
+                  <li>During tracking the particle initial momentum, its
+                    true net energy gain (gain from acceleration -
+                    short-range loading) are used to calculate the
+                    structure transfer map including focusing from the
+                    fringe fields and adiabatic damping in the
+                    body.&nbsp; Since each particle's energy gain is
+                    calculated independently, the momentum-z correlation
+                    is implicitly taken care of without calculating the
+                    R_65 term of the transfer map.</li>
+                  <li>During tracking the transverse wakefields are
+                    applied at the longitudinal center of the structure.<br>
+                  </li>
+                  <li>Note that for these calculations the energy and
+                    momentum are taken to be synonymous (ie, the fact
+                    that particles with different momenta will get
+                    different momentum increases for the same voltage
+                    and same energy gain is neglected).&nbsp; This
+                    feature will be added in a later release.</li>
+                  <li>The LorentzDelay and ZMotion flags operate
+                    similarly as for <a href="#Drift">drifts</a>, but
+                    because the LCAV increases the particle momentum the
+                    drift-like expressions are likely not good
+                    approximations.&nbsp; Their use is discouraged for
+                    the time being.<br>
+                  </li>
+                </ul>
+                The phase convention of the LCAV is that for Phase &gt;
+                0 the RF crest arrives in the cavity earlier than a
+                particle with z=0.&nbsp; Thus Phase &gt; 0 causes the
+                unloaded voltage to be greater for the head of a bunch
+                than for the tail (the correct sign for BNS damping),
+                while Phase &lt; 0 causes the unloaded voltage to be
+                greater for the tail of a bunch than for the head (the
+                correct sign for beam loading compensation).&nbsp; More
+                quantitatively, V(z) = Volt*cos(Phase + kz), where k =
+                2pi*Freq/c.<br>
+                <br>
+                In multibunch tracking, the phase reference for an RF
+                structure is z==0 in the first bunch which is tracked
+                through the structure.&nbsp; When subsequent bunches are
+                tracked, both the bunch-to-bunch offset (in the beam's
+                BunchInterval field) and the z position of all rays are
+                taken into account when computing the energy gain.&nbsp;
+                What this means in practice is that if the beam is
+                specified with a BunchInterval which is not harmonically
+                related to the LCAV frequency, then the bunches will not
+                all get the same energy gain.&nbsp; For more information
+                on multibunch tracking see <a href="tracking.html#TrackThru">here</a>.<br>
+                <br>
+                An RF structure can also have one or more beam position
+                readings, by measuring the amplitude and phase of the
+                beam-induced higher-order mode signal.&nbsp; The number
+                of HOM BPMs in a structure is set by NBPM.&nbsp; If
+                NBPM==1, the HOM BPM reading is generated at the
+                longitudinal center of the structure.&nbsp; If NBPM ==
+                2, the signals are generated at the upstream and
+                downstream faces of the structure. If NBPM &gt; 2, then
+                the readings are generated at the upstream face, the
+                downstream face, and at (NBPM-2) uniformly spaced
+                locations along the structure.&nbsp; Each HOM BPM
+                readout can have offsets wrt the actual beam position in
+                the structure, and there is also an overall resolution
+                applied to the readouts.&nbsp; For a given structure,
+                GetSBPMData == 1 will cause the HOM BPM readings to be
+                generated and returned to the user, while GetSBPMData ==
+                0 will suppress them.<br>
+                <br>
+                
+<h3><span style="font-weight: bold;"><a name="Tcav"></a>Dipole
+
+                  Mode RF Structure --</span> RF-driven device for
+                deflecting the beam</h3>
+
+                <br>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "TCAV"</small></small></small></span><br>
+                </div>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag
+                          fields:&nbsp; SynRad, Aper, SRWF_T, SRWF_T,
+                          LRWF_T, LRWF_ERR, ZMotion, LorentzDelay,
+                          GetSBPMData</small></small></small></span><br>
+                </div>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S psition in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Volt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">MV<br>
+                      </td>
+                      <td style="vertical-align: top;">On-crest unloaded
+                        deflecting voltage<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Egain<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">MeV<br>
+                      </td>
+                      <td style="vertical-align: top;">Energy gain from
+                        SRWF loading<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Phase<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">Degrees<br>
+                      </td>
+                      <td style="vertical-align: top;">Phase offset<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Freq<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">MHz<br>
+                      </td>
+                      <td style="vertical-align: top;">Frequency<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Tilt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Radians<br>
+                      </td>
+                      <td style="vertical-align: top;">xy rotation angle<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Klystron<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer into
+                        KLYSTRON array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer into
+                        GIRDER array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Offset wrt girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Aper<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Aperture radius<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Wakes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x (1--4)</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointers into WF
+                        structure for ZSR, TSR, TLR, TLRErr data<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Kloss<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">V/C/m<br>
+                      </td>
+                      <td style="vertical-align: top;">Mean loss factor<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dV<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Fractional error
+                        in voltage<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dPhase<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">degrees<br>
+                      </td>
+                      <td style="vertical-align: top;">Phase error<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">NBPM<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Number of HOM BPM
+                        readouts<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">BPMOffset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">2 x NBPM<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">x and y offsets
+                        of each HOM BPM readout<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">BPMResolution<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">RMS resolution of
+                        HOM BPM readouts<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>The dipole mode
+                cavity works almost exactly like a linear accelerator
+                cavity, except that its voltage is applied in the
+                transverse plane to deflect the beam.&nbsp; Its R-matrix
+                is computed to be that of a drift space, and the Egain
+                is computed by the <a href="momentum_profile.html">momentum
+                  profile tools</a> in the exact same way that the
+                LCAV's is computed (note that even a dipole-mode
+                structure has some short-range beam loading due to its
+                fundamental mode getting excited by the beam).&nbsp;
+                During tracking the beam is convolved with the
+                wakefields exactly the way it is for the LCAV, HOM BPMs,
+                if any, are filled with beam data, and the deflection of
+                each ray is given by dPx = Volt/P*cos(Phase + kz), where
+                k = 2pi*Freq/c.&nbsp; If a Tilt is specified, the cavity
+                can produce any desired combination of horizontal and
+                vertical deflections.&nbsp; TCAVs will not be scaled by
+                the <a href="momentum_profile.html#UpdateMomentumProfile">UpdateMomentumProfile</a>
+                function.&nbsp; Like LCAVs, TCAV's can be driven by
+                klystrons -- use <a href="lattice_generation.html#AssignToKlystron">AssignToKlystron</a>
+                to set this up.<br>
+                <b><br>
+                </b><b> </b>
+<h3><span style="font-size: 24pt;"><small><small><b><a name="XYCor"></a></b><b>Dipole Corrector</b>
+                      -- <small>steering magnet</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                      </small></small></small></span>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "XCOR", "YCOR",
+                          or "XYCOR"</small></small></small></span><br>
+                </div>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag
+                          fields:&nbsp; SynRad, ZMotion, LorentzDelay</small></small></small></span><br>
+                </div>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Effective length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">B<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">T.m<br>
+                      </td>
+                      <td style="vertical-align: top;">Integrated dipole
+                        field<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Tilt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                      </td>
+                      <td style="vertical-align: top;">xy rotation angle<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">PS<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer into PS
+                        array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer into
+                        GIRDER array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6</td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Offset wrt girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Lrad<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Length used for
+                        calculation of radiation effects<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dB<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                        1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Fractional
+                        strength error<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                        The dipole corrector is treated as an impulse
+                        kick, applied at the center of the corrector and
+                        calculated individually for each ray based on
+                        its momentum and the magnetic field of the
+                        corrector.&nbsp; The net offset at the end of
+                        the corrector is therefore the kick angle
+                        multiplied by L/2.&nbsp; In all other respects,
+                        the dipole corrector is optically identical to a
+                        <a href="#Drift">drift</a>.&nbsp; For
+                        calculation of synchrotron radiation, Lrad will
+                        always be used unless it is zero or missing, in
+                        which case L will be used.&nbsp; If both L and
+                        Lrad are zero or missing, synchrotron radiation
+                        calculations will fail and errors will occur.<br>
+                        <br>
+                        If the dipole corrector is specified as an
+                        "XCOR" or a "YCOR", then fields B, dB, and PS
+                        are scalar.&nbsp; If it is specified as an
+                        "XYCOR", then those fields are 1 x 2 vectors,
+                        with the first entry referring to the horizontal
+                        corrector windings and the second entry
+                        referring to the vertical corrector windings.<br>
+                        <br>
+                      </small></small></small></span>
+<h3><span style="font-size: 24pt;"><small><small><a name="BPM"></a><b>Beam
+
+                        Position Monitor</b> -- <small>basic beam
+                        instrumentation</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                      </small></small></small></span>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "MONI", "HMON",
+                          or "VMON"</small></small></small></span><br>
+                </div>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag
+                          fields:&nbsp; GetBPMData, GetBPMBeamPars,
+                          MultiBunch, ZMotion, LorentzDelay</small></small></small></span><br>
+                </div>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer into
+                        GIRDER array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Offset wrt the
+                        girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">dScale<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">BPM scale factor
+                        error<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">ElecOffset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Electrical
+                        offsets in x and y readings<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Resolution<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">RMS resolution<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                        A BPM is optically equivalent to a <a href="#Drift">drift</a>, except that at the
+                        downstream end of the drift one or more BPM
+                        readings are generated.&nbsp; The readings
+                        incorporate a scale factor error, an electrical
+                        offset, and a resolution.&nbsp; If GetBPMData is
+                        not selected, no BPM readings will be
+                        generated.&nbsp; If GetBPMBeamPars is selected,
+                        in addition to BPM readings the beam's z
+                        position, x and y momenta, total momentum, and
+                        sigma matrix will be returned.&nbsp; If
+                        MultiBunch is selected then separate BPM
+                        readings and/or BPM beam data will be returned
+                        for each bunch in the train, otherwise the train
+                        as an aggregate will be used to generate
+                        data.&nbsp; Note that x and y readings are
+                        generated regardless of whether the class is
+                        HMON,VMON, or MONI.<br>
+                        <br></small></small></small></span>
+<h3><span style="font-size: 24pt;"><small><small><small>
+                      </small></small></small></span><span style="font-size: 24pt;"><small><small><b><a name="Inst"></a></b><b>Instrument</b> -- <small>advanced
+
+                        beam instrumentation</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                      </small></small></small></span>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "INST", "PROF",
+                          "WIRE", "BLMO", "SLMO", or "IMON"</small></small></small></span><br>
+                </div>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag
+                          fields:&nbsp; MultiBunch, GetInstData,
+                          ZMotion, LorentzDelay</small></small></small></span><br>
+                </div>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer into
+                        GIRDER array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Offset wrt girder<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                        An INST is optically equivalent to a <a href="#Drift">drift</a>, except that at the
+                        downstream end the following instrument readings
+                        are generated:&nbsp; x position, y position, z
+                        position, sig11 (&lt;xx&gt; - &lt;x&gt;^2),
+                        sig33, sig55, sig13, Q (charge).&nbsp; Note that
+                        the second moments are mean-squared values
+                        (units m^2).&nbsp; If GetInstData is not
+                        selected, no readings will be returned from a
+                        given INST.&nbsp; If MultiBunch is selected,
+                        readings for each bunch in the train will be
+                        generated; otherwise, the train in aggregate
+                        will be used to generate readings.&nbsp; Note
+                        that all of the data listed above is returned
+                        for each instrument, regardless of which type of
+                        instrument it is (ie, even IMONs return
+                        positions and second moments).<br>
+                        <br></small></small></small></span>
+<h3><span style="font-size: 24pt;"><small><small><small>
+                      </small></small></small></span><span style="font-size: 24pt;"><small><small><b><a name="Coll"></a></b><b>Collimator</b> -- <small>beam
+
+                        collimation</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                      </small></small></small></span>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "COLL"</small></small></small></span><br>
+                </div>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag
+                          fields:&nbsp; Aper, ZMotion, LorentzDelay</small></small></small></span><br>
+                </div>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>
+                <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <th style="vertical-align: top; text-align: center;">Field Name<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Required?<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Size<br>
+                      </th>
+                      <th style="vertical-align: top; text-align: center;">Units<br>
+                      </th>
+                      <th style="vertical-align: top;">Description<br>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Geometry<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x n char string<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">"Ellipse" ==
+                        elliptical collimator<br>
+                        "Rectangle" == rectangular collimator<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">L<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes</td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">Length<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Lrad<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Ignored<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Girder<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1</td>
+                      <td style="vertical-align: top; text-align: center;">-<br>
+                      </td>
+                      <td style="vertical-align: top;">Pointer into
+                        GIRDER array<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Offset<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">No<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Offset wrt girder<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Tilt<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">radians<br>
+                      </td>
+                      <td style="vertical-align: top;">XY rotation angle<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Aperture<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 2<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m m]<br>
+                      </td>
+                      <td style="vertical-align: top;">Half aperture of
+                        collimator in x and y<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>The position of
+                each ray is checked at the upstream and downstream face
+                of this element to make sure that it is within the
+                aperture as defined by the Aperture field and the
+                Geometry field.&nbsp; Collimators respond to the Aper
+                tracking flag, and so collimation can be completely
+                switched off if desired. A particle is stopped completely unless an <a href="extProcess_geant4.html">EXTG4Process</a>
+class is associated with the defined element, in which case all GEANT4
+physics processes are applied according to the settings therein.<br>
+                <br>
+                
+<h3><span style="font-weight: bold;"><a name="coord"></a>Coordinate
+
+                  Change</span> -- change in the reference coordinates
+                of the beam.</h3>
+
+                <br>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Class = "COORD"</small></small></small></span><br>
+                </div>
+                <div style="margin-left: 40px;"><span style="font-size: 24pt;"><small><small><small>Valid TrackFlag
+                          fields:&nbsp; ZMotion</small></small></small></span><br>
+                </div>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                      </small></small></small></span>
+                <table style="width: 100%; text-align: left;" border="1" cellpadding="2" cellspacing="2">
+                  <tbody>
+                    <tr>
+                      <td style="vertical-align: top; font-weight: bold; text-align: center;">Field Name<br>
+                      </td>
+                      <td style="vertical-align: top; font-weight: bold; text-align: center;">Required?<br>
+                      </td>
+                      <td style="vertical-align: top; font-weight: bold; text-align: center;">Size<br>
+                      </td>
+                      <td style="vertical-align: top; font-weight: bold; text-align: center;">Units<br>
+                      </td>
+                      <td style="vertical-align: top; font-weight: bold;">Description<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">S<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">m<br>
+                      </td>
+                      <td style="vertical-align: top;">S position in
+                        BEAMLINE<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">P<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                      </td>
+                      <td style="vertical-align: top;">Design centroid
+                        momentum<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="vertical-align: top; text-align: center;">Change<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">Yes<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">1 x 6<br>
+                      </td>
+                      <td style="vertical-align: top; text-align: center;">[m rad m rad m rad]<br>
+                      </td>
+                      <td style="vertical-align: top;">Desired change in
+                        beam coordinates.<br>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <br>
+                <span style="font-size: 24pt;"><small><small><small><br>
+                        </small></small></small></span>
+<h3><span style="font-size: 24pt;"><small><small><small><b><a name="TMAP"></a>Transport Map</b> -
+                        arbitrary transport function (up to fifth-order
+                        supported)</small></small></small></span></h3>
+<h3><span style="font-size: 24pt;"></span></h3>
+<span style="font-size: 24pt;"><small><small><small>
+                        <br>
+                        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;
+                        Class = "TMAP"<br>
+                        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; </small></small></small></span><span style="font-size: 24pt;"><small><small><small>Valid
+                        TrackFlag fields:&nbsp; ZMotion, LorentzDelay<br>
+                        <br>
+                      </small></small></small></span><br>
+                <div style="text-align: center;">
+                  <div align="left">
+                    <table style="width: 100%; text-align: left;" border="1" cellpadding="2" cellspacing="2">
+                      <tbody>
+                        <tr>
+                          <td style="vertical-align: top; font-weight: bold; text-align: center;">Field Name<br>
+                          </td>
+                          <td style="vertical-align: top; font-weight: bold; text-align: center;">Required?<br>
+                          </td>
+                          <td style="vertical-align: top; font-weight: bold; text-align: center;">Size<br>
+                          </td>
+                          <td style="vertical-align: top; font-weight: bold; text-align: center;">Units<br>
+                          </td>
+                          <td style="vertical-align: top; font-weight: bold;">Description<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="vertical-align: top; text-align: center;">S<br>
+                          </td>
+                          <td style="vertical-align: top; text-align: center;">Yes<br>
+                          </td>
+                          <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                          </td>
+                          <td style="vertical-align: top; text-align: center;">m<br>
+                          </td>
+                          <td style="vertical-align: top;">S position in
+                            BEAMLINE<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="vertical-align: top; text-align: center;">P<br>
+                          </td>
+                          <td style="vertical-align: top; text-align: center;">Yes<br>
+                          </td>
+                          <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                          </td>
+                          <td style="vertical-align: top; text-align: center;">GeV/c<br>
+                          </td>
+                          <td style="vertical-align: top;">Design
+                            centroid momentum<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="vertical-align: top; text-align: center;">L<br>
+                          </td>
+                          <td style="vertical-align: top; text-align: center;">Yes<br>
+                          </td>
+                          <td style="vertical-align: top; text-align: center;">1 x 1<br>
+                          </td>
+                          <td style="vertical-align: top; text-align: center;">m<br>
+                          </td>
+                          <td style="vertical-align: top;">Length<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">Offset<br>
+                          </td>
+                          <td align="center" valign="top">Yes<br>
+                          </td>
+                          <td align="center" valign="top">6 x 1<br>
+                          </td>
+                          <td align="center" valign="top">[m rad m rad m
+                            GeV/c]<br>
+                          </td>
+                          <td valign="top">Static offset change<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">R<br>
+                          </td>
+                          <td align="center" valign="top">Yes<br>
+                          </td>
+                          <td align="center" valign="top">6 x 6<br>
+                          </td>
+                          <td align="center" valign="top">m, rad, dP/P<br>
+                          </td>
+                          <td valign="top">First-order R response matrix<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">T<br>
+                          </td>
+                          <td align="center" valign="top">No<br>
+                          </td>
+                          <td align="center" valign="top">N x 1<br>
+                          </td>
+                          <td align="center" valign="top">m, rad, dP/P</td>
+                          <td valign="top">Second-order T response
+                            matrix values<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">Tinds<br>
+                          </td>
+                          <td align="center" valign="top">No<br>
+                          </td>
+                          <td align="center" valign="top">N x 1<br>
+                          </td>
+                          <td align="center" valign="top">-<br>
+                          </td>
+                          <td valign="top">T matrix indices<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">U<br>
+                          </td>
+                          <td align="center" valign="top">No<br>
+                          </td>
+                          <td align="center" valign="top">N x 1<br>
+                          </td>
+                          <td align="center" valign="top">m, rad, dP/P</td>
+                          <td valign="top">Third-order U response matrix
+                            values<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">Uinds<br>
+                          </td>
+                          <td align="center" valign="top">No<br>
+                          </td>
+                          <td align="center" valign="top">N x 1<br>
+                          </td>
+                          <td align="center" valign="top">-<br>
+                          </td>
+                          <td valign="top">U matrix indices<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">V<br>
+                          </td>
+                          <td align="center" valign="top">No<br>
+                          </td>
+                          <td align="center" valign="top">N x 1<br>
+                          </td>
+                          <td align="center" valign="top">m, rad, dP/P</td>
+                          <td valign="top">Fourth-order V response
+                            matrix values<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">Vinds<br>
+                          </td>
+                          <td align="center" valign="top">No<br>
+                          </td>
+                          <td align="center" valign="top">N x 1<br>
+                          </td>
+                          <td align="center" valign="top">-<br>
+                          </td>
+                          <td valign="top">V matrix indices<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">W<br>
+                          </td>
+                          <td align="center" valign="top">No<br>
+                          </td>
+                          <td align="center" valign="top">N x 1<br>
+                          </td>
+                          <td align="center" valign="top">m, rad, dP/P</td>
+                          <td valign="top">Fifth-order W response matrix
+                            values<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" valign="top">Winds<br>
+                          </td>
+                          <td align="center" valign="top">No<br>
+                          </td>
+                          <td align="center" valign="top">N x 1<br>
+                          </td>
+                          <td align="center" valign="top">-<br>
+                          </td>
+                          <td valign="top">W matrix indices<br>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style="text-align: left;"> <br>
+                    Use this element to apply a user-defined arbitrary
+                    transport map, including first, up to fifth order
+                    terms. The Offset field can also be used to provide
+                    a static offset. Create TMAP class with TMapStruc.m
+                    function. The default TMAP element generates a zero
+                    initialized Offset vector and an identity R matrix.
+                    T,U,V,W elements are empty by default. It is up to
+                    the user to manually set required elements of the R
+                    and/or Offset matrices. Individual T/U/V/W matrix
+                    elements are set by providing a list of the required
+                    indices in Tinds etc and corresponding T matrix
+                    element values. Tinds and T (and similarly for U, V,
+                    W) must have the same length. The inds vectors are N
+                    x 1 vectors, specify the indices such as 326 for
+                    T(3,2,6); 1456 for U(1,4,5,6); 34456 for
+                    V(3,4,4,5,6); 122226 for W(1,2,2,2,2,6) etc.<br>
+                    The length element is just for bookeeping and
+                    doesn't enter into the ray propogation calculation.<br>
+<span style="font-weight: bold;">NB:</span> <span style="font-weight: bold;">The 6th dimension for the purposes of the transport map definitions is dP/P, not absolute P as for the Lucretia beam definition.<br>
+Note on XSIF parsing: "Rij" and "Tijk" parameters of MATRIX definitions
+are converted into TMAP fields along with Name and L definitions. Note
+that XSIF differs from e.g. MAD8 in the parameter definitions (MAD8
+defines "RM(i,j,k)" for instance).<br>
+</span>
+                    <br>
+                    <img alt="" src="TMAPeq.jpg" height="65" width="592"><br>
+                    j = 1 ... 6<br>
+                  </div>
+                </div>
+                <br>
+                <a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+                26-May-2014<br>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+</body></html>

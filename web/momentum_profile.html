@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Momentum Profile Management</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img alt="LucretiaLogo"
+ title="Lucretia home page" src="LucretiaLogo.gif"
+ style="border: 0px solid ; width: 80px; height: 90px;" align="right"
+ hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Momentum Profile Management<br>
+<br>
+</small></span></div>
+"Momentum profile management" is the act of correctly computing the
+expected momentum as a function of S position, and scaling magnet
+strengths to correctly match the momentum profile.&nbsp; Typically
+there are two types of momentum profile adjustments that one might want
+to make:&nbsp; setting the initial design momentum profile, and
+updating the momentum profile during operation.<br>
+<br>
+<span style="font-style: italic;">Setting the Design Momentum Profile</span>:&nbsp;
+this is typically something which is done once, when the lattice is
+instantiated.&nbsp; At instantiation time one wants the BEAMLINE{}.P
+values to exactly match expectations and one wants all element settings
+to be correctly matched to it.&nbsp; At this point we are still
+"setting up the perfect lattice" and not yet concerning ourselves with
+the finite granularity of power supplies, limited accuracy of our tools
+for energy measurement, etc.&nbsp; The correct tool for this job is
+SetDesignMomentumProfile.<br>
+<br>
+<span style="font-style: italic;">Updating the Momentum Profile</span>:&nbsp;
+after one has started simulating operation of the accelerator, it
+becomes useful to accurately simulate realistic momentum profile
+management.&nbsp; Here one needs to take into account realistic limits
+on knowledge of accelerator parameters, finite granularity on the
+devices used for tuning, changes in active klystron complement, and the
+fact that some elements cannot be scaled when the momentum profile is
+varied (for example, permanent magnets).&nbsp; The correct tool for
+this job is UpdateMomentumProfile.<br>
+<br>
+<span style="font-weight: bold;"><a name="SetDesignMomentumProfile"></a>SetDesignMomentumProfile:</span><br>
+<br>
+Recalculate the momentum-vs-S profile of the accelerator and scale
+magnets to the new profile, neglecting realistic accelerator
+limitations.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat =
+SetDesignMomentumProfile( start, end, Q, P0 )<br>
+<br>
+computes the momentum and energy gain from start to end inclusive,
+given an initial momentum P0 and single bunch charge Q.&nbsp; Sets the
+new momentum profile into the BEAMLINE, scaling all magnets and TCAVs
+from
+the&nbsp; current profile to the new one.&nbsp; Performs
+renormalization of all <a
+ href="lattice_generation.html#RenormalizeKlystron">klystrons</a> and <a
+ href="lattice_generation.html#RenormalizePS">power supplies</a>
+encountered in the desired range, and also <a
+ href="#UpdateKlystronStatus">updates the status of all klystrons</a>.&nbsp;
+The mean synchrotron radiation losses are included for any bends,
+correctors, TCAVs, or multipoles with a dipole field which have a
+SynRad tracking flag which is nonzero.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat =
+SetDesignMomentumProfile( start, end, Q, P0, Pf )<br>
+<br>
+performs the same operation, but also scales the voltages on all LCAVs
+to force the momentum on the downstream face of the last element in the
+desired range to be Pf.<br>
+<br>
+Status returns:&nbsp; stat{1} == +1 in the event of success.&nbsp;
+Other possible return values are -1 (power supply which supplies
+magnets inside and outside the range was detected), -2 (klystron which
+supports RF units inside and outside the range was detected), -3
+(updated momentum profile would set P&lt;0 at some point in the range),
+-4 (invalid range, Q, or P0 arguments), -5 (unable to scale due to
+infinite or negative scale factor).&nbsp; If stat{1} != +1, no momenta
+or Egain values will be updated and no magnets will be scaled.<br>
+<br>
+Note on synchrotron radiation:&nbsp; At the moment,
+SetDesignMomentumProfile is not clever enough to scale synchrotron
+radiation losses when it scales to a final momentum.&nbsp; The problem
+is that the energy loss in SR in a magnet depends on the momentum of
+the particles in that magnet (which is changed when the lattice is
+rescaled), but the scale factor depends on the amount of SR losses
+(which change as the magnets are scaled).&nbsp; Fortunately, in these
+circumstances SetDesignMomentumProfile can converge on the right answer
+if it is iterated.<br>
+<br>
+<span style="font-weight: bold;"><a name="UpdateMomentumProfile"></a>UpdateMomentumProfile:</span><br>
+<br>
+Recalculate the momentum-vs-S profile of the accelerator and scale
+magnets to the new profile, taking into account realistic accelerator
+limitations.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat&nbsp; =
+UpdateMomentumProfile( start, end, Q, P0 )<br>
+<br>
+estimates the current momentum and energy gain at each point from start
+to end inclusive, given an initial momentum P0 at BEAMLINE{start} and a
+bunch charge Q.&nbsp; In the process the status of all klystrons which
+support elements in the start:end range <a href="#UpdateKlystronStatus">will
+be updated</a>.&nbsp; In this way the current actual complement of
+active klystrons becomes
+the current design complement for purposes of momentum profile
+calculations.&nbsp; The computed P and Egain values are loaded into the
+correct BEAMLINE fields.&nbsp; The mean synchrotron radiation losses
+are included for any bends,
+correctors, TCAVs, or multipoles with a dipole field which have a
+SynRad tracking flag which is nonzero.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat =
+UpdateMomentumProfile( start, end, Q, P0, scale )<br>
+<br>
+performs the same updating of the momentum profile, and also optionally
+scales power supplies within the start:end range based on the change in
+design momentum at those locations.&nbsp; If scale == 0 or is absent,
+no scaling is performed, if scale == 1 power supplies are scaled,
+subject to limits on granularity.&nbsp; Magnets which are not on a
+power supply (ie, permanent magnets) are not scaled; TCAVs are also not
+scaled.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat =
+UpdateMomentumProfile( start, end, Q, P0, scale, Pf )<br>
+<br>
+performs the same operation, but also scales the LCAV Egain
+values to achieve a momentum of Pf on the downstream face of the last
+element.&nbsp; Note that the klystron amplitudes and structure voltages
+are not scaled; essentially, a "fudge" is uniformly applied to all
+Egain values.&nbsp; The idea here is to allow calculation of an
+approximate momentum profile in the case where there are unknown errors
+but the final momentum is believed to be Pf.<br>
+<br>
+Possible stat{1} values from UpdateMomentumProfile and their
+definitions are the same as those for SetDesignMomentumProfile.<br>
+<br>
+Note on synchrotron radiation:&nbsp; similar to
+SetDesignMomentumProfile, and for similar reasons,
+UpdateMomentumProfile does not give the exact right answer when SR and
+acceleration are both present and scaling of the final momentum is
+requested.&nbsp; UpdateMomentumProfile will also allow you to converge
+on the right answer by iteration, but it has subtly different
+requirements.&nbsp; If your desired final momentum is PF and
+UpdateMomentumProfile arrives at an initial answer of PF - dP1, then
+you can call UpdateMomentumProfile with a final momentum of PF + dP1;
+this will get you to an answer of PF - dP2 (where dP2 &lt; dP1), and on
+the next iteration you need to ask for a final momentum of PF + dP1 +
+dP2; and so on.<br>
+<br>
+<span style="font-weight: bold;">Summarizing the differences between
+SetDesignMomentumProfile and UpdateMomentumProfile:</span><br>
+<ul>
+  <li>UpdateMomentumProfile scales a momentum profile to achieve a
+desired final momentum by scaling the Egain parameters only, while
+leaving the element voltages and klystron amplitudes at their original
+values, in essence it "fudges" the profile to match the
+desired/expected one; SetDesignMomentumProfile actually scales the
+element voltages to achieve the desired final momentum.</li>
+  <li>UpdateMomentumProfile scales magnet power supplies, so any magnet
+without a power supply will not be scaled and scaling will only be
+correct up to the granularity of the magnet power supplies;
+SetDesignMomentumProfile scales the B values of the magnet directly,
+regardless of power supply issues.&nbsp; Amongst other things, this
+makes SetDesignMomentumProfile the correct tool to use when doing
+initial setup of a beamline that does not yet have klystrons or power
+supplies assigned (since UpdateMomentumProfile cannot scale any magnet
+which has no power supply).<br>
+  </li>
+  <li>SetDesignMomentumProfile renormalizes klystron and power supply
+parameters; UpdateMomentumProfile does not.<br>
+  </li>
+</ul>
+<br>
+Here are a couple of other tools that are potentially of interest:<br>
+<br>
+<span style="font-weight: bold;"><a name="ComputeMomentumProfile"></a>ComputeMomentumProfile:</span><br>
+<br>
+Compute the momentum and energy gain at each point in a given region.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat, V_on, V_off,
+V_load, V_SR] = ComputeMomentumProfile( start, end, Q )<br>
+<br>
+computes the momentum profile parameters over the range from start to
+end inclusive for bunch charge Q.&nbsp; <br>
+Return variable V_on is a matrix of the cosine-like, sine-like, and
+total voltage of all RF units presently accelerating the beam (ie, all
+units whose klystrons are in Status == ON or Status == MAKEUP).&nbsp;
+V_off is a matrix of cosine-like, sine-like, and total voltage of all
+hot-spare RF units (ie, all units whose klystrons are in Status ==
+STANDBY).&nbsp; RF units powered by a failed klystron (Status ==
+TRIPPED or Status == TRIPSTANDBY) are not counted in V_on or
+V_off.&nbsp; V_load is the beam loading at each structure for single
+bunch charge Q.&nbsp; V_SR is the synchrotron radiation losses at each
+element.&nbsp; V_on, V_off, V_load, V_SR are all in GeV.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat, V_on, V_off,
+V_load, V_SR,&nbsp; P] = ComputeMomentumProfile( start, end, Q, P0 )<br>
+<br>
+also computes the momentum P at each element given initial momentum P0.<br>
+<br>
+Return variable stat{1} == +1 if the calculation was successful, -4 if
+the start, end, Q, P0, or Pf arguments are not well-formed, -5 if the
+scaling is not possible due to infinite or negative scaling factor
+required, 0 if invalid synchrotron radiation parameters are
+encountered, -6 if synchrotron radiation calculations fail due to
+negative or zero design momentum in one or more elements.<br>
+<br>
+<span style="font-weight: bold;"><a name="UpdateKlystronStatus"></a>UpdateKlystronStatus:</span><br>
+<br>
+Update the current status of a set of klystrons.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; UpdateKlystronStatus(
+klist )<br>
+<br>
+examines the status of each klystron in klist.&nbsp; Any klystron with
+Status == TRIPPED is changed to TRIPSTANDBY; any klystron with Status
+== MAKEUP is changed to ON.&nbsp; This allows the user to incorporate
+changes in the active klystron complement into the current momentum
+model.<br>
+<br>
+<span style="font-weight: bold;"><a name="CalculateSR"></a>CalculateSR:</span><br>
+<br>
+Calculate synchrotron radiation parameters.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; [stat,umean] = CalculateSR( P,
+BL, L ) <br>
+<br>
+computes the mean energy loss experienced by a particle with initial
+momentum P [GeV/c] which passes through an element of effective length
+L [m] with integrated field BL [T.m].&nbsp; The returned loss is in
+GeV.&nbsp; Return variable stat{1} == 1 indicates success, stat{1} == 0
+indicates L &lt;= 0 bad argument, stat{1} == -2 indicates P &lt;= 0 bad
+argument.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; [stat,umean,urms] = CalculateSR(
+P, BL, L ) <br>
+<br>
+also returns the RMS energy loss (in GeV) for particles with the given
+parameters.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; [stat,umean,urms,uc] =
+CalculateSR( P, BL, L ) <br>
+<br>
+also returns the critical energy (in GeV) for particles with the given
+parameters.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; [stat,umean,urms,uc,nphot] =
+CalculateSR( P, BL, L ) <br>
+<br>
+also returns the mean number of emitted photons for particles with the
+given parameters.<br>
+<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+13-Jan-2006<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</body>
+</html>

@@ -1,0 +1,124 @@
+%================================================================
+%  Simple FODO line with ground motion
+%  MAT-LIAR simulation
+%     Calculate spectra p(w,L) and plot figures
+%
+%  A.S. Jan.1, 2002
+%================================================================
+%
+close all;
+clear all;
+load gm_fodo_fft_w2_save;
+%
+nfou=nsample/2;
+ttot=tsample(nsample)-tsample(1);
+dt=ttot/(nbpm-1);
+df=1./ttot;
+  fr=zeros(nfou,1);
+  xx=zeros(nfou,1);
+  xxav=zeros(nfou,1);
+for i=1:nfou
+    fr(i)=df*i;
+end
+%
+%
+iquad1=[ 2   1  1   ];
+iquad2=[ 3   2  5   ];
+nchoice=length(iquad1);
+%
+for ichoice=1:nchoice
+   
+    xxav=0;
+    dsquad=abs(sbpm(iquad2(ichoice))-sbpm(iquad1(ichoice)));
+    
+for ihorzvert=1:2    
+
+for iter=1:niter
+
+if ihorzvert==1
+    x=mislx(iquad1(ichoice),:,iter)-mislx(iquad2(ichoice),:,iter);
+else
+    x=misly(iquad1(ichoice),:,iter)-misly(iquad2(ichoice),:,iter);
+end
+    
+x=x-mean(x);
+
+%x2in=var(x);
+
+for i=1:nsample
+    x(i)=x(i)*(1-cos((i-1)/(nsample-1)*2*pi));
+end
+% filter
+
+ff=fft(x);
+
+for i=1:nfou-1
+    xx(i)=abs(ff(i+1))^2;
+end
+xx(nfou)=2*abs(ff(nfou+1))^2;
+
+xx=xx/df/nfou^2 /2;
+
+%x2fi=0.0;
+%for i=1:nfou
+%    x2fi=x2fi+xx(i)*df;
+%end
+%x2fi
+%x2fi/x2in
+
+xxav=xxav + xx;
+
+end % loop of iter
+
+end % loop of ihorzvert
+
+xxav=xxav/niter/2;
+% /2 because of horiz and vertical 
+
+xxav=xxav*1.e12;
+% convert to micron^2/(1/m)
+
+figure;
+hs=loglog(fr,xxav);
+
+strr=num2str(floor(dsquad));
+timestr= ['dS (m) = ',strr];
+
+hc=title('Spectra of ground motion generated in LIAR');
+    set(hc,'FontSize',14);  
+  hc=ylabel('spectrum, micron**2/Hz');
+    set(hc,'FontSize',12);
+  hc=xlabel('F, Hz');
+    set(hc,'FontSize',12);  
+  text(fr(4),xxav(4),timestr);
+  
+
+end % loop of ichoice
+
+figure(1)
+hold on
+load pwl10.dat;
+ff=pwl10(:,1);
+pwlmodel=pwl10(:,2);
+loglog(ff,pwlmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(2)
+hold on
+load pwl30.dat;
+ff=pwl30(:,1);
+pwlmodel=pwl30(:,2);
+loglog(ff,pwlmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(3)
+hold on
+load pwl100.dat;
+ff=pwl100(:,1);
+pwlmodel=pwl100(:,2);
+loglog(ff,pwlmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+

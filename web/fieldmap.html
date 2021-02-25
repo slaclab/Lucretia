@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Field Map Proposal and Specifications</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"
+ align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Field Map Proposal and Specifications<br>
+<br>
+</small></span></div>
+The use of arbitrary field maps, which can be superimposed over
+beamline elements, has been proposed as a reasonably elegant technique
+which would allow Lucretia to simulate a wide variety of unusual
+conditions or systems which would otherwise be difficult to
+manage.&nbsp; Examples include the coupler kicks of an RF cavity,
+solenoids or quads which are wrapped around an RF cavity, or an IR
+solenoid wrapped around the IR quads and other elements.<br>
+<br>
+On this page we attempt to collect the specifications and requirements
+for adding field maps to Lucretia.<br>
+<br>
+<div style="text-align: center;"><span style="font-weight: bold;">Data
+Management and Other General Issues</span><br>
+</div>
+<br>
+The Lucretia representation of a field map will be in a new global data
+array, FIELDMAP.&nbsp; Each FIELDMAP entry will be a data structure
+with the following fields:<br>
+<ul>
+  <li>Element:&nbsp; # of the element in BEAMLINE which this field map
+is superimposed upon.</li>
+  <li>dS:&nbsp; S position offset between the upstream face of the
+element and the kick center of the field map.</li>
+  <li>Class:&nbsp; can be "AC" or "DC".<br>
+  </li>
+  <li>Lrad:&nbsp; Longitudinal extent of the field map, used for
+tracking with synchrotron radiation (DC maps only).</li>
+  <li>Offset:&nbsp; 1 x 6 vector of field map offsets [x, xang, y,
+yang, z, roll].</li>
+  <li>Girder:&nbsp; Index # of the girder which supports the field map.</li>
+  <li>PS:&nbsp; Index # of the power supply which excites the field map
+(DC maps only).</li>
+  <li>Klystron:&nbsp; Index # of the klystron which excites the field
+map (AC maps only).</li>
+  <li>Freq:&nbsp; frequency of the field map (AC maps only).<br>
+  </li>
+  <li>Phase:&nbsp; phase of the field map (AC maps only).</li>
+  <li>x:&nbsp; 1 x N vector of horizontal coordinates.</li>
+  <li>y:&nbsp; M x 1 vector of vertical coordinates.</li>
+  <li>Ex, Ey, Es, Bx, By, Bs:&nbsp; M x N matrices of electric /
+magnetic fields in the map, at the (x,y) coordinate specified by the x
+and y vectors.&nbsp; E values are in MV, B values in T.m.<br>
+  </li>
+  <li>TrackFlag:&nbsp; data structure of tracking flags.&nbsp; At this
+time, only one tracking flag is foreseen:</li>
+  <ul>
+    <li>SynRad:&nbsp; selects whether incoherent emission of
+synchrotron radiation is enabled (1) or disabled (0).&nbsp; The value
+of SynRad in the field map must match the SynRad value in the element's
+TrackFlag structure, if the element has such a flag at all.</li>
+  </ul>
+  <li>do we need any kind of errors for the field map?<br>
+  </li>
+</ul>
+It is clear that there are some fields which are only relelvant for AC
+field maps, some which are only relevant for DC maps, and some which
+are relevant for either type.&nbsp; The bookkeeping can be taken care
+of by making FIELDMAP an array of data structures, in which each array
+member has all the fields for either AC or DC, but the fields which are
+not relevant for the particular map are zero.&nbsp; Alternately (my
+preference), FIELDMAP can be a cell array, and each cell can be either
+an AC map or a DC map, and would only have the relevant fields for the
+correct type.&nbsp; <br>
+<br>
+The data structures BEAMLINE, GIRDER, KLYSTRON, and PS would be
+expanded to include FieldMap fields, which contain the numbers of the
+field maps which are connected to the element, girder, klystron, or
+power supply.&nbsp; Each field map can be associated with at most one
+element, girder, klystron, or power supply; each element, girder,
+klystron, or power supply can have an unlimited number of field
+maps.&nbsp; The field maps which are pointed to by an element need not
+be in any particular order (ie, the BEAMLINE{}.FieldMap vector need not
+be sorted by S position, nor by index into FIELDMAP; the field maps in
+FIELDMAP need not be sorted by S position or even by element).&nbsp; It
+may be desirable to expand the TrackFlag structure of the elements to
+have a FieldMap flag, which indicates whether field maps are to be used
+in the tracking.<br>
+<br>
+Elements of Class MARK and COORD may not be associated with any field
+maps.<br>
+<br>
+<div style="text-align: center;"><span style="font-weight: bold;">Lattice
+Verification</span><br>
+</div>
+<br>
+The lattice verification process (VerifyLattice) must be expanded to
+perform checkout of the FIELDMAP data structures. The checkout must
+include the following:<br>
+<ul>
+  <li>Consistency between FIELDMAP and BEAMLINE, GIRDER, KLYSTRON, PS
+arrays:&nbsp; all cross-referencing is correct:&nbsp; if a field map
+points to an element, the element points back at the field map, etc.</li>
+  <li>No element points at a field map index past the end of the
+FIELDMAP array.</li>
+  <li>No field map points at an element, girder, klystron, or power
+supply which is past the end of those arrays.<br>
+  </li>
+  <li>All necessary fields are present for either an AC or a DC field
+map, and have the correct sizes.</li>
+  <li>A map associated with a cavity is AC, otherwise it's DC.</li>
+  <li>The sizes of the E and B matrices are consistent with the sizes
+of x and y vectors.</li>
+  <li>The SynRad track flag of the field map and its element are
+consistent with one another.</li>
+  <li>The field map does not point to an invalid element class (COORD
+or MARK).</li>
+  <li>The field map does not extend past the end of the element, taking
+the Lrad into account (ie, dS+/- Lrad/2 is neither &lt; 0 nor &gt; the
+length of the element).</li>
+  <li>The field maps on a given element do not overlap each other,
+taking their Lrad values into account (ie, when considering neighboring
+field maps on an&nbsp; element, ds(first)+Lrad(first)/2 &lt;
+ds(second)-Lrad(second)/2).</li>
+  <li>If SynRad &gt; 0, then Lrad ~= 0 as well (ie, no synchrotron
+radiation from an element with zero Lrad!).</li>
+  <li>Anything I've forgotten?</li>
+</ul>
+<div style="text-align: center;"><span style="font-weight: bold;">Operation
+within Mexfiles</span><br>
+</div>
+<br>
+The GetRmats, RmatAtoB, and GetTwiss mexfiles ignore the field maps
+completely -- their operation is the same as it is now.<br>
+<br>
+For tracking, any element with field maps must be divided into
+longitudinal slices between the map locations.&nbsp; In the element
+segments, regular element tracking is performed.&nbsp; At the field map
+locations, the field values at the location of each particle are
+estimated by using the interp2 matlab function, and applied to the
+particle in a thin-kick method.&nbsp; If the particle lies outside the
+area specified by the x and y vectors, an extrapolation value of zero
+is used and a warning is sent to the status cell array (ie, a text
+message and a -1 status).&nbsp; After each slice of the element and
+each field map, the tests for a stopped particle (due to transverse
+momentum &gt; 1 or total momentum &lt; 0) must be executed.<br>
+<br>
+During tracking, all of the bad conditions which are listed in Lattice
+Verification must be tested for.&nbsp; If any such bad condition
+exists, tracking should immediately halt and return to the Matlab
+prompt, setting stat{1} to zero and putting an appropriate complaint
+into the stat message stack.&nbsp; <br>
+<br>
+Since synchrotron radiation emission is a nonlinear function of
+magnetic field, the field of the magnet and of the field map must be
+combined to compute the SR emission correctly.&nbsp; In regions where
+there is no overlapping field map, the SR calculation must use only the
+element's field.&nbsp; To do this right, it will probably be necessary
+for the length of an element segment for tracking purposes to be
+different from its length for synchrotron radiation calculations!<br>
+<br>
+<div style="text-align: center;"><span style="font-weight: bold;">M-file
+modifications</span><br>
+</div>
+<br>
+The following M-file additions or changes must be made:<br>
+<ul>
+  <li>One or more m-files for instantiating field map data structures
+must be written.</li>
+  <li>Tools for creating the cross-referencing between a field map and
+an element, field map and girder, field map and klystron, field map and
+power supply must be written.&nbsp; This includes eliminating that
+cross-reference (ie, removing a field map from an element, etc).<br>
+  </li>
+  <li>The momentum profile management tools must add an option to scale
+a field map's strength when the field map's element is scaled.</li>
+  <li>Field map display tools must be added to the BeamlineViewer.</li>
+  <li>If we decide to allow field maps to have offsets and errors, we
+need to add field map support to the offsets and errors tools.<br>
+  </li>
+</ul>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+03-Mar-2008<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</body>
+</html>

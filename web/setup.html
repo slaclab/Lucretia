@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+
+
+
+
+<meta content="en-us" http-equiv="Content-Language" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" /><title>Lucretia setup instructions</title></head><body>
+
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span style="font-size: 24pt;">
+	<img src="LucretiaLogo.gif" alt="LucretiaLogo" style="border: 0px solid ; width: 80px; height: 90px;" align="right" hspace="20" /></span></a><span style="font-size: 24pt;"><br />
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br />
+</div>
+<span style="font-size: 24pt;"><br />
+<small>Setup Instructions<br />
+<br />
+</small></span><br />
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+	<ul>
+		<li>
+		<div>
+			<a href="downloads.html">Download</a> Lucretia package to a desired 
+			installation folder</div>
+		</li>
+		<li>
+		<div>
+			Make a working directory</div>
+		</li>
+		
+  <li>
+		
+    <div>
+			Add the Lucretia shared objects to your dynamic library search path 
+			(see <a href="downloads.html">download</a> section for more details)</div>
+
+		</li>
+
+		<li>
+		<div>
+			Add required Lucretia directories to your Matlab search path (make a 
+			startup.m file with required "addpath" commands or use Matlab's 
+			pathtool)<br />
+&nbsp;&nbsp;&nbsp; e.g. Lucretia/src/Tracking for TrackThru command<br />
+&nbsp;&nbsp;&nbsp; e.g. Lucretia/src/utils for various utility commands etc...</div></li>
+  <ul>
+    <li>You can use the LucretiaInit.m function provided in the root Lucretia directory to map all Lucretia directories.</li>
+  </ul>
+  <li>To use the GEANT4 interface use the LucretiaInit.m function with
+the 'cpu-g4' calling argument, this will automatically select the
+GEANT4-built binaries for use.<br />
+  </li>
+
+		<li>
+		<div>
+			Try out some of the examples in Lucretia/src/Examples.</div>
+		</li>
+	</ul>
+	<br />
+	<br /><br /><a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br />6-August-2016<a href="http://www.slac.stanford.edu/detailed.html"><img src="SLAC_whitebkgd.jpg" title="Return to SLAC detailed home page" alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;" align="right" /></a><br />
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

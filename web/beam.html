@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Beam representation</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Representation of the Beam<br>
+<br>
+</small></span>
+<div style="text-align: left;"><br>
+Lucretia uses a Matlab data structure to represent a beam to be tracked
+through the lattice.&nbsp; Each beam can have one bunch or a train of
+bunches; each bunch can have one ray which is to be tracked, or more
+than one; bunches within a beam can have different numbers of rays,
+different charges per ray, different charges per bunch.&nbsp; The
+fields of the beam structure are as follows:<br>
+<br>
+<span style="font-weight: bold;">BunchInterval:</span>&nbsp; the time
+interval between bunches in the beam, in seconds.<br>
+<br>
+<span style="font-weight: bold;">Bunch:</span>&nbsp; A structure array
+containing information on the rays in each bunch of the beam (so, for
+example, if you have beam structure MyBeam, the information on rays in
+bunch 1 is in MyBeam.Bunch(1), bunch 2 is MyBeam.Bunch(2), etc).&nbsp;
+The fields of the Bunch structure are as follows:<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">Q:</span>&nbsp;
+charge of each ray in coulombs.&nbsp; This is a 1 x nray row-vector.<br>
+<br>
+<span style="font-weight: bold;">stop<span style="font-weight: bold;">:</span></span>&nbsp;
+the index into BEAMLINE of the element at which the ray was
+stopped.&nbsp; MyBeam.Bunch(bunchno).stop(rayno) == 0 for a ray which
+has not been stopped (ie, hasn't hit an aperture, been decelerated to
+rest in the lab frame, or been deflected by &gt; 90 degrees wrt the
+accelerator axis), so this is the normal state of a ray.&nbsp; If a ray
+meets the stopping conditions listed above at some point during
+tracking, its value of stop is set to the index of the element and its
+coordinates are frozen at their values at the moment the ray was
+stopped.&nbsp; This is a 1 x nray row-vector.<br>
+<br>
+<span style="font-weight: bold;">x:</span>&nbsp; the 6-dimensional
+coordinates of the ray.&nbsp; The coordinates in order are:&nbsp;
+horizontal position [m]; horizontal component of transverse momentum,
+normalized to the ray's total momentum [radians]; vertical position and
+normalized momentum ([m] and [rad], respectively); arrival time wrt
+reference particle * the speed of light [m]; total momentum
+[GeV/c].&nbsp; MyBeam.Bunch(bunchno).x is a 6 x nray matrix, so the
+coordinates of a given ray are a column vector,
+MyBeam.Bunch(bunchno).x(1:6,rayno).<br>
+<br>
+</div>
+A few things to note about the ray coordinates used for tracking:<br>
+<br>
+<ul>
+  <li>The transverse momentum coordinates are not the same as those
+used in MAD.&nbsp; MAD uses the transverse momenta normalized to the
+design or reference momentum; Lucretia uses the transverse momenta
+normalized to the actual total momenum of the given ray.&nbsp; In other
+words, px[Lucretia] = px[MAD] / (1+delta[MAD]).</li>
+  <li>The transverse momentum coordinate is also not the same as the x'
+coordinate used in TRANSPORT, DIMAD, and LIAR, although it's
+close.&nbsp; For a particle whose trajectory makes an angle theta wrt
+the nominal, the TRANSPORT x' = tan(theta), while Lucretia's px =
+sin(theta).&nbsp; In the paraxial approximation these two are very
+nearly equal; outside of that approximation none of the codes listed
+above is to be trusted in any case.</li>
+  <li>The longitudinal position / arrival time coordinate is defined
+such that z &lt; 0 particles arrive first, ie they are in the "head"
+while z&gt;0 particles are in the "tail."&nbsp; This is the same as the
+TRANSPORT, DIMAD, and LIAR conventions and the opposite of the MAD and
+MERLIN conventions.</li>
+  <li>Note that coordinate 6 is the actual total momentum of the ray
+rather than its offset wrt the design or nominal momentum.&nbsp;
+Lucretia doesn't really have a concept of "design momentum" -- magnet
+strengths are stored in magnetic field units (ie, B values and not K
+values), and rays are represented with momentum units [GeV/c] and not a
+dimensionless offset.&nbsp; For beamlines which have a nonzero design
+energy gain, this is a more convenient method of accounting for
+momentum variation than the typical reference momentum / delta
+methodology.</li>
+  <li>Because x(6,:) is the total momentum, a zero value for this
+coordinate represents a ray which has decelerated to rest in the lab
+frame, and is stopped.&nbsp; This is different from most codes, in
+which coordinates [0 ; 0 ; 0 ; 0 ; 0 ; 0] represent an "ideal" particle
+on the reference trajectory; in Lucretia these coordinates represent a
+ray which has stopped dead and will no longer be tracked.</li>
+</ul>
+The function <a href="beam_generation.html#CreateBlankBeam">CreateBlankBeam</a> can be
+used to generate a proper data structure for a beam with a desired
+number of rays, etc.&nbsp; Other functions for this sort of purpose are
+discussed on the <a href="beam_generation.html">beam generation</a> page.<br>
+<br>
+</div>
+<div style="text-align: left;"><a
+ href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+21-Feb-2005<br>
+</div>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</body>
+</html>

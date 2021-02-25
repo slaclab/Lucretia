@@ -1,0 +1,221 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="en-us" http-equiv="Content-Language" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Untitled 0</title>
+<style type="text/css">
+.auto-style1 {
+	text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;">
+	<img src="LucretiaLogo.gif"
+ alt="LucretiaLogo"
+ style="border: 0px solid ; width: 80px; height: 90px;" align="right"
+ hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Distributed Computing Operations<br>
+<br>
+</small></span><br>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">The Lucretia <strong>distributedLucretia</strong> 
+	class (src/Distributed/distributedLucretia) exists to specify and control 
+	the application of Lucretia operations in a distributed computing 
+	environment. The use of this functionality requires as a minimum the
+	<a href="http://www.mathworks.com/products/parallel-computing/?s_cid=global_nav">
+	Matlab Parallel Computing Toolbox</a>, and also the
+	<a href="http://www.mathworks.com/products/distriben/?s_cid=global_nav">
+	Distributed Computing Server</a> if you wish to run in a multi-host 
+	environment (across multiple physical computers, of potentially varying type 
+	and operating system). The parallel toolbox takes care of the
+	<span class="auto-style1">tasks</span> associated with setting up and 
+	distributing and communicating with the parallel tasks, the <strong>
+	distributedLucretia</strong> class utilizes the toolbox functions to perform 
+	Lucretia operations on the parallel compute nodes and provides multiple 
+	methods to help with this task. Note, this class assumes a distributed 
+	environment with a shared file system. It may be possible to operate with 
+	just synchronous mode (see below) without a shared file system between the 
+	compute nodes but this is untested and unsupported.<br />
+	<br />
+	The <strong>distributedLucretia</strong> class describes the parallel 
+	environment and provides methods which allow the parallel environment to be 
+	manipulated. An object of this class also forms the basis for other Lucretia 
+	classes to take advantage of this environment. The currently existing 
+	Lucretia classes which make use of the <strong>distributedLucretia</strong> 
+	class are:<br />
+&nbsp;&nbsp;&nbsp; <a href="tracking.html#Track">Track</a><br />
+	<br>
+	The main purpose behind creating this class and the concept of distributed 
+	Lucretia operations was to provide a supported and user-friendly way of 
+	achieving Monte Carlo type simulations. The idea is that the user first sets 
+	up his/her parallel computing environment using the Matlab Parallel 
+	Computing Toolbox to configure number of nodes, scheduler interface etc. At 
+	the bare minimum, you can set this up to just use the number of available 
+	compute cores on your local cpu(s). Then use the <strong>distributedLucretia</strong> 
+	class to distribute the current BEAMLINE, PS, KLYSTRON, GIRDER arrays across 
+	the compute nodes and make changes to them, e.g. set up different 
+	configurations of errors on each one. Then other classes which have been 
+	written to know about <strong>distrinutedLucretia</strong> can be run taken 
+	the <strong>distributedLucretia </strong>object you have created as input. 
+	e.g. Track can then track one or several pre-defined bunches through the set 
+	of defined BEAMLINES in parallel. The distributed nodes can be set up to 
+	perform operations in one of two modes further described below: synchronous 
+	and asynchronous. The mode of operation is set at the time the<strong> 
+	distributedLucretia</strong> object is instantiated and cannot be changed 
+	afterwards (unless you delete and re-create the object).<strong> </strong>
+	<h3>Synchronous Mode</h3>
+	With your <strong>distributedLucretia</strong> object set to this mode the 
+	parallel Lucretia environment (all the global arrays) and running Matlab 
+	sessions ready to receive further commands are all started at the time of 
+	object creation. In the language of the Matlab Parallel Computing Toolbox, a
+	<em>matlabpool</em> of the requisite number of nodes is initiated. The 
+	advantage of this mode is that commands to run in the parallel environment 
+	are quickly processed providing the fastest possible way of issuing a 
+	command to the parallel nodes and receiving the required response. The 
+	downside is that it takes some time to set up the parallel environment and 
+	there is a time delay in the creating of the corresponding <strong>
+	distributedLucretia</strong> object at the time of instantiation, this is 
+	however a one-time event normally. Also, the processing of commands in the 
+	controlling Matlab session is blocked until the parallel command operation 
+	is complete.<h3>Asynchronous Mode</h3>
+	If you select this mode of operation then no &quot;external&quot; setup tasks are 
+	performed at the time of object instantiation, so this is fast. Instead, 
+	local properties keep track of the parallel environments and at run-time are 
+	transmitted through file exchange methods. The advantage of this mode is 
+	that the issued commands to perform parallel tasks return immediately, 
+	enabling you to keep processing tasks locally whilst the parallel 
+	computations are taking place. This lets you &quot;offload&quot; tasks onto other 
+	processors which can be useful, especially in an event-driven environment 
+	such as you might have when operating within a hardware environment. The 
+	downside is that the parallel task itself takes longer to perform as behind 
+	the scenes files are generated and copied to the different compute node 
+	environments and the parallel Matlab worker sessions are started before 
+	computations can begin which takes several 10&#39;s of seconds to minutes 
+	depending on the setup. This is also a recurring penalty as the worker nodes 
+	are shutdown after each processing task.<br />
+	<br />
+	In principal, it would be nice to have the best of both worlds and be able 
+	to have all the benefits of synchronous mode with the ability to detach from 
+	the parallel processing and come back to it later. This is currently not 
+	possible due to the restrictions of the <em>matlabpool</em> way of doing 
+	things but may change in the future in which case I shall re-visit this 
+	situation.<br />
+	<h3>distributedLucretia Class Description</h3>
+	As with all Lucretia classes, online help is available both through the <em>
+	help</em> command. Further descriptions of the public properties and methods 
+	of the class are available through the <em>doc distributedLucretia</em> 
+	command.<br />
+	<br />
+	<strong>Constructor:</strong><br />
+	<br />
+&nbsp;&nbsp;&nbsp; DL=<strong>distributedLucretia(</strong> issync [,nworkers])<br />
+	<br />
+	Synchronous/Asynchronous behavious is tied to the object and unchangeable 
+	once created, decide with issync=true|false<br />
+	Supply nworkers to restrict max number of distributed worker nodes available 
+	to functions which use this object (optional, default is the max defined by 
+	your scheduler preferences).<br />
+	Do not try and have multiple instantiated <strong>distributedLucretia
+	</strong>objects active at a time, destroy any existing ones with the <em>
+	delete</em> method before creating another.<br />
+	<br />
+	<strong>Main public properties:<br />
+	<br />
+	schedConfigs: </strong>list of available scheduler configurations<strong><br />
+	thisConfig: </strong>The currently inuse configuration<strong><br />
+	maxworkers: </strong>max number of worker nodes available<strong><br />
+	sched: </strong>scheduler resource object<strong><br />
+	synchronous: </strong>synchronous mode if true<strong><br />
+	workers: </strong>vector of worker ID&#39;s to act upon (min=1, max=obj.maxworkers)<strong><br />
+	latticeSyncVals: </strong>data values used to specify differences between 
+	lattices in different workers (PS/GIRDER/KLYSTRON values as separate fields, 
+	each with number of rows = number of workers, number of columns the same as 
+	the local PS/GIRDER/KLYSTRON arrays)<strong><br />
+	syncMethod: </strong>Method to synchronise lattice on workers, (&#39;SetPt&#39; or &#39;Ampl&#39;)<strong>.
+	</strong>If <em>SetPt</em> then the various Trim functions are used on the 
+	worker nodes (actuator error parameters are properly treated etc). Use <em>
+	Ampl</em> if you want to just set the devices to known values and ignore the 
+	error treatments, here values are just directly distributed to the worker 
+	nodes.<strong><br />
+	<br />
+	Main public methods:</strong><br />
+	<br />
+&nbsp;&nbsp;&nbsp; DL.<strong>setConfig</strong>(configName[,nworkers])<br />
+	<br />
+	Choose a new parallel configuration from DL.schedConfigs list (obtained from 
+	Matlab Parallel Computing Toolbox settings)<br />
+	Optionally set max number of workers to use<br />
+	<br />
+&nbsp;&nbsp;&nbsp; DL.<strong>PSTrim</strong>(psList)<br />
+	<br />
+	Perform PSTrim operation on all workers to trim their PS values to those 
+	held in local DL.latticeSyncVals.PS property array<br />
+	psList=list of PS indices to trim (on all workers selected in DL.workers)<br />
+	[if DL.syncMethod==&#39;Ampl&#39;, just copy DL.latticeSyncVals.PS values to Ampl 
+	fields of PS&#39;s and don&#39;t perform PSTrim operation on workers]<br />
+	<br />
+&nbsp;&nbsp;&nbsp; DL.<strong>MoverTrim</strong>(mList)<br />
+	<br />
+	Perform MoverTrim operation on all workers to trim their mover positions 
+	those held in local DL.latticeSyncVals.GIRDER property array<br />
+	mList=list of GIRDER indices to trim (on all workers selected in DL.workers)<br />
+	[if DL.syncMethod==&#39;Ampl&#39;, just copy DL.latticeSyncVals.GIRDER values to 
+	MoverPos fields of GIRDER&#39;s and don&#39;t perform MoverTrim operation on 
+	workers]<br />
+	<br />
+&nbsp;&nbsp;&nbsp; DL.<strong>KlystronTrim</strong>(kList)<br />
+	<br />
+	Perform KlystronTrim operation on all workers to trim their KLYSTRON values 
+	to those held in local DL.latticeSyncVals.KLYSTRON property array<br />
+	kList=list of KLYSTRON indices to trim (on all workers selected in 
+	DL.workers)<br />
+	[if DL.syncMethod==&#39;Ampl&#39;, just copy DL.latticeSyncVals.KLYSTRON values to 
+	Ampl fields of KLYSTRON&#39;s and don&#39;t perform KlystronTrim operation on 
+	workers]<br />
+	<br />
+&nbsp;&nbsp;&nbsp; DL.<strong>latticeCopy</strong>([doSync])<br />
+	<br />
+	Copy current in-local-memory Lucretia lattice to all workers (Copy takes 
+	affect next sync event)<br />
+	doSync (optional), if true then also sync all workers with Trim methods. 
+	Default=true<br />
+	<br />
+&nbsp;&nbsp;&nbsp; <strong>delete</strong>(DL)<br />
+	<br />
+	delete - delete object when done with it to free up resources (destructor 
+	function)<br />
+	<br />
+	<br />
+<br>
+	<a
+ href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+	5-Oct-2011<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC detailed home page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+
+</html>

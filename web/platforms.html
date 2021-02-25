@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Supported Platforms and Configurations</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"
+ align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Supported Platforms and Configurations<br>
+<br>
+</small></span></div>
+The Lucretia source code, makefiles, compiled libraries, and
+executables (m-files and mexfiles) are all available from the <a
+ href="downloads.html">downloads</a> page.&nbsp; Users should be able
+to simply download Lucretia from there and then run it.&nbsp; We
+currently provide the following builds of Lucretia:<br>
+<br>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">Windows
+XP 32 bit:</span>&nbsp; (.dll)<br>
+<div style="margin-left: 40px;">Matlab R14 (7.0.0), built with
+Microsoft Visual C version 6.0 under DevStudio 2003.<br>
+Matlab R2006a (7.2.0.232), built with Microsoft Visual C++ 2005 under
+DevStudio 2005.<br>
+</div>
+<br>
+<span style="font-weight: bold;">Solaris:</span>&nbsp; (.mexsol)<br>
+<div style="margin-left: 40px;">Matlab R14 (7.0.0), built with Sun
+C compiler "Forte Developer 7 C 5.4 2002/03/09"<br>
+Matlab R2006a (7.2.0.283), built with Sun C compiler 5.8 Patch
+121015-04 2007/01/10.<br>
+</div>
+<br>
+<span style="font-weight: bold;">Linux 32 bit:</span>&nbsp; (.mexglx)<br>
+<div style="margin-left: 40px;"><span style="font-weight: bold;"></span>Matlab
+R14SP1 (7.0.1) built with gcc compiler, version 3.2.3 20030502<br>
+Matlab R2006a (7.2.0.294), built with gcc compiler, version 3.4.6
+20060404<br>
+</div>
+<br>
+<span style="font-weight: bold;">Linux 64 bit:</span>&nbsp; (.mexa64)<br>
+<div style="margin-left: 40px;">Matlab 2007b (7.?), built with gcc
+compiler, version 4.1<br>
+</div>
+</div>
+<br>
+In principle it should be possible to build Lucretia for any platform
+which has a reasonably current version of Matlab, but the platforms
+above are the ones in common use at SLAC, so that's what I have access
+to.&nbsp; Since SLAC is planning to eliminate its support for Solaris
+in the near future, we will no longer be able to provide updated builds
+for this platform at some point real soon.<br>
+<br>
+The Lucretia mexfiles for R14 are no longer updated; they are kept in
+the directory Lucretia / src / mexsrc / mexfileOld.&nbsp; The R2006a
+versions of the mexfiles are in directory: Lucretia / src / mexsrc /
+mexfile2006.&nbsp; As soon as R2008a is finalized and made available at
+SLAC, we will build versions of Lucretia against it and store the
+resulting mexfiles in the mexfile2008 subdirectory of Lucretia / src /
+mexsrc.&nbsp; We will keep both of these versions updated for awhile
+because there
+are compatibility problems between R2006/R2007 mexfiles and R2008
+mexfiles -- they require different versions of glibc.&nbsp; Depending
+on which version of Matlab you run, you should set the path
+appropriately to pick up the compatible version of the mexfiles.<br>
+<br>
+&nbsp;If you want to build the Lucretia mexfiles yourself, then there
+are details for you
+below.&nbsp; Be sure also to check out the page on <a
+ href="mexfiles.html">code organization</a>.<br>
+<br>
+<br>
+<br>
+<div style="text-align: center;"><big>Windows XP</big><br>
+</div>
+<br>
+The approach I've taken to building Lucretia is to have a single
+workspace (Lucretia) which contains LucretiaMain and LucretiaMatlab as
+static library projects and GetRmats, GetTwiss, RmatAtoB, TrackThru,
+VerifyLattice as dynamic library projects.&nbsp; I put all of the
+source code and include files into a single directory.&nbsp; If you
+arrange the files and workspace differently, the instructions below
+will need some modification for you.<br>
+<br>
+<span style="font-weight: bold;">How to Build:&nbsp; Static Libraries</span><br>
+<br>
+LucretiaMain.lib needs the following files included in the project as
+source files:<br>
+&nbsp;&nbsp;&nbsp; LucretiaCommon.c<br>
+&nbsp;&nbsp;&nbsp; LucretiaPhysics.c<br>
+and the following files included as header files:<br>
+&nbsp;&nbsp;&nbsp; LucretiaCommon.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaDictionary.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaGlobalAccess.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaPhysics.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaVerifyMsg.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaVersionProto.h<br>
+With those included, it should simply build without further ado.<br>
+<br>
+LucretiaMatlab.lib need the following files included as source files:<br>
+&nbsp;&nbsp;&nbsp; LucretiaMatlab.c<br>
+&nbsp;&nbsp;&nbsp; LucretiaMatlabErrMsg.c<br>
+and the following files included as header files:<br>
+&nbsp;&nbsp;&nbsp; LucretiaCommon.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaGlobalAccess.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaMatlab.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaVersionProto.h<br>
+Since LucretiaMatlab.lib also uses external headers mex.h and matrix.h,
+MSVC needs to know which directory to use to look for these.&nbsp;
+Typically this is the extern/include directory under the main Matlab
+directory.&nbsp; To set this up, select Settings from the Project menu
+(a window will appear).&nbsp; In the LHS of the window, select
+LucretiaMatlab, in the "Settings For" pulldown menu select "All
+Configurations".&nbsp; On the RHS, select the "C/C++" tab, select
+"Preprocessor" from the Category pull-down menu, and in the box for
+"Additional include directories" put in the directory which contains
+the Matlab include files (for example on my PC it's
+c:/matlab/MATLAB7/extern/include).<br>
+<br>
+<span style="font-weight: bold;">How to build:&nbsp; Dynamic Libraries<br>
+</span><br>
+The 5 dynamic libraries take a bit more work to build properly.&nbsp;
+Start by including the necessary source files and header files:<br>
+<br>
+GetRmats:&nbsp; Source<br>
+&nbsp;&nbsp;&nbsp; GetRmats.c<br>
+&nbsp;&nbsp;&nbsp; GetRmats.def<br>
+GetRmats:&nbsp; Header<br>
+&nbsp;&nbsp;&nbsp; LucretiaCommon.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaMatlab.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaGlobalAccess.h<br>
+GetTwiss:&nbsp; Source<br>
+&nbsp;&nbsp;&nbsp; GetTwiss.c<br>
+&nbsp;&nbsp;&nbsp; GetTwiss.def<br>
+GetTwiss:&nbsp; Header<br>
+&nbsp;&nbsp;&nbsp; LucretiaCommon.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaMatlab.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaGlobalAccess.h<br>
+RmatAtoB:&nbsp; Source<br>
+&nbsp;&nbsp;&nbsp; RmatAtoB.c<br>
+&nbsp;&nbsp;&nbsp; RmatAtoB.def<br>
+RmatAtoB:&nbsp; Header<br>
+&nbsp;&nbsp;&nbsp; LucretiaCommon.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaMatlab.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaGlobalAccess.h<br>
+TrackThru:&nbsp; Source<br>
+&nbsp;&nbsp;&nbsp; TrackThru.c<br>
+&nbsp;&nbsp;&nbsp; TrackThru.def<br>
+TrackThru:&nbsp; Header<br>
+&nbsp;&nbsp;&nbsp; LucretiaCommon.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaMatlab.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaGlobalAccess.h<br>
+VerifyLattice:&nbsp; Source<br>
+&nbsp;&nbsp;&nbsp; VerifyLattice.c<br>
+&nbsp;&nbsp;&nbsp; VerifyLattice.def<br>
+VerifyLattice:&nbsp; Header<br>
+&nbsp;&nbsp;&nbsp; LucretiaCommon.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaMatlab.h<br>
+&nbsp;&nbsp;&nbsp; LucretiaGlobalAccess.h<br>
+<br>
+A word of explanation:&nbsp; the .def files are simple text files with
+a small amount of information needed to make a proper DLL.&nbsp; For
+example, the GetRmats.def contains the lines:<br>
+LIBRARY GETRMATS.DLL<br>
+EXPORTS mexFunction<br>
+and the other .def files are the same except with a different library
+name in line 1.<br>
+<br>
+Now, each of these DLLs needs to access both Matlab header files and
+Matlab libraries, and also needs the LucretiaMain and LucretiaMatlab
+libraries to build.&nbsp; Set this up by selecting Settings from the
+Project menu.&nbsp; In the window that appears, select the desired DLL
+from the list on the LHS, and "All configurations" from the "Settings
+For" pulldown menu.&nbsp; On the RHS select the "C/C++" tab,
+"Preprocessor" from the Category pulldown menu.&nbsp; In the
+"Preprocessor definitions:" area, add MATLAB_MEX_FILE, and in the
+"Additional include directories" select the Matlab include file
+directory discussed for the static libraries.&nbsp; Now select the
+"Link" tab and "Input" from the Category pull-down menu.&nbsp; In the
+"Object/library modules:" box add LucretiaMain.lib LucretiaMatlab.lib
+libmx.lib libmex.lib (library names should be separated by
+spaces).&nbsp; In the "Additional library path:" box add the paths to
+the correct versions of LucretiaMain and LucretiaMatlab (in my case,
+for example, it's:<br>
+c:/pt files/nlc and ilc/sw+tools/lucretia/lucretia/LucretiaMain/Release
+for the former).&nbsp; Add also the path for the Matlab libraries
+libmex and libmx (in my case that's
+c:/matlab/MATLAB7/extern/lib/win32/microsoft/msvc60), with semicolons
+(;) used to separate the paths entered in this box.<br>
+<br>
+Note that if you decide to build both release and debug versions of the
+libraries you will need to set different paths to the LucretiaMain and
+LucretiaMatlab libraries for the two versions of each DLL.&nbsp; Do
+this by using either the "Win32 Release" or "Win32 Debug" selections in
+the "Settings For" pulldown menu. <br>
+<br>
+With all that done, all you should need to do is set Matlab's path to
+include the location of your DLLs and the location of the Lucretia
+m-file functions and scripts, and everything should just work!<br>
+<br>
+<div style="text-align: center;"><big>Solaris</big><br>
+</div>
+<br>
+<span style="font-weight: bold;">How to Build:&nbsp; Static Libraries</span><br>
+<br>
+The Lucretia distribution includes a Makefile for use with gmake to
+build the static libraries, which for Solaris are named
+libLucretiaMain_sun.a and libLucretiaMatlab_sun.a.&nbsp; You will need
+to edit the Makefile and change the MANPATH symbol, which points at the
+location I use for the Matlab header files for libLucretiaMatlab_sun.a.
+<br>
+<br>
+<span style="font-weight: bold;">How to Build:&nbsp; Dynamic Libraries</span><br>
+<br>
+The Lucretia distribution includes a Matlab script, MakeLucretiaMex.m,
+which will automatically build the dynamic libraries GetRmats.mexsol,
+GetTwiss.mexsol, RmatAtoB.mexsol, TrackThru.mexsol,
+VerifyLattice.mexsol.&nbsp; You may need to first perform mex -setup to
+tell Matlab to use the Sun C compiler rather than some other one (such
+as lcc, which is bundled with Matlab).&nbsp; <br>
+<br>
+<div style="text-align: center;"><big>Red Hat Linux</big><br>
+</div>
+<br>
+<span style="font-weight: bold;">How to Build:&nbsp; Static Libraries</span><br>
+<br>
+The Lucretia distribution includes a Makefile for use with gmake to
+build the static libraries, which for Linux are named
+libLucretiaMain_linux.a and libLucretiaMatlab_linux.a.&nbsp; You will
+need to
+edit the Makefile and change the MANPATH symbol, which points at the
+location I use for the Matlab header files for
+libLucretiaMatlab_linux.a.
+<br>
+<br>
+<span style="font-weight: bold;">How to Build:&nbsp; Dynamic Libraries</span><br>
+<br>
+The Lucretia distribution includes a Matlab script, MakeLucretiaMex.m,
+which will automatically build the dynamic libraries GetRmats.mexglx,
+GetTwiss.mexglx, RmatAtoB.mexglx, TrackThru.mexglx,
+VerifyLattice.mexglx.&nbsp; You may need to first perform mex -setup to
+tell
+Matlab to use the Gnu C compiler rather than some other one (such as
+lcc, which is bundled with Matlab).&nbsp; <br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+07-Mar-2008<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</body>
+</html>

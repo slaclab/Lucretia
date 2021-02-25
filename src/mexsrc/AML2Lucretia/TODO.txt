@@ -1,0 +1,11 @@
+1/ Extract orientation information and add this to BEAMLINE{}.Offset.
+This needs to be done for all types of element.
+
+2/ Search for the presence of an instrument at each element, and make a BPM
+if necessary.
+
+3/ Fix the "type 3" corrector structure.
+
+4/ GIRDERs are in there now, but I haven't done anything to extract their
+orientation yet.
+

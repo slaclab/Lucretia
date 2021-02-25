@@ -1,0 +1,13 @@
+! ==============================================================================
+! 24-jul-2003, PT:
+!    beam energy and EFACT parameters for 250 GeV/beam (500 GeV CM).
+! ------------------------------------------------------------------------------
+
+! Energy and pole-tip field scaling for BDS
+
+  Ef    := 250.0           !beam energy (GeV)
+  Efact := Ef/500          !fraction of 500 GeV (for pole-tip field scaling)
+
+! ==============================================================================
+
+  RETURN

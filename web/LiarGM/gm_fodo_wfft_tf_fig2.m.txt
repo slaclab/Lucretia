@@ -1,0 +1,139 @@
+%================================================================
+%  Simple FODO line with ground motion
+%  MAT-LIAR simulation
+%     find spectra and plot ratio of them. Compare with TF 
+%
+%  A.S. Jan.29, 2002
+%================================================================
+%
+close all;
+clear all;
+load gm_fodo_fft_w_tf_save2;
+%
+nfou=nsample/2;
+ttot=tsample(nsample)-tsample(1);
+dt=ttot/(nbpm-1);
+df=1./ttot;
+  fr=zeros(nfou,1);
+  xx=zeros(nfou,1);
+  xxav=zeros(nfou,1);
+  yy=zeros(nfou,1);
+  yyav=zeros(nfou,1);
+for i=1:nfou
+    fr(i)=df*i;
+end
+
+xxav=0;
+yyav=0;
+ 
+
+for iter=1:niter
+
+    x=mislx(2,:,iter) - mislx(3,:,iter);
+    y=misly(2,:,iter) - misly(3,:,iter);
+    
+x=x-mean(x);
+y=y-mean(y);
+
+for i=1:nsample
+    x(i)=x(i)*(1-cos((i-1)/(nsample-1)*2*pi));
+    y(i)=y(i)*(1-cos((i-1)/(nsample-1)*2*pi));
+end
+% filter
+
+ffx=fft(x);
+ffy=fft(y);
+
+for i=1:nfou-1
+    xx(i)=abs(ffx(i+1))^2;
+    yy(i)=abs(ffy(i+1))^2;
+end
+xx(nfou)=2*abs(ffx(nfou+1))^2;
+yy(nfou)=2*abs(ffy(nfou+1))^2;
+
+xx=xx/df/nfou^2 /2;
+yy=yy/df/nfou^2 /2;
+
+xxav=xxav + xx;
+yyav=yyav + yy;
+
+end % loop of iter
+
+
+xxav=xxav/niter;
+yyav=yyav/niter;
+
+xxav=xxav*1.e12;
+yyav=yyav*1.e12;
+% convert to micron^2/(1/m)
+
+figure;
+hs=loglog(fr,xxav,'b');
+hold on
+hs=loglog(fr,yyav,'g');
+
+hc=title('Modifying ground motion by Transfer Function, example');
+    set(hc,'FontSize',14);  
+  hc=ylabel('spectra, micron**2/Hz');
+    set(hc,'FontSize',12);
+  hc=xlabel('F, Hz');
+    set(hc,'FontSize',12);   
+legend('S_{x}','S_{y}',1);
+axis tight;
+
+hc=text(0.11,1.e-6,'Spectra of relative motion of two separated quadrupoles');
+    set(hc,'FontSize',11);   
+hc=text(0.11,0.5e-6,'Horizontal motion was modified by a Transfer Function');
+    set(hc,'FontSize',11);   
+
+
+rxy=zeros(nfou,1);
+
+%iquad=[ 2  3  4 ];
+
+for i=1:nfou
+rxy(i)=sqrt(xxav(i)/yyav(i));
+end
+
+figure;
+hs=loglog(fr,rxy);
+
+
+figure(2)
+hold on
+load tf_1.out;
+ff=tf_3(:,1);
+tfr=tf_3(:,2);
+tfi=tf_3(:,3);
+for i=1:length(ff)
+    tf1(i)=sqrt(tfr(i)^2+tfi(i)^2);
+end
+
+load girder_tf.dat;
+ffo=girder_tf(:,1);
+
+tfr_o=girder_tf(:,2);
+tfi_o=girder_tf(:,3);
+for i=1:length(ffo)
+    tfo(i)=sqrt(tfr_o(i)^2+tfi_o(i)^2);
+end
+
+
+hc=loglog(ff,tf1,'r-');
+hc=title('Transfer Function, model and measured in LIAR');
+    set(hc,'FontSize',14);  
+  hc=ylabel('Transfer Function');
+    set(hc,'FontSize',12);
+  hc=xlabel('F, Hz');
+    set(hc,'FontSize',12);   
+axis([0.1 100 1e-2 10 ]); 
+
+hc=text(0.11,3.e-2,'Arbitrary TF  from file girder\_tf.dat');
+    set(hc,'FontSize',11);   
+
+hold on
+loglog(ffo,tfo,'og');
+
+legend('TF_{LIAR}','TF_{approx}','TF_{file}',2);
+
+

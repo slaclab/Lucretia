@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Mexfiles</title>
+
+  
+  
+  <meta name="author" content="Peter Tenenbaum">
+
+</head><body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span style="font-size: 24pt;"><img style="border: 0px solid ; width: 80px; height: 90px;" alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif" align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Internal Arrangement of the Mexfiles<br>
+<br>
+</small></span></div>
+
+Most of the fun stuff in Lucretia is in the form of individual m-files
+that are, on the whole, pretty simple.&nbsp; The mexfiles which do the
+CPU-intensive tracking, Twiss and Rmat calculations, and lattice
+verifications are another matter.&nbsp; Documentation of the mexfile
+inner workings can be found below. Any shared object file dependencies
+of the mexfiles are included in the Lucretia distribution in the
+src/Libs directories. You should esnure that these files are included
+in your shared libs search path (e.g. include in LD_LIBRARY_PATH
+environment variable under Linux).<br>
+
+<br>
+
+<span style="font-weight: bold;">Static Libraries:&nbsp; LucretiaMain
+and LucretiaMatlab</span><br>
+
+<br>
+
+Static library LucretiaMain contains all of the actual accelerator
+physics and simulation algorithms.&nbsp; LucretiaMain is further
+divided into 2 main source files, LucretiaCommon.c and
+LucretiaPhysics.c.&nbsp; LucretiaCommon.c contains all of the logic
+which is used in the Twiss, Rmat, verification, and tracking
+operations:&nbsp; looping over elements and bunches, dynamic allocation
+and deallocation, stopping particles, etc.&nbsp; LucretiaPhysics.c is
+almost pure accelerator physics:&nbsp; calculation of transfer maps,
+propagation of Twiss functions through a transfer map, etc.&nbsp; I
+would be the first to admit that the line is somewhat blurry:&nbsp; is
+splining of wake functions more like logic or like physics?&nbsp; Is
+the combination of an element's offsets with its girder's offsets more
+like logic or like physics?&nbsp; I put the former in LucretiaPhysics
+and the Latter in LucretiaCommon.<br>
+
+<br>
+
+In any event, LucretiaMain does not require any Matlab support to
+build.&nbsp; It does require several include files, however:<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaCommon.h (data type definitions and function
+prototypes for LucretiaCommon.c)<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaPhysics.h (constants and function prototypes
+for LucretiaPhysics.c)<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaDictionary.h (definitions of parameters for
+elements, wakefields, klystrons, etc)<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaVerifyMsg.h (definitions of various text
+strings used in lattice verification messages)<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaVersionProto.h (function prototypes for
+getting version information)<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaGlobalAccess.h (function prototypes for
+requesting information from Matlab).<br>
+
+<br>
+
+Static library LucretiaMatlab contains all the functions which are used
+to access Matlab's dataspace and built-in functions (random number
+generation, cubic spline, etc).&nbsp; Almost all of LucretiaMatlab's
+functions are in LucretiaMatlab.c; a small number of functions related
+to the status-and-message stack for the mexfiles is in
+LucretiaMatlabErrMsg.c.&nbsp; LucretiaMatlab will not compile without
+two Matlab include files, mex.h and matrix.h.&nbsp; It also needs the
+following include files:<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaCommon.h<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaGlobalAccess.h<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaVersionProto.h<br>
+
+&nbsp;&nbsp;&nbsp; LucretiaMatlab.h (function prototypes for
+LucretiaMatlab.c and LucretiaMatlabErrMsg.c).<br>
+
+<br>
+
+<span style="font-weight: bold;">Dynamic Libraries:&nbsp; GetRmats,
+GetTwiss, RmatAtoB, TrackThru, VerifyLattice</span><br>
+
+<br>
+
+The mexfile functions use the somewhat-awkward Matlab standard
+protocols for communicating with Matlab:&nbsp; there is a function file
+(for example, GetRmats.c) which contains a gateway function (which must
+have the name MexFunction); MexFunction performs all of the interfacing
+between Matlab (which calls MexFunction) and the actual working
+functions of Lucretia mexfiles (which are called by MexFunction).&nbsp;
+<br>
+
+<br>
+
+In each of the mexfiles, the C file which contains MexFunction also
+contains other routines related to unpacking arguments and general
+preparation for simulation work, packing results in Matlab data
+structures, and miscellaneous cleanup.&nbsp; No other functionality is
+coded in the mexfile C files.&nbsp; Each of the mexfiles requires mex.h
+and matrix.h from Matlab as well as LucretiaCommon.h, LucretiaMatlab.h,
+and LucretiaGlobalAccess.h in order to build, and they must also link
+against the LucretiaMain and LucretiaMatlab static libraries.<br>
+
+<br>
+
+<span style="font-weight: bold;">Static Libraries:&nbsp; g4track<br>
+</span><br>
+
+This static library is built using the c++ source and Makefile in the
+src/mexsrc/g4track directory. This build process requires the presence
+of the GEANT4 source code installed with all Material files databases
+in the standard way (in particlular the geant4-config script must also
+be on the PATH). To use the GEANT4 calling functionality of Lucretia,
+TrackThru must be built against this library using the "make g4track"
+build option in the main Lucretia build area.<br>
+
+<br>
+
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a>
+<a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+8-April-2014<br>
+
+<a href="http://www.slac.stanford.edu/detailed.html"><img src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page" alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;" align="right"></a><br>
+
+<br>
+</body></html>

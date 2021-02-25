@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Examples</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+	</span><font size="5">Using Matlab in &quot;Batch&quot; Mode to Deploy Parallel 
+	Lucretia Simulations</font><span style="font-size: 24pt;"><small><br>
+<br>
+</small></span></div>
+If you have lots of spare Matlab licenses floating around (lucky you!), one 
+option to run parallel Lucretia simulations is to simply run your serial 
+simulation program in batch mode multiple times (using multiple execution 
+commands on the same system or submitted to a batch farm). This is the simplest 
+way of parallelising your simulation and requires the least modification to 
+existing code. To do this, follow the steps below:<ul>
+	<li>Decide on the granularity of the parallelisation and if the parallel 
+	tasks need to communicate with each other. If inter-process communication or 
+	fine-grained parallelisation is desired, this is probably not the best 
+	approach (<a href="pLucretia.html">see the appropriate section on the 
+	introductory page to this section</a>). If you can start the different 
+	parallel instances of your simulation by simply specifying different 
+	variable assignments (e.g. a flag specifying a machine configuration or a 
+	random seed number) this method will work well.</li>
+	<li>Create a shell script to run an instance of Matlab with given parameters 
+	which are passed to the master Lucretia simulation script or function (see 
+	below for examples). Note, under Windows you really need to have the master 
+	simulation routine be a function- see the
+	<a href="pLucretia_hints+tips.html">hints &amp; tips</a> section for 
+	consequences of this.</li>
+	<li>Execute the scripts with the different parameters (one Matlab session 
+	should start per script instance), or submit various copies of the 
+	executable scripts to your batch farm scheduler (e.g. using bsub with LSF, 
+	or qsub with PBS). Note, one license gets used up per session if you have 
+	concurrent licensing. It is good to have an additional script to automate 
+	this task, <a href="jobSub.pl">here</a> is an example perl script I use to 
+	submit 100 parallel jobs to a farm that uses the LSF scheduler (it also has 
+	a flag to re-run failed jobs).</li>
+</ul>
+<p>How you collate the results from the task is up to you. You can look at the 
+output of the sessions which can be piped into separate files, or you can have 
+each session save its state on your file system and have a separate results 
+collation routine. See the discussion page on hints and tips for parallel 
+computing.</p>
+<p>Example shell scripts for running individual simulation instances:</p>
+<p><b>Under Windows:<br>
+</b>In a .bat file, you need the following (assuming you aren't concerned about 
+graphical output from each individual session) which utilises the windows <i>
+<a href="http://www.robvanderwoude.com/index.html">start</a> </i>command:<br>
+<b><i>start matlab -nosplash -nodesktop -minimize -r mfile(par1,par2,...) -logfile 
+c:\temp\logfile</i></b><br>Where, you pass arguments to each session through the 
+mfile.m function parameters, and the workspace text is saved in <i>logfile</i>. 
+You should make sure to have the last command in mfile.m be <i>exit</i> 
+otherwise you will have lots of open Matlab sessions to manually shut down (also 
+consider enclosing all the code in the file in a try, catch block with <i>exit</i> 
+as the last command in the catch section so that the session also exists 
+properly in case of a run-time error).<br>
+Note, there are other useful arguments you can use with the <i>start</i> 
+command, such as assigning the execution priorities.</p>
+<p><b>Under Linux:<br>
+</b>The following works for c-shell type command shells, for bash-like ones use 
+the ##(bash) commented lines instead of those above.<br>
+So, for an example script, <b><i>lucretiaSubmit.csh</i></b>:<br>
+<b><i>#!/bin/tcsh<br>
+unsetenv DISPLAY<br>
+##(bash) unset DISPLAY<br>
+matlab -nodesktop -nosplash &gt;&amp;! outputDirectory/lucretiaJob_$1.out &lt;&lt; EOF<br>
+##(bash) matlab -nodisplay -nosplash 1&gt; outputDirectory/lucretiaJob_$1.out 2&gt;&amp;1 
+&lt;&lt; EOF<br>
+randomSeed=$1<br>
+machineConfig=$2<br>
+myParam=$3<br>
+lucretiaJob<br>
+exit<br>
+EOF<br>
+</i></b>All the code specific to the simulation instance being run is put 
+between the <i>matlab</i> command and <i>EOF</i> line. One instance of the above 
+could be started with something like <i><b>&quot;./lucretiaSubmit.csh 1 configA 63&quot;
+</b></i>for example. Note, make sure to assign the shell script executable 
+privileges (<i><b>chmod a+x lucretiaSubmit.csh</b></i>) and make sure to have 
+exit as the last command (see above comments on this in the &quot;Under Windows&quot; 
+section).</p>
+<p><br><a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>24-May-2007<br>
+<a href="http://www.slac.stanford.edu/detailed.html">
+<img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br></p>
+</body>
+</html>

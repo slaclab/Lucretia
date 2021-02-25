@@ -1,0 +1,18 @@
+% LIAR setting for the FODO beamline
+
+mat_liar('  reset, all');
+mat_liar('  set_control, debug   = 0');    % Debug-level               
+%mat_liar('               outlun  = 6,');    % Output unit (6 = terminal)
+%mat_liar('               outfile = ' '');   % Optional output file name
+%
+mat_liar('  read_xsif, ');
+mat_liar('  file = ''line.mad'',');
+mat_liar('             energy = 500.,');
+mat_liar('             echo   = .f.,');
+mat_liar('             line   = ''crasyline'' ');
+% 
+% Definition of the girder supports:
+mat_liar('define_support,ngirder=1 ');
+%
+%
+return

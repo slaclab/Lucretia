@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Examples</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"
+ align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Examples<br>
+<br>
+</small></span></div>
+Often the best way to learn a new simulation code is to start from an
+example or two; this will also help to indicate whether the code is
+working or not.&nbsp; At the moment there are 3 Lucretia examples
+available, and they are included in the Lucretia Zip files (see <a
+ href="downloads.html">downloads</a>), or the source code of the
+examples can be browsed (follow the links in the example names).<br>
+<br>
+<a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/src/Examples/Tutorial/"><span
+ style="font-weight: bold;">Tutorial:</span></a>&nbsp; this example
+starts by generating a simple lattice (a linac with 10 FODO cells plus
+a 4 bend chicane at the end) and uses it to demonstrate many of
+Lucretia's most interesting features and functions.&nbsp; Users should
+feel free to insert "return" statements into the master file
+(LucretiaTutorial.m) in various places, and at those locations use the
+BeamlineViewer GUI to explore the state of the beamline.&nbsp;
+Hopefully this is a good entry point for general use of Lucretia.<br>
+<br>
+Approximate execution time:&nbsp; 3 minutes on a 2 GHz WinXP laptop,
+most of which is taken up by a tracking example of 1000 bunches with
+long-range wakefields turned on...<br>
+<br>
+<span style="font-weight: bold;">Note:</span>&nbsp; both examples below
+need
+the XSIF parser library for Matlab, which is available from the <a
+ href="downloads.html">downloads</a> page.<br>
+<br>
+<span style="font-weight: bold;"><a name="ILCBC"></a><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/src/Examples/ILCBC/">ILC
+BC</a>:&nbsp; </span>A "straw man"
+single-stage BC + main linac.&nbsp; After instantiation the example
+will generate Twiss parameters, track bunches on-axis and with a 1
+sigma_y initial offset, examine the longitudinal phase space variation
+as the BC RF phase is varied, and do some simple studies of transverse
+sensitivities to misalignments.&nbsp; Finally, a bunch train (with 1
+ray/bunch) is tracked through the linac with LRWFs, including rotations
+and mode-splittings.<br>
+<br>
+This example shows how to use deck parsing, deck verification, Twiss
+and Rmat calculation, single and multibunch tracking, bunch
+compression, acceleration, and focusing, BPM data, single-bunch and
+multi-bunch wakefields, and a variety of analysis tools.&nbsp; It also
+shows the use of a "rich" lattice (ie, one with all the girders, power
+supplies, and klystrons defined).<br>
+<br>
+Approximate execution time:&nbsp; 19 minutes on a 1 GHz WinXP laptop.<br>
+<br>
+<span style="font-weight: bold;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/src/Examples/NLCFF/">NLC
+FF</a>:</span>&nbsp; After
+instantiation the example will generate Twiss parameters, track a bunch
+on-axis, and study the performance of the NLC-FF as a function of beam
+centroid energy.<br>
+<br>
+This example shows how to use sextupoles, octupoles, and higher-order
+multipoles.&nbsp; It also shows the use of a lattice without girders,
+power supplies, or klystrons (which is somewhat less fun and doesn't
+engage the full utility of Lucretia but can be faster to set up, and
+really, sometimes the BEAMLINE is all you need).<br>
+<br>
+Approximate execution time:&nbsp; 95 seconds on a 1 GHz WinXP
+workstation.<br>
+<br>
+<br>
+<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+13-Mar-2008<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</body>
+</html>

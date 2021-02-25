@@ -1,0 +1,168 @@
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! This file defines the stage 1 bunch compressor.
+!
+! Required files:
+!
+!   BCWIGPROTO.XSIF
+!   BCMODPROTO.XSIF
+!   BCMATCH.XSIF
+!   BCPARAMS.XSIF
+!
+!
+! AUTH:   PT,        24-jan-2005
+! MOD:    
+!         PT,        18-apr-2005
+!            Set correct upper/lower cases on SRWF names.
+!         PT,        09-mar-2005
+!            Add longbunch wakefields to BC1CAV.  Add start and end markers
+!            to sub-beamlines.
+!         A. Wolski, 11-feb-2005
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! RF Module
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! RF Module Quadrupoles
+
+  BC1MQFK1     :=  0.206615       
+  BC1MQDK1     := -0.206615
+  BC1MQDMK1    := -0.177093377071
+
+  BC1MQF       : BCMQUAD, K1 = BC1MQFK1
+  BC1MQD       : BCMQUAD, K1 = BC1MQDK1
+  BC1MQDM      : BCMQUAD, K1 = BC1MQDMK1
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! RF Module Cavities
+
+  BC1CAV       :  TTFCAV, DELTAE = BC1CAVVOLT, PHI0 = BC1RFPHASE,       &
+      LFILE =                        "ilc2005.lwake.sr.longbunch.data", &
+      TFILE =                        "ilc2005.twake.sr.longbunch.data", &
+     ELOSS = 0.
+ 
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! RF Module Beamlines
+
+! Quad packages
+
+  BC1MODQFPKG  : LINE = (QPKG(BC1MQF))
+  BC1MODQDPKG  : LINE = (QPKG(BC1MQD))
+  BC1MODQDPKGM : LINE = (QPKG(BC1MQDM))
+
+! Modules
+
+  BC1RF0       : LINE = (MODULE(BC1CAV,BC1MODQFPKG), &
+                         MODULE(BC1CAV,BC1MODQDPKG))
+
+  BC1RF        : LINE = (2*BC1RF0,                   &
+                         MODULE(BC1CAV,BC1MODQFPKG), &
+                         MODULE(BC1CAV,BC1MODQDPKGM))
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Wiggler
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Wiggler Markers
+
+  BC1WMK0      : MARKER
+  BC1WMK1      : MARKER
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Wiggler Bends
+
+! Main bends are split into upstream (A) and downstream (B) parts
+
+  BC1BENDANGLE := 0.078717830631
+  BC1HALFANGLE := BC1BENDANGLE/2
+
+  BC1PLUS_A    : BCPLUS_A,  ANGLE = BC1HALFANGLE, E1 = BC1HALFANGLE
+  BC1PLUS_B    : BCPLUS_B,  ANGLE = BC1HALFANGLE, E2 = BC1HALFANGLE
+  BC1MINUS_A   : BCMINUS_A, ANGLE =-BC1HALFANGLE, E1 =-BC1HALFANGLE
+  BC1MINUS_B   : BCMINUS_B, ANGLE =-BC1HALFANGLE, E2 =-BC1HALFANGLE
+
+! Dispersion suppression bends are unsplit 
+
+  BC1MATCHANGLE := BC1HALFANGLE
+  BC1MATCHLEN   := 2.976297531711
+
+  BC1MATCHPLUS  : BCMATCHPLUS,  L  = BC1MATCHLEN, ANGLE = BC1MATCHANGLE, &
+                                E1 = BC1MATCHANGLE
+  BC1MATCHMINUS : BCMATCHMINUS, L  = BC1MATCHLEN, ANGLE =-BC1MATCHANGLE, &
+                                E2 =-BC1MATCHANGLE
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Wiggler Drifts
+
+  BC1DFTL       := LZDFT
+  BC1DFTML      := 0.608207608777
+
+  BC1DFT        : DRIFT, L = BC1DFTL
+  BC1DFTA       : DRIFT, L = BC1DFTL/2 - LQ/2
+  BC1DFTM       : DRIFT, L = BC1DFTML    
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Wiggler Quadrupoles
+
+  BC1WIGQFK1    :=  0.234929119287
+  BC1WIGQDK1    := -0.233480256682
+
+  BC1WIGQF      : BCWQUAD, K1 = BC1WIGQFK1
+  BC1WIGQD      : BCWQUAD, K1 = BC1WIGQDK1
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Wiggler Beamlines
+
+  BC1WIGSUPPU   : LINE = (             BC1MATCHMINUS,     BC1DFTM, &
+                           BC1PLUS_A,  BC1PLUS_B,         BC1DFT,  &
+                           BC1WIGQD )
+
+  BC1WIGCELL    : LINE = (             BCQDBPM(BC1WIGQD), BC1DFT,  &
+                           BC1MINUS_A, BC1MINUS_B,        BC1DFT,  &
+                           BC1WIGQF,   BCQDBPM(BC1WIGQF), BC1DFT,  &
+                           BC1PLUS_A,  BC1PLUS_B,         BC1DFT,  &
+                           BC1WIGQD )
+
+  BC1WIGSUPPD   : LINE = (             BCQDBPM(BC1WIGQD), BC1DFT,  &
+                           BC1MINUS_A, BC1MINUS_B,        BC1DFTM, &
+                           BC1MATCHPLUS )
+
+  BC1WIGGLER    : LINE = (   BC1WMK0,    BC1WIGSUPPU, &
+                           6*BC1WIGCELL, BC1WIGSUPPD, &
+                             BC1WMK1 )
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Bunch Compressor Stage 1: BC1
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+! Some start/end markers 
+
+  BC0BEGIN       : MARKER
+  BC0END         : MARKER
+  BC1RFBEGIN     : MARKER 
+  BC1RFEND       : MARKER
+  BC1MATCH1BEGIN : MARKER
+  BC1MATCH1END   : MARKER
+  BC1WIGGBEGIN   : MARKER
+  BC1WIGGEND     : MARKER
+  BCXBEGIN       : MARKER
+  BCXEND         : MARKER
+
+  BC1    : LINE = (BC0BEGIN,       BC0,        BC0END,       &
+                   BC1RFBEGIN,     BC1RF,      BC1RFEND,     &
+                   BC1MATCH1BEGIN, BC1M2W,     BC1MATCH1END, &
+                   BC1WIGGBEGIN,   BC1WIGGLER, BC1WIGGEND,   &
+                   BCXBEGIN,       BCX,        BCXEND         )
+
+RETURN

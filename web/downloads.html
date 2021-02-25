@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+
+
+
+  
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"><title>Lucretia: Downloads</title>
+  
+
+  
+  
+  <meta name="author" content="Peter Tenenbaum">
+
+  
+  <style type="text/css">
+.auto-style1 {
+	font-weight: bold;
+}
+.auto-style2 {
+	text-align: center;
+}
+  </style></head><body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span style="font-size: 24pt;"><img style="border: 0px solid ; width: 80px; height: 90px;" alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif" align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Downloads / Source code description<br>
+<br>
+</small></span></div>
+
+The Lucretia code is open-source:&nbsp; anyone can freely download any
+or all of the source, examples, binaries, etc.&nbsp; Links to
+facilitate downloading are below.&nbsp; The philosophy of the Lucretia
+maintainers is to keep binaries (mex files) for the CURRENT version of
+Matlab only in the download package and file repository. All
+development and bugfixes/maintainance etc are done using the current
+Matlab release. Although most m-files, and to a lesser extent the
+mexfiles, will probably work for several versions back from the current one,
+we cannot guarantee this as supported functions and the Matlab build
+environment change over time.<br>
+Two sets of mexfiles are maintained, if you wish to use the GEANT4
+interface an additional setup step is required after downloading (see
+below).<br>
+
+<br>
+
+<div style="text-align: center;"><span class="auto-style1">Supported
+Environments</span><br>
+</div>
+
+<br>
+Any environment supported by Matlab should be OK for running
+Lucretia: Mathworks product support information for all Matlab versions
+can be found
+<a href="http://www.mathworks.com/support/product/sys_requirements.html?product=ML">here</a>.
+We supply build files and the source code for compiling all included
+mexfiles, if the supplied mexfiles do not work for you in your
+environment, see the section below to building mex files from source.
+The supplied mex file binaries are built under the current latest
+Matlab version,<br>
+<span style="font-weight: bold;">NB: Currently the GEANT4 compatible binaries are only supplied for the Linux environment.</span><br>
+
+Lucretia is currentluy developed, and mexfiles built, under the
+following environments:
+<blockquote> Red Hat Linux (Enterprise Linux 6 64-bit) gcc5.2.1<em><strong><br>
+</strong></em></blockquote>
+
+<blockquote> Mac OSX (10.12, 64-bit)<br>
+  <br>
+Windows 10 (64 bit) MinGW<br>
+</blockquote>
+
+
+
+<div style="text-align: center;"><span style="font-weight: bold;">Lucretia
+Downloads</span><br>
+</div>
+
+<span style="font-weight: bold;"><br>
+</span>
+<div style="text-align: center;">
+<div style="text-align: left;">The complete source code and all mexfile
+binaries can be downloaded from bitbucket which performs code hosting
+for the Lucretia project. The project home page is:<br>
+<blockquote> <a href="https://bitbucket.org/whitegr/lucretia">https://bitbucket.org/whitegr/lucretia</a>
+</blockquote>
+
+Here you can download the current production version of Lucretia from the master repository branch.<br>
+<br>
+<span style="font-weight: bold;">Note on use with GEANT4 subroutines: (only available currently under linux)<br>
+</span>To run the GEANT4 compatible versions of the Lucretia mex files,
+run the LucretiaInit.m function with the 'cpu-g4' argument in your
+Matlab session.<span style="font-weight: bold;"><br>
+</span>If you wish to make use of the GEANT4 calling subroutines, you
+must also have the required GEANT4 data files. For the tar
+distributions, these are packaged along with the Lucretia distrubution
+and you will get these automatically when you extract the everything
+else. If you are using code checked out from the subversion repository,
+you need to separately download and unpack the G4Data files into the
+ExtProcess directory:<br>
+<ul>
+  <li>Download G4Data tarball from <a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/package/G4Data.tar-bz2">here</a> into Lucretia/src/ExtProcess directory</li>
+  <li>$ cd Lucretia/src/ExtProcess</li>
+  <li>$ tar --bzip2 -xf G4Data.tar-bz2<br>
+  </li>
+</ul>
+<span style="font-weight: bold;"></span>
+</div>
+</div>
+
+<div class="auto-style2"> <strong>mexfile Source</strong></div>
+
+<br>
+
+The source code for Lucretia binary mex files exists as several c, c++,
+and fortran files all contained in the Lucretia/src/mexsrc directory
+and subdirectories therein. The "core" Lucretia binaries are built in
+the mexsrc directory itself from c source files. See <a href="mexfiles.html">here</a>
+for a description of these mexfiles.
+There is a build.m file in the mexsrc file which is designed to be run
+from within a Matlab session and builds Lucretia using the mex compiler
+defined in the Matlab session for any supported operating system.
+Follow Matlab instructions for setting up your mex environment, then
+see build instructions in the build.m function file. There is also a
+system Makefile included in the mexsrc directory for building.<br>
+
+There
+are separate directories containing the source code for the XSIF
+parser (mexsrc/xsif) and for the Ground Motion code (mexsrc/matgm).
+These source files are fortran77 and fortran90 based. Once again there
+are self-describing Makefiles in each of these build directories. There
+is also a seperate directory for the source for the GEANT4 interface
+module, contained in the src/mexsrc/g4track directory. To build against
+this to enable the GEANT4 process function to work from within
+Lucretia: first build the g4track library object using the Makefile in
+that directory (assumes GEANT4 v.10+ is installed on your system). Then
+build Lucretia using the "make g4track" command. The distributed
+TrackThru mex files (for linux 64-bit) are built including the GEANT4
+libraries.<br>
+
+The only known fortran compiler which works with current versions of
+Matlab and these source files is the Intel fortran compiler.<br>
+
+Run-time libraries for the Intel compiler and other required shared
+object libraries are kept in the Lucretia/src/Libs directory (each
+environment has a sub-directory). You should add the relevant Libs
+directory to your shared object search path (LD_LIBRARY_PATH
+environment variable for Linux-based operating systems, PATH for
+windows or DYLD_LIBRARY_PATH for Mac) before starting Matlab to
+successfully run all mexfiles.<br>
+
+<br>
+
+<a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+
+5-April-2017<br>
+
+<a href="http://www.slac.stanford.edu/detailed.html"><img src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page" alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;" align="right"></a><br>
+
+<br>
+</body></html>

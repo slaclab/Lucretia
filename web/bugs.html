@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Known Bugs</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"
+ align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Known Bugs<br>
+<br>
+</small></span></div>
+The Lucretia management endeavors to correct bugs as quickly as they
+are discovered, especially any bugs in the mexfiles which can cause all
+kinds of misery.&nbsp; In some cases we discover bugs which cause
+mexfile problems but require sufficiently weird conditions to trigger
+them that we put them on the back burner until we have a spare
+moment.&nbsp; Those bugs are listed here.<br>
+<br>
+At this time there are no known, uncorrected bugs in Lucretia.<br>
+<br>
+<div style="text-align: center;"><big><big>Corrected Known Bugs</big></big><br>
+</div>
+<br>
+The following bugs were corrected in the release on 02-August-2007:<br>
+<br>
+<span style="font-weight: bold;">Ill-Defined Short-Range Wakefields:</span>&nbsp;
+in the case where wakefields are defined with z values &lt; 0 (the
+opposite of what Lucretia is expecting), a crash can occur.&nbsp; We
+think that the problem is that the spliner tries to use the shape of
+the wakefield (defined only for z&lt;0) to apply wakes from leading
+slices of the bunch to trailing slices (for which z&gt;0), and this can
+lead to a huge numerical value for the wakefield, especially in the
+case of the longitudinal wake.<br>
+<br>
+<span style="font-weight: bold;">Humongous Energy Spread:</span>&nbsp;
+In the case of a bunch with an RMS energy spread which is comparable to
+1, a crash occurs.&nbsp; We think that the problem is that rays with a
+negative initial energy are generated in the MakeBeam routines, and
+that the logic which traps ill-constructed beams at entry to TrackThru
+is not catching them properly.<br>
+<span style="font-weight: bold;"></span><br>
+<span style="font-weight: bold;">Crash on Apertures:</span>&nbsp; a bug
+is present which causes Lucretia to crash when it tries to determine
+whether a ray is outside the aperture of an element.&nbsp; Setting the
+Aper flag in the TrackFlag data structure to zero allows tracking to
+continue without crashing (but also without checking positions of rays
+wrt the apertures).<br>
+<br>
+<span style="font-weight: bold;">Synchrotron Radiation:</span>&nbsp; A
+minor error in the handling of synchrotron radiation in bend magnets
+causes the emittance growth from SR to be slightly overestimated.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+02-August-2007<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</body>
+</html>

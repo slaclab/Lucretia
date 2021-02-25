@@ -1,0 +1,507 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Tuning and Analysis</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img alt="LucretiaLogo"
+ title="Lucretia home page" src="LucretiaLogo.gif"
+ style="border: 0px solid ; width: 80px; height: 90px;" align="right"
+ hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Tuning and Analysis<br>
+<br>
+</small></span></div>
+Lucretia has a number of tools which are designed to aid in analyzing
+accelerator properties and tuning them as well.<br>
+<br>
+<span style="font-weight: bold;"><a name="AddMagnetPlot"></a>AddMagnetPlot:</span><br>
+<br>
+Add a schematic "magnet-bar" above an existing plot.&nbsp; This is an
+emulation of the MAD-8 "magnet bar" (which itself is based on an even
+older plotting widget which apparently dates back to TRANSPORT).&nbsp; <br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [h0,h1] =
+AddMagnetPlot(start,end)<span style="font-weight: bold;"><br>
+<br>
+</span>changes the size of the existing plot and adds a magnet bar
+representing the beamline elements from start to end, respectively,
+with multiple slices of an element represented as a single box on the
+magnet bar.&nbsp; At this time the bar shows sector bends, quads,
+sextupoles, octupoles, accelerating structures, and solenoids.&nbsp;
+AddMagnetPlot was adapted from Matlab scripts developed by Mark Woodley.<br>
+<br>
+<span style="font-weight: bold;"><a name="BeamHistogram"></a>BeamHistogram:</span><br>
+<br>
+Bin a histogram of particles in a beam.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [center,height] =
+BeamHistogram( beam, bunchno, coord, spacing )<br>
+<br>
+returns a vector of histogram centers and a vector of histogram heights
+given a beam, the bunch number which is to be binned, the coordinate (1
+to 6) which is to be binned, and the bin spacing in sigmas.&nbsp; A
+bunchno of 0 indicates that all bunches are to be accumulated in one
+set of bins.&nbsp; The reason that it is necessary to use BeamHistogram
+instead of Matlab's native histogram function is that rays in a bunch
+can have unequal weights, and BeamHistogram takes that into account
+(which Matlab histogram does not).&nbsp; The resulting histograms can
+be plotted with Matlab bar or barh functions.&nbsp; Note also that the
+algorithm to determine the bin centers does not use the RMS width as
+its sigma, but rather the region about the median which contains 68% of
+the total bunch charge.&nbsp; This keeps the bin width and spacing from
+getting too wacky in the case of extremely non-Gaussian beams.<br>
+<br>
+<span style="font-weight: bold;"><a name="BPMZPlot"></a>BPMZPlot:</span><br>
+<br>
+Plot beam position monitor readings in a SLAC-style "z-plot".<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [x,y,S] = BPMZPlot(
+beamdatastruc )<br>
+<br>
+plots x vs S and y vs S in "z-plot" fashion (ie, the BPM reading is
+represented as a bar running vertically from the S axis to the
+reading).&nbsp; Argument beamdatastruc is the Matlab structure of BPM
+data returned by <a href="tracking.html#TrackThru">TrackThru</a> (ie,
+if you use [stat,beam,data] = TrackThru(...), then use data{1} as the
+argument to BPMZPlot).&nbsp; The plotter also returns the x readings, y
+readings, and BPM S positions as vectors.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [x,y,S] = BPMZPlot(
+beamdatastruc, ustring )<br>
+<br>
+plots BPM data with a requested scaling of the readings.&nbsp;
+Supported values of ustring are 'mm' (millimeters) and 'um'
+(micrometers).&nbsp; The same scaling is used for both sets of
+readings.&nbsp; The returned x and y vectors will still be in meters.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [x,y,S] = BPMZPlot(
+beamdatastruc, ustring1, ustring2 )<br>
+<br>
+plots the data with different scalings for x and y.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [x,y,S] = BPMZPlot(
+beamdatastruc, ustring1, ustring2, ustring3 )<br>
+<br>
+allows a unit to be selected for the S coordinate.&nbsp; The only
+currently supported value of ustring3 is 'km' (kilometers). <br>
+<br>
+<span style="font-weight: bold;"><a name="ComputeSRIntegrals"></a>ComputeSRIntegrals:</span><br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat,Ix,Iy] =
+ComputeSRIntegrals( istart, iend, Twiss )<br>
+<br>
+computes the synchrotron radiation integrals I<sub>1</sub> through I<sub>5</sub>,
+in each plane, between the upstream face of BEAMLINE element istart and
+the downstream face of BEAMLINE element iend.&nbsp; Argument Twiss is
+the output of a <a href="twiss.html#GetTwiss">GetTwiss</a> operation
+and contains the uncoupled Twiss parameters over a region which
+includes istart and iend.&nbsp; Ix and Iy are the horizontal and
+vertical integrals, respectively (each is a 1 x 5 vector).<br>
+<br>
+Return argument stat is a Lucretia status cell array; stat{1} == 1
+indicates success without problems.&nbsp; If coupling is detected in
+the region of interest, stat{1} == -1; in this case, the integrals are
+returned but their accuracy is suspect (indeed, the very definition of
+the synchrotron radiation integrals becomes somewhat questionable in
+this case).&nbsp; If the necessary Twiss data is not available over the
+entire region, stat{1} == 0 and the Ix and Iy vectors are zeroed.&nbsp;
+<br>
+<br>
+Many people have expressed skepticism about the actual utility of the
+synchrotron radiation integrals in any situation which is even remotely
+real-world, and that skepticism is warranted.&nbsp; However, the
+integrals are useful in evaluating the performance of the lattice in
+its design state, with no errors or misalignments.<br>
+<br>
+<span style="font-weight: bold;"><a name="GetBeamPars"></a>GetBeamPars:</span><br>
+<br>
+Compute the first and second moments of a beam distribution.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [x,sigma] = GetBeamPars(
+beam, bunchno )<br>
+<br>
+returns the vector of first moments and the matrix of second moments of
+a beam, given that beam and a desired bunch number.&nbsp; If bunchno ==
+0, the returned values will be the aggregated mean and second moment
+matrix over all bunches.&nbsp; If bunchno == -1, x will be a 6 x nbunch
+vector with the centroids of each bunch, and sigma will be a 6 x 6 x
+nbunch matrix of the second moment matrices of each bunch.<br>
+<br>
+<span style="font-weight: bold;"><a name="GetBPMvsS"></a>GetBPMvsS:</span><br>
+<br>
+Extract BPM data and S positions returned from tracking.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [S, x, y] = GetBPMvsS(
+bpmdatastruc )<br>
+<br>
+returns vectors of S positions, x readings, and y readings from the
+data which is returned from tracking.&nbsp; Argument bpmdatastruc is
+the first cell of the beam instrument data cell array returned by
+TrackThru, ie, if your TrackThru call looks like:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat,beam,instdata] =
+TrackThru(...)<br>
+<br>
+then your GetBPMvsS call looks like<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [S,x,y] =
+GetBPMvsS(instdata{1}).<br>
+<br>
+<span style="font-weight: bold;"><a name="GetNEmitFromBeam"></a>GetNEmitFromBeam:</span><br>
+<br>
+Compute normalized emittances directly from a beam data structure.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [nx, ny, nt] =
+GetNEmitFromBeam( beamdatastruc, bunchno )<br>
+<br>
+returns the projected emittances of a particular bunch of a particular
+beam.&nbsp; If bunchno == 0, the returned emittances will be aggregated
+over all the bunches; if bunchno == -1, then the emittances of each
+bunch will be returned.&nbsp; Essentially, this is the equivalent of
+using GetBeamPars to get the sigma matrix and centroids from a beam
+data structure, and then using GetNEmitFromSigmaMatrix to get the
+emittances from the sigma matrix and the central momentum.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [nx, ny, nt] =
+GetNEmitFromBeam( beamdatastruc, bunchno, 'normalmode' )<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <br>
+returns the normal mode emittances instead of the projected emittances.<br>
+<br>
+<span style="font-weight: bold;"><a name="GetNEmitFromBPMData"></a>GetNEmitFromBPMData:</span><br>
+<br>
+Compute normalized emittances at each BPM from data returned from
+tracking.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [S, nx, ny, nt] =
+GetNEmitFromBPMData( BPMdatastruc )<br>
+<br>
+returns the S position and the projected normalized emittances at each
+BPM, given the BPM data structure returned from tracking.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [S, nx, ny, nt] =
+GetNEmitFromBPMData( BPMdatastruc, 'normalmode' )<br>
+<br>
+returns the normal-mode normalized emittances at each BPM.<br>
+<br>
+<span style="font-weight: bold;"><a name="GetNEmitFromSigmaMatrix"></a>GetNEmitFromSigmaMatrix:</span><br>
+<br>
+Compute normalized emittances from the sigma matrix of a beam bunch.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [nx, ny, nt] =
+GetNEmitFromSigmaMatrix( P, sigma )<br>
+<br>
+computes the projected normal-mode emittance of a bunch given its sigma
+matrix and central momentum.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [nx, ny, nt] =
+GetNEmitFromSigmaMatrix( P, sigma, 'normalmode' )<br>
+<br>
+computes the normal-mode normalized emittance.<br>
+<br>
+<span style="font-weight: bold;"><a name="GetTruePhase"></a>GetTruePhase:</span><br>
+<br>
+Get the phase of an RF structure, taking into account both the
+BEAMLINE{}.Phase and the KLYSTRON().Phase parameters.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; pact = GetTruePhase(
+elemno )<br>
+<br>
+returns BEAMLINE{elemno}.Phase +
+KLYSTRON(BEAMLINE{elemno}.Klystron).Phase.<br>
+<br>
+<span style="font-weight: bold;"><a name="GetTrueStrength"></a>GetTrueStrength:</span><br>
+<br>
+Get the true integrated strength of a magnet, taking into account both
+the BEAMLINE and PSdata values.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; bact = GetTrueStrength(
+elemno )<br>
+<br>
+returns BEAMLINE{elemno}.B * PS(BEAMLINE{elemno}.PS).Ampl.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; bact = GetTrueStrength(
+elemno, 1 )<br>
+<br>
+returns the total strength of all <a href="SlicesBlocks.html">slices</a>
+which are in the same physical element as BEAMLINE{elemno}.<br>
+<br>
+<span style="font-weight: bold;"><a name="GetTrueVoltage"></a>GetTrueVoltage:</span><br>
+<br>
+Compute the voltage of an RF structure including both BEAMLINE and
+KLYSTRON data fields.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; Vact = GetTrueVoltage(
+elemno )<br>
+<br>
+returns BEAMLINE{elemno}.Volt *
+KLYSTRON(BEAMLINE{elemno}.Klystron).Ampl.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; Vact = GetTrueVoltage(
+elemno, 1 )<br>
+<br>
+returns the total strength of all <a href="SlicesBlocks.html">slices</a>
+which are part of the same physical element as BEAMLINE{elemno}.<br>
+<br>
+<span style="font-weight: bold;"><a name="IncrementMultiKnob"></a>IncrementMultiKnob:</span><br>
+<br>
+Increase the value of a multiknob by a desired amount.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat = IncrementMultiKnob( knobname,
+dValue )<br>
+<br>
+increases the value of the named multiknob by the specified
+dValue.&nbsp; Note that knobname is a string and not a Lucretia
+multiknob data structure, ie, if you want to increment the knob named
+XWaist, you type:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat = IncrementMultiKnob( 'XWaist' , 1
+)<br>
+<br>
+and not<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat = IncrementMultiKnob( XWaist , 1 )<br>
+<br>
+Note also that, unlike most Matlab function calls, IncrementMultiKnob
+will CHANGE THE VALUE OF THE MULTIKNOB IN THE CALLER'S WORKSPACE, ie,
+it functions as the moral equivalent of a "pass by reference function"
+which is not typical of Matlab functions.&nbsp; Return argument is a
+Lucretia status cell array which indicates success or failure based on
+whether the KlystronTrim, MoverTrim, and PSTrim functions called by
+IncrementMultiKnob are successful or not.<br>
+<br>
+<span style="font-weight: bold;"><a name="KlystronTrim"></a>KlystronTrim:</span><br>
+<br>
+Set klystron actual amplitude and phase equal to desired, modulo finite
+step sizes.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat = KlystronTrim(
+klyslist )<br>
+<br>
+sets Ampl == AmplSetPt and Phase == PhaseSetPt for each klystron in the
+klyslist.&nbsp; If Ampl or Phase have zero step size, then they are
+simply set equal.&nbsp; If step sizes are present, they are set as
+close as possible to the desired setpoint consistent with the step size
+limit.&nbsp; Returned value stat{1} == 1 for success, 0 if klyslist
+includes indices for klystrons which are out of range.<br>
+<br><strong><a name="Match"></a>Match (Class):<br><br></strong>Lucretia beam 
+matching using GetTwiss and TrackThru<br>SOME OPTIONS REQUIRE OPTIMIZATION 
+TOOLBOX AND/OR GLOBAL OPTIMISATION TOOLBOX<br><br>As with all Lucretia classes, &quot;doc<strong> </strong>Track&quot; 
+	will give you more information about the class properties and methods 
+	available to you.<br><br>This class is best described by example:<br><br>
+Create object:<br>&gt;&gt; M=Match;<br><br>Assign Lucretia beam if tracking needed 
+(matching S,T or U):<br>&gt;&gt; M.beam=Beam;<br><br>Assign Lucretia Initial structure 
+if twiss matching needed (anything other than S,T or U):<br>&gt;&gt; M.initStruc=InitialStructure;
+<br><br>Assign initial track/twiss point corresponding to above:<br>&gt;&gt; 
+M.iInitial=findcells(BEAMLINE,'Name','InitialMarkerName');<br><br>Choose an 
+optimizer to use:<br>&gt;&gt; M.optim='lsqnonlin';<br><br>Supported optimizers are:<br>
+* fminsearch (supported in standard Matlab)<br>* fmincon (requires optimization 
+toolbox)<br>* lsqnonlin (requries optimization toolbox)<br>* fgoalattain 
+(requires optimization toolbox)<br>* genetic (requires global optimization and 
+optimization toolboxes)<br>The recommended optimizers are lsqnonlin for twiss 
+optimization only and fminsearch or fmincon for tracking-based optimization (S, 
+T or U).<br>The Genetic algorithm requires a lot of tuning of its input 
+parameters to give sensible answers, you may need to play with the gaoptimset 
+options inside the doMatch method.<br>&nbsp;<br>Add optimization variables<br>&gt;&gt; 
+M=addVariable(M,'PS',BEAMLINE{quadEle}.PS,'Ampl',0.8,1.2);<br><br>Available 
+variable types are: PS,BEAMLINE,GIRDER,KLYSTRON. You can use any available field 
+of the supported types that contains a scalar quantity. Repeat above for each 
+required variable. The last 2 input parameters define the lower and upper bounds 
+for this variable. For the constrained optimizers the final variable values are 
+guaranteed to be within this range, for the unconstrained ones this range is 
+used as part of the weighting system to restrain the allowed movement of this 
+variable.<br><br>Add constraints<br>&gt;&gt; M=addMatch(M,beamlineElement1,'alpha_y',0,1e-4);<br>
+&gt;&gt; M=addMatch(M,beamlineElement2,'Sigma',35e-9^2,1e-9^2,'33');<br><br>Add a 
+constraint for the optimizer at the given BEAMLINE element number. Available 
+constraint types are: alpha_x, beta_x, eta_x, etap_x, nu_x, NEmit_x, S, T, U. 
+Also _y for vertical twiss parameters. For S, T, U (second moment, and second 
+and third-order beam correlations) also supply correlation matrix elements as 
+last argument. e.g. '33' for sigma_33. '3126' for U3126 etc... Third argument is 
+required match value. Forth argument is tolerance, the matcher will stop when 
+all added constraints are closer than this value to the desired match value. 
+Repeat for all required match parameters<br><br>Look at the list of assigned 
+variables and constraints and the current match data<br>&gt;&gt; display(M) [or simply 
+type 'M']<br><br>Perform the matching<br>&gt;&gt; M=M.doMatch;<br><br>See how it did<br>
+&gt;&gt; display(M)<br><br><strong>Note: to use the T/U match conditions you need the 
+&quot;polyfitn&quot; tools supplied in the Lucretia/src/utils/PolyfitnTools directory</strong><br>
+<br>See also:<br>InitCondStruc MakeBeam6dGauss findcells fminsearch fmincon 
+lsqnonlin fgoalattain<br>
+<br>
+<span style="font-weight: bold;"><a name="MakeMultiKnob"></a>MakeMultiKnob</span><br>
+<br>
+Create the data structure for a multi-device tuning knob ("multiknob).<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; [stat,knob] = MakeMultiKnob( comment,
+Parameter1, coefficient1, ... , ParameterN, coefficientN )<br>
+<br>
+creates a data structure describing a set of device parameters which
+are varied together in a linear way to control a single physical
+parameter of the accelerator (waist position, IP dispersion,
+etc).&nbsp; Argument comment is a text comment which describes the
+knob.&nbsp; Arguments Parameter1, Parameter2, etc, are strings which
+name the parameters to be varied, for example 'PS(1).SetPt'.&nbsp;
+Valid parameters are PS(...).SetPt, KLYSTRON(...).AmplSetPt,
+KLYSTRON(...).PhaseSetPt, GIRDER{...}.MoverSetPt(...).&nbsp; Arguments
+coefficient1, coefficient2, etc, are the linear coefficients of the
+devices Parameter1, Parameter2, etc.&nbsp; The multiknob data structure
+is returned as the second return argument.&nbsp; The first return
+argument is a Lucretia status cell array; cell 1 is a number indicating
+success (1) or failure (0) in generating the knob; the remaining cells
+are text messages, if any, generated during multiknob construction.<br>
+<br>
+<span style="font-weight: bold;"><a name="MoverTrim"></a>MoverTrim:</span><br>
+<br>
+Set girder mover actual positions equal to desired, modulo finite step
+sizes.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat = MoverTrim( girdlist
+)<br>
+<br>
+sets MoverPos = MoverSetPt for each girder in the girdlist.&nbsp; If
+the mover degrees of freedom have zero step size, then they are simply
+set equal.&nbsp; If step sizes are present, they are set as close as
+possible to the desired setpoint consistent with the step size
+limit.&nbsp;
+Returned value stat{1} == 1 for success, -1 if girdlist includes
+indices
+for girders which are out of range or do not have movers.<br>
+<br>
+<span style="font-weight: bold;"><a name="PlotOrbit"></a>PlotOrbit:</span><br>
+<br>
+Plot the orbit reported by the BPMs.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [x,y,S] = PlotOrbit(
+beamdatastruc )<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [x,y,S] = PlotOrbit(
+beamdatastruc, ustring )<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [x,y,S] = PlotOrbit(
+beamdatastruc, ustring1, ustring2 )<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [x,y,S] = PlotOrbit(
+beamdatastruc, ustring1, ustring2, ustring3 )<br>
+<br>
+perform the same basic plot as <a href="#BPMZPlot">BPMZPlot</a>, but
+in a different format: readings are plotted as dots connected by lines,
+rather than as vertical bars.<br>
+<br>
+<span style="font-weight: bold;"><a name="PlotTwiss"></a>PlotTwiss:</span><br>
+<br>
+Plot the Twiss functions and the locations of beamline elements.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; PlotTwiss( start,
+end, Twiss, Title, select ) <br>
+<br>
+plots the Twiss functions from the upstream face of element # start to
+the downstream face of element # end.&nbsp; Argument Twiss is a data
+structure holding Twiss data in the output format of the <a
+ href="twiss.html#GetTwiss">GetTwiss</a> function.&nbsp; Title is the
+desired title string for the plot.&nbsp; Argument select is a 1 x 3
+vector:&nbsp; if select(1) ~= 0, then the betatron functions are
+plotted; if select(2) ~= 0 then the horizontal dispersion is plotted;
+if select(3) ~= 0 then the vertical dispersion is plotted.&nbsp; If
+both beta and dispersion are plotted, then a double-y-axis plot is
+generated, otherwise a single-y-axis plot is used.&nbsp; PlotTwiss
+automatically plots a display of beamline element locations over the
+main plot, in the format of the <a href="#AddMagnetPlot">AddMagnetPlot</a>
+function.<br>
+<br>
+<span style="font-weight: bold;"><a name="PSTrim"></a>PSTrim:</span><br>
+<br>
+Set power supply actual values equal to desired, modulo finite step
+sizes.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat = PSTrim( PSlist )<br>
+<br>
+sets Ampl = SetPt for each power supply in the PSlist.&nbsp; If a power
+supply has zero step size, then they are simply
+set equal.&nbsp; If step sizes are present, they are set as close as
+possible to the desired setpoint consistent with the step size
+limit.&nbsp;
+Returned value stat{1} == 1 for success, 0 if PSlist includes
+indices
+for power supplies which are out of range.<br>
+<br>
+<span style="font-weight: bold;"><a name="RestoreMultiKnob"></a>RestoreMultiKnob:</span><br>
+<br>
+Return a multiknob to its initial value of zero.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat = RestoreMultiKnob( knobname )<br>
+<br>
+takes a multiknob which and resets it back to a value of zero; this is
+the equivalent of using SetMultiKnob( knobname, 0 ).&nbsp; Note that
+knobname is a string and not a Lucretia multiknob data
+structure, ie, if you want to restore the knob named XWaist, you type:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat = RestoreMultiKnob( 'XWaist' )<br>
+<br>
+and not<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat = RestoreMultiKnob( XWaist )<br>
+<br>
+Note also that, unlike most Matlab function calls, RestoreMultiKnob
+will CHANGE THE VALUE OF THE MULTIKNOB IN THE CALLER'S WORKSPACE, ie,
+it functions as the moral equivalent of a "pass by reference function"
+which is not typical of Matlab functions.&nbsp; Return argument is a
+Lucretia status cell array which indicates success or failure based on
+whether the KlystronTrim, MoverTrim, and PSTrim functions called by
+IncrementMultiKnob are successful or not.<br>
+<br>
+<span style="font-weight: bold;"><a name="ReturnMatchedTwiss"></a>ReturnMatchedTwiss:</span><br>
+<br>
+Compute the Twiss parameters for a cell.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; Twiss =
+ReturnMatchedTwiss( start, end, plane )<br>
+<br>
+computes the Twiss parameters which are matched to a cell which starts
+at the upstream face of element start and ends at the downstream face
+of element end; if plane == 1, the horizontal functions are computed,
+otherwise the vertical functions are computed.&nbsp; The format of the
+returned data is the same as that required as an input to <a
+ href="twiss.html#GetTwiss">GetTwiss</a>, and which is used in data
+structures returned by <a href="beam_generation.html#InitCondStruc">InitCondStruc</a>.<br>
+<br>
+<span style="font-weight: bold;"><a name="SetMultiKnob"></a>SetMultiKnob:</span><br>
+<br>
+Set a multiknob to a desired absolute value.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat = SetMultiKnob( knobname , Value )<br>
+<br>
+sets a multiknob's absolute value to Value; this is different from
+IncrementMultiKnob, which performs a relative change.&nbsp; Note that
+knobname is a string and not a Lucretia multiknob data
+structure, ie, if you want to set the knob named XWaist, you type:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat = SetMultiKnob( 'XWaist' , 1 )<br>
+<br>
+and not<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat = SetMultiKnob( XWaist , 1 )<br>
+<br>
+Note also that, unlike most Matlab function calls, SetMultiKnob
+will CHANGE THE VALUE OF THE MULTIKNOB IN THE CALLER'S WORKSPACE, ie,
+it functions as the moral equivalent of a "pass by reference function"
+which is not typical of Matlab functions.&nbsp; Return argument is a
+Lucretia status cell array which indicates success or failure based on
+whether the KlystronTrim, MoverTrim, and PSTrim functions called by
+IncrementMultiKnob are successful or not.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a>
+<a
+ href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+21-Sept-2011<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</body>
+</html>

@@ -1,0 +1,23 @@
+! FODO linac
+!
+LH  : DRIF, L = 4.900
+BPM : MONITOR
+!
+! halh cell
+HLFCLL(Q):LINE=(LH,Q,BPM,Q,LH)
+!
+! length of quad
+LQ  = 0.2/2
+! strength of quad
+KQ  = 0.5033672
+!
+QF:QUAD,L=LQ,K1= KQ
+QD:QUAD,L=LQ,K1=-KQ
+!
+! full cell
+FLCLL:LINE=(HLFCLL(QF),HLFCLL(QD))
+!
+FODO:LINE=(128*FLCLL)
+!
+RETURN
+!

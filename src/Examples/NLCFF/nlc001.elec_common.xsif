@@ -1,0 +1,10 @@
+! ==============================================================================
+! 23-JUL-2003, PT
+!      Accumulate in one place all the parameters related to electron vs
+!      positron beamlines.
+! ------------------------------------------------------------------------------
+
+  BSIGN := -1.0
+  BSIGNBC2 := -1.0
+
+  RETURN

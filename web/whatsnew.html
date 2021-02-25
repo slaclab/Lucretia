@@ -1,0 +1,635 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+
+  
+    <meta http-equiv="content-type" content="text/html;
+      charset=windows-1252"><title>Lucretia: What's New</title>
+    
+    <meta name="author" content="Peter Tenenbaum"></head><body>
+    <div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span style="font-size: 24pt;"><img alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif" style="border: 0px solid ; width: 80px; height: 90px;" align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+      </span>
+      <div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The
+
+
+
+          <span style="color: rgb(214, 0, 147);">LUCRETIA</span> Project</span><br>
+      </div>
+      <span style="font-size: 24pt;"><br>
+        <small>What's New<br>
+          <br>
+        </small></span><span style="font-size: 24pt;"></span></div>
+    <span style="font-weight: bold;"><span style="font-weight: bold;"></span></span><span style=""><br>
+      <span style=""><b><span style="font-weight: bold;"></span></b></span></span><span style=""><span style=""><b><span style="font-weight: bold;">17-September-2017<br>
+</span></b>* Added 2D CSR computation option for SBEN elements. </span></span><strong></strong>See
+
+
+
+    <a href="SynRad.html">here</a> for more details.<br>
+<span style=""><span style=""><br>
+</span></span><span style=""><span style=""><b><span style="font-weight: bold;">5-April-2017<br>
+</span></b>* Added "DeckTool" class for reading and writing XSIF deck files - see documentation in<a href="lattice_generation.html"> Lattice Generation</a><br>
+<br>
+<b>13-June-2014:<br>
+        </b>* Added "Tapered" geometry type in ExtProcess (GEANT4).<br>
+        * Added capability for user-defined material types for
+        ExtProcess (GEANT4)<br>
+        <b><br>
+          2-June-2014:</b><br>
+        Added capability to define and associate an electromagnetic
+        field to a BEAMLINE element using ExtProcess interface.
+        Implemented GEANT4 handling of electromagnetic fields. See
+        section on ExtProcess and GEANT4 for more details.<br>
+        <br>
+        <b>27-May-2014:</b></span></span><br>
+    Added TMAP element class for tracking through arbitrary,
+    user-defined transport maps. See <a href="element_classes.html#TMAP">here</a> for more details.<br>
+    <span style="font-weight: bold;"><span style="font-weight: bold;"></span><br>
+      28-April-2014:<br>
+    </span>Added capability to simulate longitudinal space charge. See <a href="LSC.html">here</a> for more details.<span style="font-weight: bold;"><br>
+      <br>
+      8-April-2014:<br>
+    </span>* Added ExtProcess class library, including ExtG4Process to
+    handle interface of Lucretia with GEANT4 tracking routines.
+    Documentation for their use included here.<br>
+    * New source code directory imported into repository
+    (src/mexsrc/g4track) with all the c++ code required to link
+    TrackThru code to GEANT4 tracking routines. A seperate Makefile is
+    included in this directory to build the g4track library which can be
+    included in the TrackThru build using the "g4track" option to the
+    main Lucretia Makefile.<br>
+    * Added MakeBeam6DWeighted function to make a beam with uniformly
+    random distributed particles with gaussian distributed charge
+    weights<br>
+    * Some debugging for the particle stopping detection in Lucretia
+    TrackThru - some bugs found where particles wouldn't get stopped
+    under certain conditions when they should have done.<br>
+    <br>
+    <span style="font-weight: bold;"> 2-August-2012:</span><br>
+    Added Coherent Synchrotron Radiation capability.<strong> </strong>See
+
+
+
+    <a href="SynRad.html">here</a> for more details.<strong><br>
+      <br>
+      21-Sept-</strong><span style="font-weight: bold;">2011:<br>
+      <br>
+      * </span> Changed layout of mexfiles, new code hosting at
+    googlecode. See new download and setup instructions.<br>
+    <span style="font-weight: bold;">* </span>Matching routine in
+    TuningAndAnalysis (Match class)<br>
+    * Distributed parallel operations with distributedLucretia class in
+    src/Distributed.<br>
+    * Parallel tracking supported by Track class in src/Tracking<br>
+    * Ground Motion simulation with matgm mexfile<br>
+    * Floodland module- (src/Floodland directory) for real-world
+    controls communication<br>
+    * Various undocumented useful scripts and functions included "as-is"
+    in src/utils<br>
+    <br>
+    <strong>08-Oct-2010:</strong><br>
+    <br>
+    Changed the way mex files handle Lucretia global arrays (BEAMLINE,
+    PS etc). Now they don't have to be global, it is possible to just
+    define them in the local 'caller' scope. This is needed for parallel
+    operations of Lucretia within the context of the Matlab Distributed
+    Computing Toolbox where you cannot define a global variable on a
+    worker node. NOTE: where BEAMLINE etc is declared both locally and
+    globally, the locally defined version is taken in preference. It is
+    left to the user to ensure that there doesn't exist non-compatible
+    PS/GIDER/WF/KLYSTRON globals elsewhere.<br>
+    <br>
+    <span style="font-weight: bold;"><span style="font-weight: bold;">13-Mar-2008:</span></span><br>
+    <br>
+    A new example has been added.&nbsp; This example is more tutorial in
+    spirit -- it uses a fairly simple lattice (a linac with 10 FODO
+    cells plus a 4-bend chicane) to demonstrate some of the features and
+    functions of Lucretia.&nbsp; <br>
+    <br>
+    A <a href="mailto:lucretia-list@slac.stanford.edu">mailing list</a>
+    has been set up for the Lucretia developers and users.&nbsp; Only
+    members of the list can post to it; if you want to join the list, <a href="mailto:quarkpt@slac.stanford.edu">send e-mail to the list
+      manager</a>.<br>
+    <br>
+    The function AddStackToMasterStack has been tweaked to do the right
+    thing when two master stacks are added to one another.<br>
+    <span style="font-weight: bold;"><span style="font-weight: bold;"><br>
+        06-Mar-2008:</span></span><br>
+    <br>
+    New versions of all the mex-functions, plus m-files:<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; LatticeGeneration:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; SetIndependentPS<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; SetFloorCoordinates<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; TuningAndAnalysis:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; PlotTwiss<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; ComputeSRIntegrals<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; StatusAndMessages:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; DisplayMessageStack<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; Examples/ILCBC:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; MakeOneStage<br>
+    <br>
+    Bugfixes:<br>
+    <ul>
+      <li>SetIndependentPS:&nbsp; the code which managed individual
+        devices which require multiple power supplies (like XYCORs)
+        introduced a bug in handling devices which are split into
+        longitudinal slices.&nbsp; This is corrected.</li>
+      <li>ComputeSRIntegrals:&nbsp; another (hopefully successful!)
+        attempt to correct the assignment of bend magnets to x or y
+        plane.</li>
+      <li>PlotTwiss:&nbsp; corrected a range error in which the twiss at
+        the downstream face of the last element would be omitted.</li>
+      <li>VerifyLattice:&nbsp; fixed segmentation fault when running
+        under R2008a with no wakefields defined.<br>
+      </li>
+    </ul>
+    New Features:<br>
+    <ul>
+      <li><a href="lattice_generation.html#SetFloorCoordinates">SetFloorCoordinates</a>:&nbsp;
+user
+
+
+
+        can optionally request vectors of the floor coordinates of all
+        elements as output.</li>
+      <li><a href="function_status.html#DisplayMessageStack">DisplayMessageStack:</a>&nbsp;
+a
+
+
+
+        tool for displaying the contents of a message stack.</li>
+      <li><a href="examples.html#ILCBC">ILCBC Example</a>:&nbsp; use of
+        AddStackToMasterStack to simplify the display of status from the
+        lattice generation process.</li>
+    </ul>
+    Reorganization:<br>
+    <ul>
+      <li>The mexfiles have been moved to a set of subdirectories under
+        mexsrc; prior to this they had been distributed in Twiss,
+        RMatrix, Tracking, and LatticeVerification subdirectories (where
+        the help files for the mexfiles are still located).&nbsp; This
+        is done to simplify problems of maintaining several builds --
+        old (R14) builds, R2006a builds, and R2008a builds (coming
+        soon!).&nbsp; See the <a href="platforms.html">platforms page</a>
+        for more details.</li>
+      <li>Lucretia is now maintained under CVS control!&nbsp; Check out
+        the <a href="http://www.slac.stanford.edu/cgi-wrap/cvsweb/Lucretia/?cvsroot=ILC-main">Lucretia
+CVS
+
+
+
+          web interface</a>!<br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;"><span style="font-weight: bold;"><br>
+        02-Aug-2007:</span></span><br>
+    <br>
+    New versions of all the mex-functions, plus m-files:<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; Beam Generation:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; CheckBeamMomenta (new
+    function)<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; MakeBeamPZGrid<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; MakeBeamPZGauss<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; MakeBeam6DSparse<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; MakeBeam6DGauss<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; CreateBlankBeam<br>
+    <br>
+    <span style="font-weight: bold;"><span style="font-weight: bold;"></span>&nbsp;&nbsp;&nbsp;
+
+
+
+    </span>Tuning and Analysis:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; GetTrueStrength<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; PlotTwiss (new
+    function)<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; ComputeSRIntegrals<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; Lattice Generation:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; AssignToPS<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; SetIndependentPS<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; XSIFToLucretia<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; CorrectorStruc<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; AssignToGirder<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; findcells<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; GetIndicesBySPosition
+    (new function)<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; Status and Messages:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; AddStackToMasterStack
+    (new function)<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; Offsets and Errors:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; MakeErrorGroup<br>
+    <br>
+    Bugfixes:<br>
+    <ul>
+      <li>Tracking:&nbsp; segmentation fault bug in tracking through
+        apertured elements when apertures are enabled has been
+        corrected.&nbsp; <br>
+      </li>
+      <li>Tracking:&nbsp; bugs in the stopping of particles with
+        negative momentum have been corrected (corrects a known bug).</li>
+      <li>Tracking:&nbsp; tracking through an element with a
+        non-physical short-range wakefield (z&lt;0) produces an exit
+        from tracking with bad status, rather than trying to continue
+        (corrects a known bug).</li>
+      <li>Beam generation:&nbsp; generation of rays with negative total
+        momentum is correctly handled -- such rays are "stopped" in the
+        generated beam.</li>
+      <li>ComputeSRIntegrals was computing integrals for the wrong
+        planes!&nbsp; This is now corrected (how embarrassing).</li>
+    </ul>
+    New Features:<br>
+    <ul>
+      <li><a href="element_classes.html#xXYCor">New element type XYCOR</a>:&nbsp;
+combined-function
+
+
+
+        horizontal and vertical DC dipole corrector (ie, both sets of
+        windings in one physical device, with separate power supplies
+        for the two sets of windings).&nbsp; <br>
+      </li>
+      <li><a href="lattice_generation.html#AssignToGirder">AssignToGirder</a>
+        can now be told to create a new girder for the current list of
+        elements, and append it to the current list of girders.&nbsp;
+        This is done by specifying a girder index # of -1 in the calling
+        arguments.</li>
+      <li><a href="tuning_analysis.html#PlotTwiss">Automatic generation
+          of a Twiss plot</a> in the MAD style, via PlotTwiss.</li>
+      <li>Function findcells has new features which make it faster in
+        Matlab 7 and later versions; it behaves the way it always used
+        to in Matlab 6 and earlier versions.&nbsp; This function also
+        now supports wildcards.<br>
+      </li>
+      <li>Function <a href="lattice_generation.html#GetIndicesBySPosition">GetIndicesBySPosition</a>
+        can be used to find all the elements which are within a desired
+        range of S positions.&nbsp; <br>
+      </li>
+      <li>Function <a href="function_status.html#AddStackToMasterStack">AddStackToMasterStack</a>
+        allows two message stacks to be concatenated in a more useful
+        way.</li>
+    </ul>
+    The new features from 04-may-2007, below, are now properly
+    incorporated into the zip'ed archives.<br>
+    <span style="font-weight: bold;"><br>
+      04-May-2007:</span><br>
+    <br>
+    New m-files:<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; gui:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; BeamlineViewer.m<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; BeamlineSearch.m<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; Benchmarking:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Example1/main.m<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Example2/main.m<br>
+    <br>
+    Note that none of the new m-files is included in the master
+    zip-files -- we hope to do a release of everything, including up to
+    date zip-files and some new stuff, in a few weeks.&nbsp; In the
+    interim:<br>
+    <br>
+    New features:<br>
+    <ul>
+      <li><a href="gui.html">Graphical User Interface:</a>&nbsp;
+        Lucretia now includes a Beamline Viewer with search
+        capabilities.</li>
+      <li><a href="bmarking_example.html">Lucretia benchmarking:</a>&nbsp;
+the
+
+
+
+        benchmarking tests used to certify codes for simulation of
+        linear accelerators have now been run through Lucretia, with
+        good results.</li>
+      <li>A <a href="bugs.html">known bugs</a> page is now available.<br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;">13-Feb-2007:</span><br>
+    <br>
+    New versions of all the mex functions, plus m-files:<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; TuningAndAnalysis:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; GetNEmitFromBeam<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; ComputeSRIntegrals<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; ReturnMatchedTwiss<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; GetTrueStrength<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; LatticeGeneration:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; SetFloorCoordinates<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; RFStruc<br>
+    <br>
+    Bugfixes:<br>
+    <ul>
+      <li>Tracking bug:&nbsp; a girder mover with inconsistent degrees
+        of freedom (ie, the Mover, MoverPos, MoverSetPt, MoverStep
+        vectors are not the same length) was not handled correctly
+        (handled correctly == exits tracking with bad status to calling
+        routine; handled incorrectly == segmentation fault).&nbsp; This
+        bug is corrected.</li>
+      <li>Tracking bug:&nbsp; logic for finding the full position of an
+        element on a girder, where both the element and the girder have
+        some nonzero offsets, was buggy.&nbsp; This is now fixed.</li>
+      <li>Verification bug:&nbsp; the girder with inconsistent DOFs was
+        not correctly detected by LatticeVerify.&nbsp; This is fixed.</li>
+      <li>Verification bug:&nbsp; the COORD element was not correctly
+        verified by LatticeVerify.&nbsp; This is fixed.</li>
+      <li>GetTrueStrength would not do the right thing if an element had
+        a PS field but the PS had zero strength.&nbsp; This is fixed.</li>
+      <li>RFStruc would not assign the correct tracking flags to a
+        transverse mode cavity (TCAV).&nbsp; This is fixed.<br>
+      </li>
+    </ul>
+    New Features:<br>
+    <ul>
+      <li><a href="lattice_generation.html#SetFloorCoordinates">SetFloorCoordinates</a>:&nbsp;
+user
+
+
+
+        can now specify desired final coordinates, instead of desired
+        initial coordinates for a region of BEAMLINE.<br>
+      </li>
+      <li><a href="tuning_analysis.html#GetNEmitFromBeam">GetNEmitFromBeam</a>:&nbsp;
+combines
+
+
+
+        the functionality of the GetBeamPars function and the
+        GetNEmitFromSigmaMatrix function, for users who are too
+        impatient to type both commands.</li>
+      <li><a href="tuning_analysis.html#ComputeSRIntegrals">ComputeSRIntegrals</a>:&nbsp;
+uses
+
+
+
+        Helm's method to compute the synchrotron radiation integrals I<sub>1</sub>
+        through I<sub>5</sub> in both planes.</li>
+      <li><a href="tuning_analysis.html#ReturnMatchedTwiss">ReturnMatchedTwiss</a>:&nbsp;
+now
+
+
+
+        returns the matched dispersions as well as the matched betas and
+        alphas of a cell.</li>
+      <li>Documentation:&nbsp; links to the original <a href="http://www.youtube.com/watch?v=XBk8HzQp1Sg">Lucretia My
+          Reflection video</a> and to a <a href="http://www.youtube.com/watch?v=bV0ii_ThWVI">live cover
+          version by Anhedonia</a>; both courtesy of <a href="http://www.youtube.com">YouTube</a>.<br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;"><br>
+      28-June-2006:</span><br>
+    <br>
+    New versions of all the mex functions, plus m-files:<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; LatticeGeneration:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; AssignToPS<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+    MovePhysicsVarsToPS<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; XSIFToLucretia<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; TuningAndAnalysis:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+    IncrementMultiKnob<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; RestoreMultiKnob<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; SetMultiKnob<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; OffsetsAndErrors:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; MakeErrorGroup<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; BeamGeneration:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; MakeBeam6DGauss<br>
+    <br>
+    Bugfixes:<br>
+    <ul>
+      <li>Fixed a problem in reading in multipoles from XSIF files in
+        which all of the field components are zero.</li>
+      <li>Fixed a problem in which multipoles with power supplies were
+        not behaving properly in Twiss and R-matrix calculation.</li>
+      <li>Better handling of power supplies which power magnets in both
+        + and - polarities in series.</li>
+      <li>Minor correction to the way that error groups report their
+        mean and RMS errors.</li>
+      <li>Corrected generation of a Gaussian-distributed rayset in which
+        there is an initial dispersion or dispersion'.</li>
+      <li>Improvement to the way multiknobs work which reduces roundoff
+        error in knob-setting and restoring operations.<br>
+      </li>
+    </ul>
+    New Feature:<br>
+    <ul>
+      <li>All of the Lucretia web pages are now available in a Zip'ed
+        archive in the <a href="downloads.html">downloads</a> section.<br>
+      </li>
+    </ul>
+    <br>
+    <span style="font-weight: bold;">26-May-2006:</span><br>
+    <br>
+    New version of SetDesignMomentumProfile, to correct substantially
+    the same bug as in the release below of UpdateMomentumProfile;
+    ComputeMomentumProfile, to correct a bug in returning beam loading
+    to the calling routines; XSIFToLucretia, to correct a bug in the
+    instantiation of multipole magnets which are initially set to zero
+    field; and SetElementBlocks, to allow markers to be part of an
+    alignment block (silly as it sounds, this turned out to be
+    important!).&nbsp; All of the zipfiles have been updated.<br>
+    <span style="font-weight: bold;"><br>
+      04-May-2006:</span><br>
+    <br>
+    New version of UpdateMomentumProfile.m in MomentumProfile.&nbsp;
+    Bugfix:&nbsp; the 24-Apr-2006 release included a version which had a
+    mismatch between GeV and MeV when filling an LCAV's Egain
+    parameter.&nbsp; This only affected the R-matrix computed by the
+    GetRmat and RmatAtoB functions (ie, this R-matrix did not have the
+    correct adiabatic damping in its determinant).&nbsp; D'oh!&nbsp; All
+    of the zipfiles etc have been updated.<br>
+    <span style="font-weight: bold;"><br>
+      24-Apr-2006:</span><br>
+    <br>
+    New versions of all the mex functions, plus m-files:<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; LatticeGeneration:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; AssignToPS<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; CoordStruc (new function)<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; CorrectorStruc<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; SetElementSlices<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; SetFloorCoordinates (new function)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; &nbsp; SetTrackFlags<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; SolenoidStruc (new function)<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; XSIFToLucretia<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; BeamGeneration:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; CoupledTwissFromInitial (new
+    function)<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; TuningAndAnalysis:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; AddMagnetPlot (new function)<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; OffsetsAndErrors:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; ErrorGroupGaussErrors<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; MakeErrorGroup<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; SetGaussianErrors<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <br>
+    &nbsp;&nbsp;&nbsp; MomentumProfile:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; CalculateSR (new function)<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; ComputeMomentumProfile<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; SetDesignMomentumProfile<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; UpdateMomentumProfile<br>
+    <br>
+    Improvements:<br>
+    <ul>
+      <li>MakeErrorGroup now allows users to set up an error group which
+        includes elements of more than 1 class, and/or more than 1
+        name.&nbsp; When searching for elemets by name, Matlab regualr
+        expressions can be used.</li>
+      <li>ErrorGroupGaussErrors and SetGaussianErrors now return a list
+        of the exact errors set into elements, and a list of the total
+        error at those elements (ie, newly-set values plus any saved old
+        values).</li>
+      <li>Twiss calculations include the dispersion from XCOR and YCOR
+        dipole magnets.</li>
+      <li>SetTrackFlags will only set SynRad flags to nonzero values for
+        elements which have a nonzero length and/or a nonzero Lrad
+        (length for radiation calculations) value.<br>
+      </li>
+    </ul>
+    New Features:<br>
+    <ul>
+      <li><a href="element_classes.html#Solenoid">Solenoid magnets</a>
+        are now supported.</li>
+      <li>Arbitrary changes of the <a href="element_classes.html#coord">accelerator
+coordinate
+
+
+
+          system</a> are now supported.</li>
+      <li><a href="twiss.html#GetTwiss">Coupled Twiss calculations</a>
+        in the Wolski formalism are now supported, along with the <a href="beam_generation.html#CoupledTwissFromInitial">calculation
+
+
+
+          of initial coupled Twiss parameters</a>.</li>
+      <li>Calculation of the <a href="lattice_generation.html#SetFloorCoordinates">floor
+          coordinates</a> of the accelerator components.</li>
+      <li>Users can now add a "MAD-8/TransPlot" <a href="TuningAndAnalysis.html#AddMagnetPlot">schematic of
+          element components</a> to the top of a plot.<br>
+      </li>
+      <li>Simulation of <a href="SynRad.html">ihcoherent synchrotron
+          radiation emission</a>.&nbsp; Lucretia can simulate radiation
+        emission either in the classical limit, or else with quantum
+        fluctuations included.&nbsp; The Lucretia <a href="momentum_profile.html">momentum profile tools</a>
+        include classical SR losses in their calcualtion for all
+        elements with SR turned on.&nbsp; Elements for which SR is
+        supported include x and y dipole correctors, sector bends,
+        quadrupoles, sextupoles, octupoles, multipoles, solenoids.&nbsp;
+        <a href="momentum_profile.html#CalculateSR">Analytic
+          calculations</a> of the radiation parameters are also
+        available.<br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;"><br>
+      18-Oct-2005:</span><br>
+    <br>
+    New versions of all the mexfunctions, plus m-files:<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; LatticeGeneration:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; SBendStruc<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; BPMStruc<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; RFStruc<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; XSIFToLucretia<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; AssignToPS<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; MovePhysicsVarsToPS<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; RenormalizePS<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; AssignToKlystron<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; SetKlystrons<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; DualPSGradientBend (new function)<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; TuningAndAnalysis:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; MoverTrim<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; GetNEmitFromSigmaMatrix<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; GetBPMvsS (new function)<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; MakeMultiKnob (new function)<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; IncrementMultiKnob (new function)<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; SetMultiKnob (new function)<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; RestoreMultiKnob (new function)<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; OffsetsAndErrors:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; MakeErrorGroup<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; MomentumProfile:<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; SetDesignMomentumProfile<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; ComputeMomentumProfile<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; UpdateMomentumProfile<br>
+    <br>
+    Bugfixes:<br>
+    <ul>
+      <li>Fixed crash-bug when tracking through element with a mover
+        with a roll degree of freedom.</li>
+      <li>Fixed several crash-bugs related to dynamic allocation
+        problems</li>
+      <li>Fixed a loop-indexing typo in MoverTrim.m.</li>
+      <li>Fixed bug in parsing gradient bends.</li>
+      <li>Fixed a bug in parsing multipole magnets with all coefficients
+        set to zero.<br>
+      </li>
+      <li>Loading a lattice with initial momentum defaulting to 1 GeV/c
+        now reliably generates warning message and status.</li>
+    </ul>
+    Improvements:<br>
+    <ul>
+      <li>Normal-mode emittance calculator is now more robust in
+        situations where the coupling component of the projected
+        emittances is large compared to the normal-mode emittances
+        themselves.</li>
+      <li>Map calculation of <a href="element_classes.html#SBend">sector
+
+
+
+          bends</a> for R-matrix and tracking operations is
+        improved.&nbsp; In particular the map is now symplectic, and the
+        accuracy of the longitudinal terms is improved.<br>
+      </li>
+    </ul>
+    New Features:<br>
+    <ul>
+      <li>Gradient bends can have <a href="element_classes.html#SBend">separate
+power
+
+
+
+          supplies</a> for the bending and focusing components,
+        corresponding to a magnet which uses separate dipole and
+        quadrupole windings to achieve its total field.&nbsp; <br>
+      </li>
+      <li>A gradient bend can have <a href="element_classes.html#SBend">separate
+field
+
+
+
+          errors</a> for its dipole and quadrupole components,
+        corresponding to different manufacturing errors for the
+        different terms.</li>
+      <li>Transverse-mode RF cavities (<a href="element_classes.html#Tcav">TCAV's</a>) can now be
+        simulated, including short- and long-range wakefields.</li>
+      <li>Linear combinations of multiple power supplies, klystrons, and
+        girder movers (<a href="tuning_analysis.html#MakeMultiKnob">MultiKnobs</a>)
+        can now be defined and used for tuning simulations.</li>
+      <li>BPMs can have an <a href="element_classes.html#BPM">error in
+          their scale factor</a> (dScale).<br>
+      </li>
+    </ul>
+    <br>
+    <a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+    5-April-2017<br>
+    <a href="http://www.slac.stanford.edu/detailed.html"><img src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home
+        Page" alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;" align="right"></a><br>
+    <br>
+  
+</body></html>

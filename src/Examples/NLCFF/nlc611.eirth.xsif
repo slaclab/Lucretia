@@ -1,0 +1,108 @@
+! ==============================================================================
+! ==============================================================================
+! area=eirth
+!
+! Prerequisites for successful execution of this deck:
+!    nlc000.nlc_common.xsif
+!    nlc001.elec_common.xsif
+!    nlc040.bds_common.xsif
+! plus either
+!    nlc041.bds_250GeV.xsif
+!    effh_250GeV_patch.xsif
+! or
+!    nlc042.bds_500GeV.xsif
+!    effh_500GeV_patch.xsif
+! plus
+!    nlc601.ebsy.xsif
+!
+! Since this deck is not intended to execute in any sensible way on its own,
+! no BETA0 or BEAM elements are provided.
+!
+! ------------------------------------------------------------------------------
+! 28-jul-2003, PT:
+!    new preamble.  Replace BPMQ with BPMQ079.  Move quad strengths to
+!    effh_250/500GeV_patch configuration files.
+! 21-JUL-2003, M. Woodley
+!    NLC2003 configuration (250 GeV beam)
+! ------------------------------------------------------------------------------
+
+
+! ==============================================================================
+! QUADs
+! ------------------------------------------------------------------------------
+
+  QMD5 : QBDS3, K1=BQMD5*QFACT3
+  QMD6 : QBDS3, K1=BQMD6*QFACT3
+  QMD7 : QBDS3, K1=BQMD7*QFACT3
+  QMD8 : QBDS3, K1=BQMD8*QFACT3
+  QXL1 : QBDS2, K1=BQXL1*QFACT2
+  QXL2 : QBDS2, K1=BQXL2*QFACT2
+  QXL3 : QBDS2, K1=BQXL3*QFACT2
+  QXL4 : QBDS2, K1=BQXL4*QFACT2
+  QXL5 : QBDS2, K1=BQXL5*QFACT2
+  QXL6 : QBDS2, K1=BQXL6*QFACT2
+  QXL7 : QBDS3, K1=BQXL7*QFACT3
+
+! ==============================================================================
+! DRIFTs
+! ------------------------------------------------------------------------------
+
+  LLMD := 2.65
+
+  LMD0 : DRIF, L=LLMD-0.5
+  LMD1 : DRIF, L=LLMD
+  LXL1 : DRIF, L=21.75-(QBDS3[L]+QBDS2[L])
+  LXL2 : DRIF, L=24.0-2*QBDS2[L]
+  LXL3 : DRIF, L=23.0-2*QBDS2[L]
+  LXL4 : DRIF, L=9.3
+  LXL5 : DRIF, L=3.0
+
+! stretch
+
+  LEGEOH := 0
+
+  EGEOH : DRIF, L=LEGEOH
+
+! ==============================================================================
+! MARKERs
+! ------------------------------------------------------------------------------
+
+  BEGEIRTH : MARK
+  ENDEIRTH : MARK
+
+! ==============================================================================
+! BEAMLINEs
+! ------------------------------------------------------------------------------
+! BBDGN  : low energy extraction and matching section
+! ------------------------------------------------------------------------------
+
+  QMD5M  : LINE=(QMD5,BPMQ079,QMD5)
+  QMD6M  : LINE=(QMD6,BPMQ079,QMD6)
+  QMD7M  : LINE=(QMD7,BPMQ079,QMD7)
+  QMD8M  : LINE=(QMD8,BPMQ079,QMD8)
+  QXL1M  : LINE=(QXL1,BPMQ079,QXL1)
+  QXL2M  : LINE=(QXL2,BPMQ079,QXL2)
+  QXL3M  : LINE=(QXL3,BPMQ079,QXL3)
+  QXL4M  : LINE=(QXL4,BPMQ079,QXL4)
+  QXL5M  : LINE=(QXL5,BPMQ079,QXL5)
+  QXL6M  : LINE=(QXL6,BPMQ079,QXL6)
+
+  BBDGN  : LINE=(LMD0,&
+                 QMD5,BPMQ079,QMD5,LMD1,&
+                 QMD6,BPMQ079,QMD6,LMD1,&
+                 QMD7,BPMQ079,QMD7,LMD1,&
+                 QMD8,BPMQ079,QMD8,LXL1,&
+                 QXL1,BPMQ079,QXL1,LXL2,&
+                 QXL2,BPMQ079,QXL2,LXL3,&
+                 QXL3,BPMQ079,QXL3,LXL3,&
+                 QXL4,BPMQ079,QXL4,LXL3,&
+                 QXL5,BPMQ079,QXL5,LXL3,&
+                 QXL6,BPMQ079,QXL6,LXL4,&
+                 QXL7,BPMQ079,QXL7,LXL5)
+
+  EIRTH  : LINE=(BEGEIRTH,BBDGN,ENDEIRTH)
+  EIRTHG : LINE=(BEGEIRTH,BBDGN,EGEOH,ENDEIRTH)
+
+! ==============================================================================
+
+  RETURN

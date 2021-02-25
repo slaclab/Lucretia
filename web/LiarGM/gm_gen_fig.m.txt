@@ -1,0 +1,43 @@
+%
+% Make a picture of ground motion generated from saved amplitudes
+% A.S. Dec.30, 2001
+%
+load gm_generated_B_save;
+%
+mcolor=zeros(3,ntime);
+for it=1:ntime
+    mcolor(1,it)=it/ntime;
+    mcolor(3,it)=it/ntime*(1.0-it/ntime)*4.;
+    mcolor(2,it)=(1.0-it/ntime);
+end
+% 1 - red
+% 2 - green
+% 3 - blue
+
+figure;
+hc=plot(ss,x(:,1));
+set(hc,'Color',mcolor(:,1));
+hc=title('ground motion generated from saved a_{i,j}');
+    set(hc,'FontSize',14);  
+  hc=ylabel('x_{ground}, m');
+%  hc=ylabel('y_{ground}, m');
+    set(hc,'FontSize',14);
+  hc=xlabel('s, m');
+    set(hc,'FontSize',14);  
+  axis([0 2600 -4.5e-8 1.e-8 ]); 
+%  axis([0 2600 -1.0e-8 3.0e-8 ]); 
+ 
+hold on
+for it=1:ntime
+    hc=plot(ss,x(:,it));
+    set(hc,'Color',mcolor(:,it));
+end
+    strr=num2str(tt(1));
+    timestr= ['time (s) = ',strr];
+    text(1500, 0.0e-8, timestr);
+    strr=num2str(tt(ntime));
+    timestr= ['time (s) = ',strr];
+    text(2000, 0.5e-8, timestr);
+%
+%
+ 

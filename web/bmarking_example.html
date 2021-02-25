@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Benchmarking with the TESLA TDR Linac</title>
+  <meta name="author" content="Stephen Molloy">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"
+ align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>TESLA Benchmarking Test<br>
+<br>
+</small></span></div>
+For each of these examples the original lattice file (bmad format) may
+be found <a
+ href="http://www.lepp.cornell.edu/%7Ejs344/LC/bba_benchmarking/tesla_linac.mad">here</a>,
+and the wakefield data <a
+ href="http://www.lepp.cornell.edu/%7Ejs344/LC/bba_benchmarking/sr_wake.tesla">here</a>
+courtesy of Jeff Smith.<br>
+<br>
+Results from benchmarking other codes are also on <a
+ href="http://www.lepp.cornell.edu/%7Ejs344/LC/bba_benchmarking/">Jeff's
+webspace</a>.
+<br>
+<br>
+Since bmad format is not exactly xsif compliant, these files had to be
+edited slightly for acceptance by XSIFToLucretia. The edited files can
+be found in the directories linked to in each of the examples below.
+<br>
+<br>
+<span style="font-weight: bold;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/src/Benchmarking/Example1/">Example
+1
+</a>:&nbsp; </span>This example starts with a perfectly aligned linac,
+offsets the incoming beam by 5 microns in y, and tracks it through to
+the end. A switch at the beginning of the script determines whether a
+sparse or macro-particle representation of the beam is used.
+The tracking is performed with all four combinations of the
+longitudinal and transverse wakefields being on and off.<br>
+The x and y beta functions, as well as the y dispersion, is plotted in
+one figure window, while the y beam position and normalised emittance
+is plotted (for all four wakefield conditions) in a second window.
+<br>
+<br>
+<span style="font-weight: bold;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/src/Benchmarking/Example2/">Example
+2
+</a>:&nbsp; </span>This script starts by misaligning the lattice
+according to <a
+ href="http://www.lepp.cornell.edu/%7Ejs344/LC/bba_benchmarking/nick23p4_misxy_1.txt">this
+file</a>. PT applied DFS to this beamline, and determined that the
+corrector settings from <a
+ href="http://www.lepp.cornell.edu/%7Ejs344/LC/bba_benchmarking/nick23p4_misxy_ycor_1.txt">this
+file</a> should be applied.<br>
+Once these misalignments and corrector settings are applied, the script
+tracks the beam through the linac under varying wakefield conditions.
+<br>
+<br>
+<br>
+<br>
+<a href="mailto:smolloy@slac.stanford.edu">Steve Molloy</a><br>
+04-May-2007<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</body>
+</html>

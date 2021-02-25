@@ -1,0 +1,71 @@
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! This file defines the full 3-stage bunch compressor.
+!
+! Initial values of beta functions are defined in BCMATCH.XSIF
+!
+!
+! AUTH:   PT,        24-jan-2005
+! MOD:    PT,        09-mar-2005
+!            Integrate ansatz linac into system, add USE statements and
+!            BEAM statement.
+!         A. Wolski, 11-feb-2005
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+  CALL, filename = "BCWIGPROTO.XSIF"
+  CALL, filename = "BCMODPROTO.XSIF"
+  CALL, filename = "BCMATCH.XSIF"
+
+  CALL, filename = "BCPARAMS.XSIF"
+
+  CALL, filename = "BCSTAGE1.XSIF"
+
+  BUNCHCOMP : LINE = (BC1)
+!
+! now for the linac
+! 
+  CALL, filename = "BCLinacAnsatz.xsif"
+!
+! some start and end markers 
+!
+  ELIN1MATCHBEGIN : MARKER
+  ELIN1MATCHEND   : MARKER
+  ELIN1BEGIN      : MARKER
+  ELIN1END        : MARKER
+  ELIN2MATCHBEGIN : MARKER
+  ELIN2MATCHEND   : MARKER
+  ELIN2BEGIN      : MARKER
+  ELIN2END        : MARKER
+  ELIN3MATCHBEGIN : MARKER
+  ELIN3MATCHEND   : MARKER
+  ELIN3BEGIN      : MARKER
+  ELIN3END        : MARKER
+
+  LET : line = (                 bunchcomp,                             &
+                ELIN1MATCHBEGIN, matchw1,                ELIN1MATCHEND, &
+                ELIN1BEGIN,      elin1a, elin1b, elin1c, ELIN1END,      &
+                ELIN2MATCHBEGIN, match12,                ELIN2MATCHEND, &
+                ELIN2BEGIN,      elin2,                  ELIN2END,      &
+                ELIN3MATCHBEGIN, match23,                ELIN3MATCHEND, &
+                ELIN3BEGIN,      elin3,                  ELIN3END         )
+  USE, LET
+!
+! select the initial Twiss parameters 
+!
+  use, bc0beta0
+!
+! define the initial beam as well
+!
+  bc0beam : beam, energy = 5, npart = 2e10, kbunch = 1, &
+            sigt = 6e-3, sige = 1.5e-3, &
+            ex = 8.e-6 * emass/5, ey = 20e-9 * emass/5 
+
+  use, bc0beam
+!
+!
+!
+RETURN
+
+
+

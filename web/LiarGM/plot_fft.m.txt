@@ -1,0 +1,133 @@
+%================================================================
+%  Simple FODO line with ground motion
+%  MAT-LIAR simulation
+%     Plot spectra p(t,k) 
+%
+%  A.S. Jan.1, 2002
+%================================================================
+%
+close all;
+clear all;
+load gm_fodo_fft_1_save;
+gm_fodo_fft_fig;
+
+clear all;
+load gm_fodo_fft_2_save;
+gm_fodo_fft_fig;
+
+% at this point, you should have created the expected modeling spectra
+% using (for example) the program pwk2p.f
+%
+% copy gm_model_B.data to model.data, compile and then run pwk2p.exe 
+% with proper parameters and for different dt
+%     (  you can run it as 'pwk2p.exe < pwk2p.inp' or just as 'pwk2p.exe'  )
+% then copy the output file ptk.dat to (for example) ptk_001.dat, etc.
+%
+
+figure(1)
+hold on
+load ptk_001.dat;
+kk=ptk_001(:,1);
+ptkmodel=ptk_001(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(2)
+hold on
+load ptk_01.dat;
+kk=ptk_01(:,1);
+ptkmodel=ptk_01(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(3)
+hold on
+load ptk_1.dat;
+kk=ptk_1(:,1);
+ptkmodel=ptk_1(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(4)
+hold on
+load ptk1.dat;
+kk=ptk1(:,1);
+ptkmodel=ptk1(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(5)
+hold on
+load ptk10.dat;
+kk=ptk10(:,1);
+ptkmodel=ptk10(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(6)
+hold on
+load ptk100.dat;
+kk=ptk100(:,1);
+ptkmodel=ptk100(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(7)
+hold on
+load ptk100.dat;
+kk=ptk100(:,1);
+ptkmodel=ptk100(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(8)
+hold on
+load ptk1000.dat;
+kk=ptk1000(:,1);
+ptkmodel=ptk1000(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(9)
+hold on
+load ptk10000.dat;
+kk=ptk10000(:,1);
+ptkmodel=ptk10000(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(10)
+hold on
+load ptk1e5.dat;
+kk=ptk1e5(:,1);
+ptkmodel=ptk1e5(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(11)
+hold on
+load ptk1e6.dat;
+kk=ptk1e6(:,1);
+ptkmodel=ptk1e6(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;
+
+figure(12)
+hold on
+load ptk1e7.dat;
+kk=ptk1e7(:,1);
+ptkmodel=ptk1e7(:,2);
+loglog(kk,ptkmodel,'r-');
+legend('P_{LIAR}','P_{model}',1);
+axis tight;

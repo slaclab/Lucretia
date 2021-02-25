@@ -1,0 +1,183 @@
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! This file defines elements used in the matching sections of the
+! bunch compressors:
+!
+!   BC0:   entrance beamline, leading into an RF module
+!   BCM2W: matching from RF module to wiggler
+!   BCW2M: matching from wiggler to RF module
+!   BCX:   exit beamline
+!   
+!
+! AUTH:  Andy Wolski, 11-feb-2005
+! MOD:
+!        PT,          11-mar-2005
+!           Add initial x and y correctors to BC0
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Match into bunch compressor RF module - BC0
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC0 Drifts
+
+  BC0D1L    :=  0.5
+  BC0D2L    := 11.8
+
+  BC0D1     : DRIFT, L = BC0D1L
+  BC0D2     : DRIFT, L = BC0D2L
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC0 Quadrupoles
+
+  BC0Q1K1   :=  0.22069956159
+  BC0Q2K1   := -0.222591156509
+  BC0Q3K1   :=  0.223260748948
+  BC0Q4K1   := -0.22041977414
+
+  BC0Q1     : BCWQUAD, K1 = BC0Q1K1
+  BC0Q2     : BCWQUAD, K1 = BC0Q2K1
+  BC0Q3     : BCWQUAD, K1 = BC0Q3K1
+  BC0Q4     : BCWQUAD, K1 = BC0Q4K1
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC0 initial dipole correctors 
+
+  BC0XC01 : HKICKER
+  BC0YC01 : VKICKER
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC0 Beamlines
+
+  BC0       : LINE = (   BC0XC01, BC0YC01,             &
+                         BC0D2, BC0Q1, BCQDBPM(BC0Q1), &
+                         BC0D2, BC0Q2, BCQDBPM(BC0Q2), &
+                         BC0D2, BC0Q3, BCQDBPM(BC0Q3), &
+                         BC0D2, BC0Q4, BCQDBPM(BC0Q4), &
+                         BC0D1)
+
+  BC0BC1RF  : LINE = (BC0, BC1RF0)
+
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Match BC1 RF module to wiggler - BC1M2W
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC1M2W Drifts
+
+  BC1M2WD1L     :=  0.4
+  BC1M2WD2L     := 12.5
+
+  BC1M2WD1      : DRIFT, L = BC1M2WD1L
+  BC1M2WD2      : DRIFT, L = BC1M2WD2L
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC1M2W Quadrupoles
+
+  BC1M2WQ1K1    :=  0.204028503961
+  BC1M2WQ2K1    := -0.209967964123
+  BC1M2WQ3K1    :=  0.200886900156
+
+  BC1M2WQ1      : BCWQUAD, K1 = BC1M2WQ1K1
+  BC1M2WQ2      : BCWQUAD, K1 = BC1M2WQ2K1
+  BC1M2WQ3      : BCWQUAD, K1 = BC1M2WQ3K1
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC1M2W Beamlines
+
+  BC1M2W        : LINE = (BC1M2WD2, BC1M2WQ1, BCQDBPM(BC1M2WQ1), &
+                          BC1M2WD2, BC1M2WQ2, BCQDBPM(BC1M2WQ2), &
+                          BC1M2WD2, BC1M2WQ3, BCQDBPM(BC1M2WQ3), &
+                          BC1M2WD1)
+
+  BC1M2WSUPPU  : LINE = (BC1RF, BC1M2W, BC1WIGSUPPU)
+
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Match BC1 wiggler to RF module - BC1W2M
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC1W2M Drifts
+
+  BC1W2MD1L     := BC1M2WD1L
+  BC1W2MD2L     := BC1M2WD2L
+
+  BC1W2MD1      : DRIFT, L = BC1W2MD1L
+  BC1W2MD2      : DRIFT, L = BC1W2MD2L
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC1W2M Quadrupoles
+
+  BC1W2MQ1K1    :=  0.199223713646
+  BC1W2MQ2K1    := -0.208273064539
+  BC1W2MQ3K1    :=  0.204298121692
+  BC1W2MQ4K1    := -0.19914370766
+
+  BC1W2MQ1      : BCWQUAD, K1 = BC1W2MQ1K1
+  BC1W2MQ2      : BCWQUAD, K1 = BC1W2MQ2K1
+  BC1W2MQ3      : BCWQUAD, K1 = BC1W2MQ3K1
+  BC1W2MQ4      : BCWQUAD, K1 = BC1W2MQ4K1
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BC1W2M Beamlines
+
+  BC1W2M        : LINE = (BC1W2MD1, BC1W2MQ1, BCQDBPM(BC1W2MQ1), &
+                          BC1W2MD2, BC1W2MQ2, BCQDBPM(BC1W2MQ2), &
+                          BC1W2MD2, BC1W2MQ3, BCQDBPM(BC1W2MQ3), &
+                          BC1W2MD2, BC1W2MQ4, BCQDBPM(BC1W2MQ4), &
+                          BC1W2MD1)
+
+  BC1SUPPDW2M  : LINE = (BC1WIGSUPPD, BC1W2M, BC1RF0)
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Match out of bunch compressor - BCX
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BCX Drifts
+
+  BCXD1L    := BC0D1L
+  BCXD2L    := BC0D2L
+
+  BCXD1     : DRIFT, L = BCXD1L
+  BCXD2     : DRIFT, L = BCXD2L
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BCX Quadrupoles
+
+  BCXQ1K1   :=  0.24390608285
+  BCXQ2K1   := -0.24672510217
+  BCXQ3K1   :=  0.261618959814
+  BCXQ4K1   := -0.244979936659
+
+  BCXQ1     : BCWQUAD, K1 = BCXQ1K1
+  BCXQ2     : BCWQUAD, K1 = BCXQ2K1
+  BCXQ3     : BCWQUAD, K1 = BCXQ3K1
+  BCXQ4     : BCWQUAD, K1 = BCXQ4K1
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BCX Beamlines
+
+  BCX       : LINE = ( BCXD1, BCXQ1, BCQDBPM(BCXQ1), &
+                       BCXD2, BCXQ2, BCQDBPM(BCXQ2), &
+                       BCXD2, BCXQ3, BCQDBPM(BCXQ3), &
+                       BCXD2, BCXQ4, BCQDBPM(BCXQ4), &
+                       BCXD2 )
+
+  BC1WSDBCX : LINE = (BC1WIGSUPPD, BCX)
+
+
+RETURN
+

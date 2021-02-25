@@ -1,0 +1,714 @@
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+
+* to find P(w), P(w,L), P(t,k)  from P(w,k)
+
+      program MODEL
+      character*50 fname
+      
+       fname='model.data'
+        write(*,*)' '      
+        write(*,'(a,a)')'Parameters from file ',fname      
+        write(*,*)' '      
+      
+        call READ_PWK_PARAM(fname,ierr)
+        if(ierr.eq.1) goto 900
+
+	call ANALYSE_PWK
+            
+900   end
+
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+
+        subroutine ANALYSE_PWK
+        real kmin,kmax
+        common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+
+        data kmin/1.0e-04/,kmax/1.0e+03/
+	data Ndivk/5000/
+        data wmin/1.0e-04/,wmax/1.0e+03/
+	data Ndivw/5000/, Nout/100/
+	data t/1.0/,rl/1000./
+
+        write(*,*)' '      
+        write(*,*)' '      
+        write(*,*)' '      
+	write(*,*)'               Analyzing P(w,k)'
+        write(*,*)' '      
+	write(*,*)'     1st step. Find P(t,k) at time=t'
+        write(*,*)' '      
+	write(*,*)'Enter the range of k to write out to ptk.dat :'
+	write(*,*)'   (to confirm default, just hit Enter) '
+	write(*,*)' kmin (1/m)=',kmin
+	call inr(kmin)
+	write(*,*)' kmax (1/m)=',kmax
+	call inr(kmax)
+	write(*,*)'Number of points to write: Nout =',Nout
+	call ini(Nout)
+
+	write(*,*)
+     > 'Enter the range of w over which the P(w,k) will be integrated :'
+	write(*,*)' wmin (1/s)=',wmin
+	call inr(wmin)
+	write(*,*)' wmax (1/s)=',wmax
+	call inr(wmax)
+	write(*,*)'Number of divisions in integral on w : Ndivw =',Ndivw
+	call ini(Ndivw)
+	
+	write(*,*)'Find P(t,k) at time t (s)=',t
+	call inr(t)
+    
+* find PTK 
+
+	write(*,*)'wait...'         
+        call FIND_PTK(t,wmin,wmax,kmin,kmax,Ndivw,Nout)
+        write(*,*)' '      
+	write(*,*)'Spectrum P(t,k) saved to ptk.dat'
+	write(*,*)'in three columns:'
+        write(*,*)
+     > 'k[1/m] p(t,k)[micron**2/(1/m)] ]'
+        write(*,*)' where p(t,k) results from integration '
+
+        write(*,*)' '      
+        write(*,*)' '      
+      
+	write(*,*)'               Analyzing P(w,k)'
+        write(*,*)' '      
+	write(*,*)'     2nd step. Find P(w,L) for deltaL=L'
+        write(*,*)' '      
+	write(*,*)'Enter the range of w to write out to pwl.dat :'
+	write(*,*)' wmin (1/s)=',wmin
+	call inr(wmin)
+	write(*,*)' wmax (1/s)=',wmax
+	call inr(wmax)
+	write(*,*)'Number of points to write: Nout =',Nout
+	call ini(Nout)
+
+	write(*,*)
+     > 'Enter the range of k over which the P(w,k) will be integrated :'
+	write(*,*)' kmin (1/m)=',kmin
+	call inr(kmin)
+	write(*,*)' kmax (1/m)=',kmax
+	call inr(kmax)
+	write(*,*)'Number of divisions in integral on k : Ndivk =',Ndivk
+	call ini(Ndivk)
+	
+	write(*,*)'Find P(w,L) at delta distance L (m)=',rl
+	call inr(rl)
+
+* find PWL
+
+	write(*,*)'wait...'      
+        call FIND_PWL(rl,wmin,wmax,kmin,kmax,Nout,Ndivk)
+        write(*,*)' '      
+	write(*,*)'Spectrum P(w,L) saved to pwl.dat'
+	write(*,*)'in three columns:'
+        write(*,*)'f[Hz] p(f,L)[micron**2/Hz] p(f)[micron**2/Hz]'
+        write(*,*)' where p(f,L) results from integration ',
+     > 'and p(f) is spectrum of absolute motion (analytics)'      
+        write(*,*)' '      
+	write(*,*)'Correlation c(w,L) saved to cwl.dat'
+	write(*,*)'in three columns:'
+        write(*,*)'f[Hz] correlation (1-correlation)'
+        write(*,*)' where correlation is Re part (Im==0) '
+        write(*,*)' '      
+        write(*,*)' Done. '      
+
+	return
+	end 
+
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+
+
+      subroutine FIND_PTK(t,wmin,wmax,kmin,kmax,Nw,Nk)
+      real k
+      real kmin,kmax
+      common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+
+	data pi/3.14159265358979323846/
+             
+      dk=(kmax/kmin)**(1./(Nk-1))      	
+      dw=(wmax/wmin)**(1./(Nw-1)) 
+                 
+      open(unit=1,file='ptk.dat')
+
+      do j=1,Nk
+      k=kmin*dk**(j-1)
+
+        ptk=0.          
+         do i=1,Nw
+         w=wmin*dw**(i-1)
+           wb=w*dw 
+           ds=wb-w      
+             ptk=ptk+ds*PWK(w,k)*2.0*fu(t*w)
+         end do
+         ptk=ptk/2./pi*2.
+
+	 df_vs_t = a_settlement(t,tau_syst,tgap_syst,iwhat_syst)
+     >            -a_settlement(0,tau_syst,tgap_syst,iwhat_syst)
+	      
+      ptk=ptk + QPK(k) * df_vs_t**2
+                  
+	cc=1.e+12
+        write(1,100) k,ptk*cc
+        
+      end do
+       
+      close(1)                                              
+100   format(5e12.4)
+
+      return
+      end
+      
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+      
+      function PTK_APPR(t,k)
+      real k
+      common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+     
+      t0=2.0*sqrt(A/k/B)         
+      PTKatl_appr=A*t/k**2* t/(t+t0)
+         
+c      PTK0=PTKmicro(t,k,v0,f0,d0,a0)
+      PTK1=PTKmicro(t,k,v1,f1,d1,a1)
+      PTK2=PTKmicro(t,k,v2,f2,d2,a2)
+      PTK3=PTKmicro(t,k,v3,f3,d3,a3)
+      
+      ptk_appr=PTKatl_appr + PTK1 + PTK1 + PTK2 + PTK3
+
+	 df_vs_t = a_settlement(t,tau_syst,tgap_syst,iwhat_syst)
+     >            -a_settlement(0,tau_syst,tgap_syst,iwhat_syst)
+
+      ptk_appr=ptk_appr + QPK(k) * df_vs_t**2
+      return
+      end
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+      
+      function PTKmicro(t,k,v0,f0,d0,a0)
+      real k      
+      w0=f0*2.*3.1415926 
+      if(k*v0.gt.t) then
+      PTKmicro=8.0*a0/(1.0+(d0*(k*v0-w0)/w0)**4)     
+      else
+      PTKmicro=8.0*a0/(1.0+(d0*(k*v0-w0)/w0)**4) *(w0*t)**2 /2.0
+      end if
+      return
+      end
+
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+
+      subroutine FIND_PWL(rl,wmin,wmax,kmin,kmax,Nw,Nk)
+      real k,kb
+      real kmin,kmax	!,kmins,kmaxs
+      common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+	data pi/3.14159265358979323846/
+            
+      dk=(kmax/kmin)**(1./(Nk-1))      	
+      dw=(wmax/wmin)**(1./(Nw-1)) 
+                 
+      open(unit=1,file='pwl.dat')
+c      open(unit=2,file='vf.dat')
+      open(unit=3,file='cwl.dat')
+
+      do j=1,Nw
+      w=wmin*dw**(j-1)
+
+        pwl=0.          
+         do i=1,Nk
+         k=kmin*dk**(i-1)
+           kb=k*dk 
+           ds=kb-k      
+             pwl=pwl+ds*PWK(w,k)*2.0*fu(rl*k)
+         end do
+         pwl=pwl/2./pi*2.
+                  
+	
+	cc=1.e+12
+c
+c *2 to -> w from 0 to +infty
+c
+        write(1,100) w/6.2832,2.*pwl*cc,pw(w)*2.0*cc
+c	write(2,100) w/6.2832,vfitslac(w)
+	corrm1=pwl/2./pw(w)
+	corr=1.-corrm1
+	write(3,100) w/6.2832,corr,corrm1
+        
+      end do
+       
+      close(1)                                              
+c      close(2)                                              
+      close(3)                                              
+100   format(5e12.4)
+
+      return
+      end
+           
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+      
+      function pw(w)
+* gives p(w) using parameters of the model
+* for the model explanation see somewhere else
+*
+      common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+
+      pw=B/w**4 
+
+C               And wave contribution, three peaks
+     
+c      PN0=cmic(w,f0,d0,a0)
+      PN1=cmic(w,f1,d1,a1)
+      PN2=cmic(w,f2,d2,a2)
+      PN3=cmic(w,f3,d3,a3)
+     
+c      pw=  pw + PN0 + PN1 + PN2 + PN3 
+      pw=  pw  + PN1 + PN2 + PN3 
+      return
+      end
+     
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+      
+      subroutine PPWK(S,T,k,w,RRR)
+* it put to RRR the function 
+* P(w,k) 2 (1-cos(wt)) 2(1-cos(ks)) 2/(2pi) 2/(2pi)
+* the coefficient "2" in "2/(2pi)" is due to the fact that 
+* we define P(w,k) so that w and k can be positive or negative,
+* but we will integrate only on positive values
+*
+      real k
+      common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+
+      RRR=PWK(w,k)   
+     >  *2.*fu(w*T)         ! 2*(1.-cos(w*T)) 
+     >  *2.*fu(k*S)         ! 2*(1.-cos(k*L))
+     >  *0.1013211          ! 2*2/6.28/6.28
+
+      return
+      end
+
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+      
+      function PWK(w,k)
+* gives P(w,k) using parameters of the model
+* for the model explanation see somewhere else
+*
+      real k,Lo
+      common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+
+C		 PWK of the "corrected ATL law":
+
+	if(A.ne.0.0.and.B.ne.0.0) then
+      Lo=B/A/w**2
+
+      PWK=A/(w*k)**2 
+     >  *fu(Lo*k) 		! that is (1.-cos(Lo*k))
+c     >  *1./(1.+2./(Lo*k)**2)**2
+	
+	else
+	 PWK=0.0
+	end if     
+
+C               And wave contribution, three peaks
+       vv0=v0
+       vv1=v1
+       vv2=v2
+       vv3=v3
+      if(v0.lt.0..or.v1.lt.0..or.v2.lt.0..or.v3.lt.0.) 
+     >   vvs=450.+1900.*exp(-w/12.5)
+      
+* if v < 0 then the SLAC formula is used 
+
+c       if(v0.lt.0.0) vv0=vvs
+c      PN0=Fmicro(w,k,vv0,f0,d0,a0)
+       if(v1.lt.0.0) vv1=vvs
+      PN1=Fmicro(w,k,vv1,f1,d1,a1)
+       if(v2.lt.0.0) vv2=vvs
+      PN2=Fmicro(w,k,vv2,f2,d2,a2)
+       if(v3.lt.0.0) vv3=vvs
+      PN3=Fmicro(w,k,vv3,f3,d3,a3)
+          
+c      PWK=  PWK  + PN0  + PN1 + PN2 + PN3 
+      PWK=  PWK   + PN1 + PN2 + PN3 
+      return
+      end
+      
+
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+
+ 	function fu(x)
+* gives (1-cos(x))
+*
+* if x is big we replace (1-cos(x)) by its mean value 1
+*
+		if(x.gt.1.e+8) then
+		fu=1.
+		return
+		end if
+	fu=2.*(sin(x/2.))**2
+c			it equals to (1-cos(x))
+	return
+	end
+
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+	
+	function Fmicro(w,k,velm,fmic,dmic,amic)
+* gives distribution of amplitudes on k and w due to waves
+* with phase velosity velm 
+* 
+	real k,km
+	km=w/velm
+	Fmicro=0.
+	if(k.lt.km) then
+* this shape of distribution on k assumes that the waves travell
+* in the plane (i.e. on our surface) and distribution of
+* directions is homogenious
+*
+	Fmicro=2./km/sqrt(1.-k**2/km**2)
+* distribution on w 
+	Fmicro=Fmicro*cmic(w,fmic,dmic,amic)
+	end if	
+	return
+	end
+	
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+	
+	function cmic(w,fmic,dmic,amic)
+* gives distribution of amplitudes on w due to waves
+	f=w/2./3.1415926
+	p0=amic
+	p1=1./( ((f-fmic)/fmic*dmic)**4 +1.)
+	cmic=p0*p1
+900	return
+	end
+
+                   
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+      
+      subroutine QPSK(S,k,RRR)
+* it put to RRR the function 
+* Q(k) 2(1-cos(ks)) 2/(2pi) 
+* the coefficient "2" in "2/(2pi)" is due to the fact that 
+* we define Q(k) so that k can be positive or negative,
+* but we will integrate only on positive values
+*
+      real k
+      common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+
+      RRR=QPK(k)   
+     >  *2.*fu(k*S)         ! 2*(1.-cos(k*L))
+     >  *0.318        		! 2/6.28
+
+      return
+      end
+      
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+      
+      function QPK(k)
+* gives Q(k) using parameters of the model
+* for the model explanation see somewhere else
+*
+      real k
+      common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+          
+!	function cmic(w,fmic,dmic,amic)
+* gives distribution of amplitudes on w due to waves
+!	f=w/2./3.1415926
+!!	QPK=Q1/( ((k-rk1)/rk1*rkk1)**4 +1.)
+!!	qqq=(k/rk1)**4
+!!	QPK=QPK*qqq /( qqq +1.)	
+	
+	QPK=Q1/( ((k/6.2832-rk1)/rk1*rkk1)**2 +1.)	
+	
+      return
+      end
+      
+     
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+
+      subroutine READ_PWK_PARAM(fname,ierr)
+* read parameters of P(w,k) from the file and put to the common block
+* if there is no input file, a version that correspond to very noisy
+* conditions such as in the HERA tunnel will be created
+      common/earth/f0,a0,d0,v0,
+     >A,B,f1,a1,d1,v1,f2,a2,d2,v2,f3,a3,d3,v3,Tmax,Tmin,Smax,Smin,
+     >Q1,rk1,rkk1,tau_syst,tgap_syst,iwhat_syst,Np
+      common/filejustread/inewparam,inewparams
+      character*50 chardum
+      character*(*) fname
+      
+      inewparam=0
+      
+      open(92,file=fname,err=999,status='old')
+      read(92,*,err=999,end=999) chardum,A
+      read(92,*,err=999,end=999) chardum,B
+
+c      read(92,*,err=999,end=999) chardum,f0
+c      read(92,*,err=999,end=999) chardum,a0
+c      read(92,*,err=999,end=999) chardum,d0
+c      read(92,*,err=999,end=999) chardum,v0
+      
+      f0=1.
+      a0=0.
+      d0=1.
+      v0=1000.
+      
+      read(92,*,err=999,end=999) chardum,f1
+      read(92,*,err=999,end=999) chardum,a1
+      read(92,*,err=999,end=999) chardum,d1
+      read(92,*,err=999,end=999) chardum,v1
+      
+      read(92,*,err=999,end=999) chardum,f2
+      read(92,*,err=999,end=999) chardum,a2
+      read(92,*,err=999,end=999) chardum,d2
+      read(92,*,err=999,end=999) chardum,v2
+      
+      read(92,*,err=999,end=999) chardum,f3
+      read(92,*,err=999,end=999) chardum,a3
+      read(92,*,err=999,end=999) chardum,d3
+      read(92,*,err=999,end=999) chardum,v3
+      
+      read(92,*,err=999,end=999) chardum,Tmin
+      read(92,*,err=999,end=999) chardum,Tmax
+      read(92,*,err=999,end=999) chardum,Smin
+      read(92,*,err=999,end=999) chardum,Smax
+      
+      read(92,*,err=999,end=999) chardum,Np
+
+      read(92,*,err=999,end=999) chardum,Q1
+      read(92,*,err=999,end=999) chardum,rk1
+      read(92,*,err=999,end=999) chardum,rkk1
+
+      read(92,*,err=999,end=999) chardum,iwhat_syst
+      read(92,*,err=999,end=999) chardum,tau_syst
+      read(92,*,err=999,end=999) chardum,tgap_syst
+	tau_syst=tau_syst*3600.*24.*365.
+    	tgap_syst=tgap_syst*3600.*24.*365.      
+      close(92) 
+      goto 900
+
+999   close(92) 
+
+      write(6,*)' '
+      write(6,'(a,a)')' Error reading parameter file', fname
+      write(6,*)' '        
+      close(92)
+      ierr=1
+      return
+920   format(a,1pe12.5)
+921   format(a,i6)
+
+
+     
+900   continue
+      ierr=0
+
+      chardum='''Parameter A of the ATL law,     A [m**2/m/s]   '''
+      write(6,920) chardum,A
+      chardum='''Parameter B of the PWK,         B [m**2/s**3]  '''
+      write(6,920) chardum,B
+      
+      chardum='''Frequency of 1-st peak in PWK,  f1 [Hz]        '''
+      write(6,920) chardum,f1
+      chardum='''Amplitude of 1-st peak in PWK,  a1 [m**2/Hz]   '''
+      write(6,920) chardum,a1
+      chardum='''Width of 1-st peak in PWK,      d1 [1]         '''
+      write(6,920) chardum,d1
+      chardum='''Velocity of 1-st peak in PWK,   v1 [m/s]       '''
+      write(6,920) chardum,v1
+            
+      chardum='''Frequency of 2-nd peak in PWK,  f2 [Hz]        '''
+      write(6,920) chardum,f2
+      chardum='''Amplitude of 2-nd peak in PWK,  a2 [m**2/Hz]   '''
+      write(6,920) chardum,a2
+      chardum='''Width of 2-nd peak in PWK,      d2 [1]         '''
+      write(6,920) chardum,d2
+      chardum='''Velocity of 2-nd peak in PWK,   v2 [m/s]       '''
+      write(6,920) chardum,v2
+            
+      chardum='''Frequency of 3-rd peak in PWK,  f3 [Hz]        '''
+      write(6,920) chardum,f3
+      chardum='''Amplitude of 3-rd peak in PWK,  a3 [m**2/Hz]   '''
+      write(6,920) chardum,a3
+      chardum='''Width of 3-rd peak in PWK,      d3 [1]         '''
+      write(6,920) chardum,d3
+      chardum='''Velocity of 3-rd peak in PWK,   v3 [m/s]       '''
+      write(6,920) chardum,v3
+      
+      chardum='''Minimum time,                   Tmin [s]       '''
+      write(6,920) chardum,Tmin
+      chardum='''Maximum time,                   Tmax [s]       '''
+      write(6,920) chardum,Tmax
+
+      chardum='''Minimum distance,               Smin [m]       '''
+      write(6,920) chardum,Smin
+      chardum='''Maximum distance,               Smax [m]       '''
+      write(6,920) chardum,Smax
+
+      chardum='''Number of w or k harmonics,     Np   [1]       '''
+      write(6,921) chardum,Np
+
+      chardum='''Ampl. of peak in systematic.P,Q1  [m**3*Hz**2] '''
+      write(6,920) chardum,Q1
+
+      chardum='''Wavenumber of peak in syst.P,  rk1 [1/m]       '''
+      write(6,920) chardum,rk1
+
+      chardum='''Width of peak in system.P,      rkk1 [1]       '''
+      write(6,920) chardum,rkk1
+
+      chardum='''linear or sqrt(t)->exp syst. iwhat_syst (0,1)  '''
+      write(6,920) chardum,iwhat_syst
+
+      chardum='''                          tau_syst [years]     '''
+      write(6,920) chardum,tau_syst/(3600.*24.*365.)
+
+      chardum='''(used if ist=1) time gap  tgap_syst [years]    '''
+      write(6,920) chardum,tgap_syst/(3600.*24.*365.)
+
+      return
+      end
+      
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+
+      function x2pwka(A,B,t,rl)
+* gives approximation of <[x(t,s+rl)-x(t,s)]^2> for pure ATL P(w,k)
+* needed only for the TESTS subroutine
+*
+      x2pwka=0.
+      if(t.eq.0.0.or.rl.eq.0.0.or.A.eq.0.0.or.B.eq.0.0) goto 900
+      pi=3.14159265358979      
+      t0=sqrt(A*rl/B)
+      tt0=t/t0
+      q=1.+1./(1.+ ( tt0 + 1./tt0 ))
+      x2pwka=A*t0*rl*tt0**2 *2./pi/(1.+2./pi*tt0) *q
+900   return
+      end
+      
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+	subroutine inr(R)
+	character*80 c
+	c(1:5)='     '
+c	       '12345'
+	read(*,100) c
+100	format(80a)
+	if(c(1:1).eq.' ') goto 900
+          if(icuttxt(c).ne.0) goto 990
+	read (c,'(g20.0)',err=990) R
+	goto 900
+990	write(*,*)' Error read'
+900	return
+	end
+
+	subroutine ini(N)
+	character*80 c
+	c(1:5)='     '
+c	       '12345'
+	read(*,100) c
+100	format(80a)
+	if(c(1:1).eq.' ') goto 900
+          if(icuttxt(c).ne.0) goto 990
+	read (c,'(i20)',err=990) N
+	goto 900
+990	write(*,*)' Error read'
+900	return
+	end
+
+	function icuttxt(c)
+	character*80 c
+	icuttxt=0
+	if(c(1:1).ne.'''') return
+	i2=0
+	do i=2,80
+	  if(c(i:i).eq.'''') i2=i
+	end do
+	if(i2.eq.0) icuttxt=1
+	if(icuttxt.eq.1) return
+c	
+	do i=i2+1,80
+	 k=i-i2
+	 c(k:k)=c(i:i)
+	end do
+	do i=80-i2+1,80
+	 c(i:i)=' '
+	end do
+	write(*,*)c
+	return
+	end	
+	
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################		
+	function a_settlement(t,tau,dtgap,isyst)
+	if(isyst.eq.0)	then
+	  a_settlement=t/tau
+	else if (isyst.eq.1) then
+	  a_settlement=appr_settlement((t+dtgap)/tau)
+	end if
+	return
+	end
+
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################
+	function appr_settlement(t)
+c approximation for the ground settlement 
+c  t is normalized time
+	A1 = 2.
+	c1 = 2.36
+	sq=sqrt(t)
+	appr_settlement=(1.-(1.-sq/(1.+A1*sq))*exp(-c1*t))
+	return
+	end
+*#######################################################################
+*23456789*123456789*123456789*123456789*123456789*123456789*123456789*12
+*#######################################################################

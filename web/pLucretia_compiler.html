@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Examples</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+	<small>Generation of Standalone Lucretia Simulations Using the Matlab 
+	Compiler<br>
+</small></span></div>
+<p>The <a href="http://www.mathworks.com/products/compiler/">Matlab Compiler</a> 
+is a very useful tool that generates C or C++ code from Matlab functions. It 
+also compiles this code to generate standalone executables which, when packaged 
+with the provided Matlab run-libraries, are independent of the core Matlab 
+package. This allows deployment of Lucretia simulations on any system, 
+regardless of whether the Matlab environment (license manager) is installed. The 
+Compiler also compiles code from almost any toolbox you may have installed and 
+are using (notable exceptions are Simulink and DCT). This provides an easy route 
+for creating &quot;embarrassingly parallel&quot; code by using the Compiler on existing 
+serial code and running multiple instances on a single machine with multiple 
+cores and/or processors or on a batch farm. By compiling simulation code in this 
+way, multiple licenses are not needed as the generated code is free of the 
+licensing restrictions and can therefore be run on any number of compute nodes 
+simultaneously.</p>
+<p>Note, for clarity I use &quot;Compiler&quot; with a capatalised 'C' when referring to 
+the Matlab Compiler and use &quot;compiler&quot; to refer to the system c/c++ compiler.</p>
+<p><b>Steps for deploying a parallel Lucretia simulation using the Matlab 
+Compiler:</b></p>
+<ul>
+	<li>Write the simulation code, which must be started using a Matlab 
+	function- the arguments to that function will be provided at the 
+	command-line when the compiled code is produced and should be used to pass 
+	arguments which separate one instance of the simulation from another (e.g. 
+	random seed, machine configuration parameter etc.). See the
+	<a href="pLucretia_hints+tips.html">hints &amp; tips</a> section for 
+	consequences of having to use a function and not a script if this is a 
+	change you need to make.</li>
+	<li>Set up the compiler environment (see notes below on this).</li>
+	<li>Compile the code using the mcc command (also, with R2006b and later 
+	there is now a GUI environment for building- check out the Compiler 
+	documentation if this kind of thing excites you). This invokes the 
+	dependency checker which will examine the code you are trying to compile and 
+	work out what other code needs to be pulled in to the compilation to make it 
+	work. The upshot of this is, as long as everything you need is in the Matlab 
+	search path (ie. you are compiling in an environment where the code you are 
+	trying to build will successfully run) the compiler will generate an 
+	executable file that behaves the same as when you execute the same function 
+	from within a Matlab session. Most toolboxes are acceptable, mex files you 
+	use also get pulled into the compilation automatically. If the simulation 
+	requires .mat files to be dynamically loaded, these need to be included into 
+	the compile command (which acts very much like a gcc compile command if you 
+	are familiar with this). It is also possible to do more complicated things, 
+	e.g. just generate the C code without compiling, generate static or dynamic 
+	libs which can be further linked against custom c/c++ code etc.</li>
+	<li>Decide how the generated executable file is to be deployed. If the 
+	binary is to be run in an environment which can see a Matlab installation, 
+	it is possible to run the code without further work by simply specifying 
+	some environment variables (this varies according to which Matlab release 
+	you are using- see the example below for the case of R2007a, read the Matlab 
+	documentation for other releases). If the binary is to be run on an external 
+	system which doesn't have Matlab installed anywhere (or you don't know what 
+	version is likely to exist, or want to be independent of this) you need to 
+	package up the MCR (Matlab Component Runtime)- a set of dynamic libraries 
+	which provides the Matlab environment to run the compiled binary against- 
+	see the
+	<a href="http://www.mathworks.com/access/helpdesk/help/toolbox/compiler/">
+	Matlab Compiler</a> documentation for help in doing this. This will need to 
+	be shipped wherever your compiled binary and supporting files are sent.</li>
+	<li>Make a script that executes the compiled binary with desired parameters 
+	for that instance of the simulation, the script should also contain 
+	environment variables pointing to the installed Matlab libs when running 
+	without the MCR. You should also make sure that these variables are exported 
+	correctly if using a scheduler to submit parallel jobs on a batch farm.</li>
+	<li>It is a good idea to also have a master script which runs multiple 
+	instances of the job submission script generated above (<a href="jobSub.pl">here</a> 
+	is an example perl script I use to submit 100 parallel jobs to a farm that 
+	uses the LSF scheduler- it also has a flag to re-run failed jobs).</li>
+</ul>
+<p><b>Setting up the Compiler environment</b></p>
+<p>The first step after installing the Compiler into your Matlab software suite 
+is to run the<i><b> mbuild -setup</b></i> command. This allows you to choose 
+from the Matlab supported compilers that are installed on your system. For 
+example, under unix this probably means the gcc compiler, and under windows the 
+lcc compiler that ships with Matlab, one of the MS Visual Studio products or the 
+Borland C compiler. With Linux, I have been successfully using the Intel 
+compiler which gives considerable speed improvements over gcc with Intel 
+chipsets (I have heard good results are also possible with AMD). Although the 
+Intel compiler is not officially supported, I got this to work by simply 
+replacing the <i><b>gcc,</b></i> <b><i>g++ </i></b>commands with the Intel 
+equivalent <b><i>icc </i></b>and <b><i>icpc</i></b> in the makefile shells 
+generated by the <b><i>mbuild -setup</i></b> command. I have listed some 
+OS-dependent issues I have come across below:</p>
+<p><i><b>Unix</b></i></p>
+<p>The file <b><i>mbuildopts.sh</i></b> is generated by the process described 
+above, the default location is in <i>~/.matlab/RXXXXX/mbuildopts.sh </i>(replace 
+XXXXX with the version you are running)<i>.</i> I recommend leaving the default 
+one alone generated for gcc and if you need to modify it, generate a copy in 
+your working directory- the compiler uses a local copy in preference over the 
+default one.<br>
+Here is a snippet of the mbuildopts.sh file that deals with the gcc compiler 
+(generated by Matlab R14):<br>
+<i><b><font size="1">
+#----------------------------------------------------------------------------<br>
+;;<br>
+glnx86)<br>
+#----------------------------------------------------------------------------<br>
+RPATH=&quot;-Wl,-rpath-link,$TMW_ROOT/bin/$Arch&quot;<br>
+# gcc -v<br>
+# gcc version 3.2.3<br>
+CC='gcc'<br>
+CFLAGS=&quot;$MFLAGS -ansi -D_GNU_SOURCE -pthread -fexceptions&quot;<br>
+CLIBS=&quot;$RPATH $MLIBS -lm <font color="#FF0000">-lstdc++</font>&quot;<br>
+COPTIMFLAGS='-O -DNDEBUG'<br>
+CDEBUGFLAGS='-g'<br>
+#<br>
+SHLCFLAGS=&quot;-fPIC $CFLAGS&quot;<br>
+#<br>
+# g++ -v<br>
+# gcc version 3.2.3<br>
+CXX='g++'<br>
+CXXFLAGS=&quot;$MCXXFLAGS -ansi -D_GNU_SOURCE -pthread -DGLNX86 -DGCC&quot;<br>
+CXXLIBS=&quot;$RPATH $MCXXLIBS -lm&quot;<br>
+CXXOPTIMFLAGS='-O -DNDEBUG'<br>
+CXXDEBUGFLAGS='-g'<br>
+CXXLDFLAGS='-pthread'<br>
+#<br>
+SHLCXXFLAGS=&quot;-fPIC $CXXFLAGS&quot;<br>
+#<br>
+LD=&quot;$COMPILER&quot;<br>
+LDFLAGS='-pthread'<br>
+LDOPTIMFLAGS='-O'<br>
+LDDEBUGFLAGS='-g'</font></b></i></p>
+<ul>
+	<li>As I mentioned above, I found it possible to use the Intel compiler 
+	(Version 9) by simply changing out the <i>gcc, g++ and $COMPILER </i>flags 
+	to their Intel equivalent.</li>
+	<li>I have always had problems with run-time errors if I use the file as 
+	generated above (I get unresolved symbol errors). These have always been 
+	caused by incompatibilities between the system c libs and the ones packaged 
+	with Matlab. The solution for me has been to remove the link statement in 
+	the CLAGS definition highlighted in red in the above code snippet (<i>-lstdc++)</i>, 
+	if you get this type of error cropping up, you may want to try this first.</li>
+	<li>Different releases of Matlab support different gcc releases, and you can 
+	run into trouble if there is a large difference between the glibc version 
+	you are running on your system and that supported by the particular release 
+	of Matlab you have. For example, on the system I use, I have gcc 3.2 which 
+	works fine with R14, but if I try to use any later release of Matlab which 
+	has been built with gcc4+ I get all sorts of compilation issues, especially 
+	with compiled mex code amongst the code being compiled.</li>
+</ul>
+<p><b>Example compilation command</b></p>
+<p><b><i>&gt;&gt; mcc -mv masterSimFunction.m -a myData.mat<br>
+</i></b>Compiles masterSimFunction and all dependencies, including the 
+myData.mat data file which can be referenced in the simulation code to produce
+<i>a ./masterSimFuncion </i>executable binary. You can pass arguments the same 
+way as any command line executable file- e.g. <i><b>./masterSimFunction 1 'myParam' 
+3.2</b></i> and the arguments are passed to the arguments in the Matlab <i>
+masterSimFunction(A, B, C)</i> function.</p>
+<p><b>Example run script</b></p>
+<p>This code exists in <i>simRun.csh</i>:</p>
+<p><i><b><font size="1">#!/bin/tcsh<br>
+setenv LD_LIBRARY_PATH ${MATLAB}/sys/os/glnx86:${MATLAB}/bin/glnx86:${MATLAB}/sys/java/jre/glnx86/jre1.5.0/lib/i386/native_threads<br>
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${MATLAB}/sys/java/jre/glnx86/jre1.5.0/lib/i386/client:${MATLAB}/sys/java/jre/glnx86/jre1.5.0/lib/i386<br>
+cd /afs/slac.stanford.edu/u/ey/whitegr/u01<br>
+cd /afs/slac.stanford.edu/u/ey/whitegr/LET<br>
+./simLET $1</font></b></i></p>
+<p>It is submitted to a batch scheduler which runs the script automatically on a 
+compute node of its choosing. For example, bsub ./simRun 12 is submitted; at run 
+time the script is executed which sets the LD_LIBRARY_PATH variables needed for 
+the Matlab Compiled code to find the correct dynamic libs; then it cd's to an 
+NFS directory I need to make sure it is mounted and finally cd's to the run 
+directory before running the compiled Matlab simulation <i>simLET</i> with the 
+argument '12' passed (which in this case sets the random number generator seed 
+for this instance of the simulation).</p>
+<p><b>General hints for running simulations with the Compiler</b></p>
+<ul>
+	<li>All arguments passed are passed to your master function at the command 
+	line as strings. Therefore, if you are expecting numerical inputs to your 
+	function, for the cases where you are running in the compiled environment 
+	you need to convert using e.g. <b><i>str2double</i></b>.</li>
+	<li>It is good to have the version of your simulation that runs under Matlab 
+	and the version that runs in the compiled environment be the same. Where 
+	code changes are necessary between the two, such as in the case above, a 
+	useful built-in variable is <b><i>isdeployed</i></b> - this is set to be 
+	true in the compiled environment and false under Matlab.</li>
+	<li>Although recent versions of the Compiler are very good at seamlessly 
+	converting all your Matlab code without additional work, there are some 
+	exceptions you need to be aware of, check the documentation if you are 
+	having compilation difficulties, some issues I have come across are listed 
+	below.</li>
+	<li>It is a good practice to avoid using shell commands whenever possible; 
+	these make your code platform dependent, try to use the built-in Matlab 
+	functions instead, e.g. <i><b>delete('file.txt')</b></i> instead of <b><i>!rm 
+	file.txt </i></b>.</li>
+	<li>At compile-time, the Matlab dependency checker iteratively goes through 
+	your code and the code it calls etc. looking for the files required for the 
+	compilation based on the Matlab search path. One thing that confuses this 
+	process is if you refer to a function in a string- this will not get picked 
+	up and will result in a run-time error as the function will not have been 
+	compiled. One example of where this might happen is in an <b><i>eval</i></b> 
+	command. There are 3 ways around this problem: Manually include the function 
+	files in the compilation command using the <b><i>-a</i></b> switch; use 
+	function handles instead; use the %#function pragma in the function where 
+	the function string is used to tell the dependency checker that it is there. 
+	See the Compiler documentation section on &quot;limitations and restrictions&quot; for 
+	more details.</li>
+</ul>
+<p><a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>24-May-2007<br>
+<a href="http://www.slac.stanford.edu/detailed.html">
+<img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br></p>
+</body>
+</html>

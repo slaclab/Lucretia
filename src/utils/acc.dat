@@ -1,0 +1,12 @@
+$ACCELERATOR:: nominal
+{energy=250.0;particles=2.0;beta_x=21.0;beta_y=0.4;emitt_x=10.0;emitt_y=0.04;sigma_x=655.0;sigma_y=5.70;
+sigma_z=300.0;f_rep=1.0;n_b=1;charge_sign=-1;scale_step=1.0;}
+$PARAMETERS:: par
+{n_z=12;n_t=3;n_m=80000;cut_z=3.0*sigma_z.1;
+n_x=16;
+n_y=128;
+cut_x=160;
+cut_y=1280;
+rndm_seed=1;
+pair_ecut=0e-3;force_symmetric=0;do_pairs=0;do_photons=0;store_photons=0;track_secondaries=0;do_hadrons=0;
+store_hadrons=0;do_lumi=0;do_jets=0;store_jets=0;load_beam=3;electron_ratio=0.1;store_beam=0;do_isr=1;do_eloss=1;}

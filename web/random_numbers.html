@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"><title>Lucretia: Random Numbers and Seeds</title>
+  
+  <meta name="author" content="Peter Tenenbaum"></head><body>
+<div style="text-align: center;"><a href="home.html"><span style="font-size: 24pt;"><img style="border: 0px solid ; width: 80px; height: 90px;" alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif" align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Random Numbers and Seeds<br>
+<br>
+</small></span>
+<div style="text-align: left;">For many simulation studies, it is
+important or useful to get complete control over the generation of
+random numbers, and to ensure that a given randomly-generated state can
+be exactly reproduced at a later date.&nbsp; <br>
+</div>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;"><br>
+Lucretia functions use the Matlab rand and randn random number
+generators for flat and Gaussian-distributed random numbers,
+respectively.&nbsp; Hence, any Lucretia simulation can be reproduced by
+taking control of the seeds / states used by these two random number
+generators.<br>
+<br>
+More specifically, the random number generators will be advanced by the
+following functions:<br>
+<br>
+<span style="font-weight: bold;">MakeBeamPZGauss:</span>&nbsp; advances
+Gaussian random number generator randn.<br>
+<span style="font-weight: bold;">MakeBeam6DGauss:&nbsp; </span>advances
+Gaussian random number generator randn.<br>
+<span style="font-weight: bold;">ErrorGroupGaussErrors:&nbsp; </span>advances
+Gaussian random number generator randn.<br>
+<span style="font-weight: bold;">SetGaussianErrors:&nbsp; </span>advances
+Gaussian random number generator randn.<br>
+<span style="font-weight: bold;"></span><span style="font-weight: bold;">TrackThru:&nbsp;
+</span>when BPM readings are returned, the Gaussian random number
+generator randn is advanced.&nbsp; When synchrotron radiation modes 2
+or 3 are used, the flat random number generator rand is advanced.<br>
+<br>
+<span style="font-weight: bold;">Note on mex file random number generation:</span><br>
+The default build of the mex files utilizes the gcc random number
+generation routines (rand() and srand() to provide the seed). To
+maintain reproducibility of random number sequences, the random number
+routine is seeded using the current Matlab random seed at the run time
+of the mex code. It is possible to instead have the mex code call the
+Matlab random number generation routines (rand and randn) if, for
+example, you feel a more robust random number generation algorithm than
+that provided by the C library is warrented. To do this requires
+re-compilation of the mex code including the "-DLUCRETIA_MLRAND" switch
+in the Makefile (as documented in the Makefile code). Note that there
+is a heavy run time penalty to pay for this in some instances due to
+the computational overhead in calling the Matlab routines from C. For
+example, with ISR switched on the tracking time is approximately a
+factor 10 longer.<br>
+For gpu code, the CUDA "curand" library is used, which again gets its
+initial random number seed from Matlab at mex run time. It is not
+possible to call the Matlab random number generation routines from the
+gpu in this case.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt whitegr</a><br>
+18-Apr-2014<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page" alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;" align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

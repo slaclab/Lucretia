@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Slices and Blocks</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Slices and Blocks<br>
+<br>
+</small></span>
+<div style="text-align: left;"><br>
+</div>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">On the <a href="data_elements.html">data
+elements</a> page, the method of attaching beamline elements to <a
+ href="data_elements.html#GIRDER">girders</a>, <a
+ href="data_elements.html#KLYSTRON">klystrons</a>, or <a
+ href="data_elements.html#PS">power supplies</a> is discussed.&nbsp; It
+is often useful to establish a set of relationships between elements
+which are below the level of the girder, klystron, or power
+supply.&nbsp; For example, it is sometimes customary for a single
+accelerator component to be represented by two or more consecutive
+longitudinal "slices".&nbsp; Similarly, it is sometimes helpful to be
+able to combine heterogeneous beamline elements (for example a magnet
+and a BPM, or a "real" magnet and a thin multipole element which
+represents its higher-multipole field errors).&nbsp; Again:&nbsp; in
+principle this can be done with power supplies or girders or klystrons,
+but in practice sometimes it is helpful to have a girder, power supply,
+or klystron which supports a large number of devices, a subset of which
+are also clustered together with one another as discussed above.<br>
+<br>
+Lucretia supports such intermediate clustering with the concept of
+Slices and Blocks:<br>
+<br>
+<ul>
+  <li>"Slices" are longitudinal segments of a single physical
+element.&nbsp; The criterion for determining that several entries in
+BEAMLINE are slices of a single element is that the elements have the
+same class and that they are contiguous in S.&nbsp; Note that it is not
+required that they be consecutive members of BEAMLINE -- there can be
+intervening elements of other classes, so long as those elements are
+zero length.&nbsp; Bend magnets, quads, sextupoles, octupoles,
+finite-length multipoles, and linear accelerator structures can be
+represented by slices.</li>
+  <li>"Blocks" are consecutive elements which are strongly connected to
+one another mechanically.&nbsp; A block can contain any combination of
+any valid Lucretia element classes, provided that they are contiguous
+with one another (ie, a block cannot contain drift spaces of finite
+length).</li>
+</ul>
+The Lucretia functions <a
+ href="lattice_generation.html#SetElementSlices">SetElementSlices</a>
+and <a href="lattice_generation.html#SetElementBlocks">SetElementBlocks</a>
+will identify
+elements which are sliced or in a block, respectively, and will so
+label them by adding a field to their data structures (either "Slices"
+or "Block").&nbsp; In the case of a sliced element, the Slices field
+contains the index numbers of all slices of the physical element; in
+the case of a block, the Block field contains the indices of the first
+and last elements in the block.&nbsp; Once the slicing and blocking of
+the beamline has been defined, the user can apply misalignments and
+errors which use the slice and block information (ie, apply the same
+error to all slices of an element, apply the same misalignment to all
+members of a block).&nbsp; For further information see the <a
+ href="lattice_errors.html">errors and misalignments</a> page.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+09-Apr-2005<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

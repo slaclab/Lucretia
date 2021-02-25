@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Beam Generation</title>
+
+  
+  
+  <meta name="author" content="Peter Tenenbaum">
+
+</head><body>
+<div style="text-align: center;"><a href="home.html"><span style="font-size: 24pt;"><img style="border: 0px solid ; width: 80px; height: 90px;" alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif" align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Beam Generation<br>
+<br>
+</small></span></div>
+
+As described on the <a href="beam.html">beams</a> webpage, a Lucretia
+beam consists of an arbitrary number of bunches, each bunch can contain
+an arbitrary number and distribution of rays, and each ray can have any
+desired amount of charge.&nbsp; This gives the user total flexibility
+in selecting a representation which is optimal for their particular
+application.<br>
+
+<br>
+
+Lucretia support for beam generation includes tools for generating a
+syntactically-correct but otherwise blank beam, as well as tools for
+generating some of the more typical distributions.<br>
+
+<br>
+
+<span style="font-weight: bold;"><a name="CheckBeamMomenta"></a>CheckBeamMomenta:</span><br>
+
+<br>
+
+Check that all of the momenta in a generated beam are physically
+meaningful.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; BeamOut =
+CheckBeamMomenta( BeamIn )<br>
+
+<br>
+
+takes as its calling argument a beam data structure, BeamIn.&nbsp; For
+each ray in each bunch in the beam, the total momentum is checked (it
+must be &gt; 0), and the transverse momentum is checked (it must be
+&lt; 1).&nbsp; Any ray which has a bad momentum, according to these
+criteria, has its "stop" parameter set in the beam which is returned to
+the calling function as BeamOut.<br>
+
+<br>
+
+<span style="font-weight: bold;"><a name="CoupledTwissFromInitial"></a>CoupledTwissFromInitial:</span><br>
+
+<br>
+
+Function CoupledTwissFromInitial takes an <a href="#InitCondStruc">initial
+conditions data
+structure</a> and returns the equivalent data structure of coupled
+Twiss parameters.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; C = CoupledTwissFromInitial( Initial0 )<br>
+
+<br>
+
+The returned data structure C is a 6 x 6 x 3 structure of the initial
+Twiss parameters of the beam, including coupling, expressed in <a href="http://prst-ab.aps.org/abstract/PRSTAB/v9/i2/e024001">the Wolski
+notation</a>.<br>
+
+<br>
+
+<span style="font-weight: bold;"><a name="CreateBlankBeam"></a>CreateBlankBeam:</span><br>
+
+<br>
+
+Generate a beam which is syntactically correct but otherwise blank,
+according to certain user specifications.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; beam = CreateBlankBeam(
+nbunch, nrays, P0, interval )<br>
+
+<br>
+
+creates a beam with nbunch bunches, nrays rays per bunch, and an
+inter-bunch time of interval.&nbsp; Each ray is instantiated with a
+charge of 1.60217653e-19 coulombs (the electron charge magnitude from
+the <a href="http://pdg.lbl.gov/2004/reviews/consrpp.pdf">2004 PDG</a>),
+and a momentum of P0.&nbsp; The number of rays per bunch is nrays for
+each bunch.<br>
+
+<br>
+
+<span style="font-weight: bold;"><a name="InitCondStruc"></a>InitCondStruc:</span><br>
+
+<br>
+
+Return a blank initial condition structure.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; Initial = InitCondStruc( )<br>
+
+<br>
+
+creates a structure with the following fields:<br>
+
+<ul>
+
+  <li>Initial.Momentum:&nbsp; centroid momentum in GeV/c</li>
+  <li>Initial.x:&nbsp; horizontal beam parameters</li>
+  <ul>
+    <li>Initial.x.NEmit:&nbsp; horizontal normalized emittance in m.rad</li>
+    <li>Initial.x.pos:&nbsp; x centroid position in meters</li>
+    <li>Initial.x.ang:&nbsp; xz centroid angle in radians</li>
+    <li>Initial.x.Twiss:&nbsp; uncoupled horizontal Twiss parameters</li>
+    <ul>
+      <li>Initial.x.Twiss.beta:&nbsp; beta_x in meters</li>
+      <li>Initial.x.Twiss.alpha:&nbsp; alpha_x<br>
+      </li>
+      <li>Initial.x.Twiss.eta:&nbsp; horizontal dispersion in meters</li>
+      <li>Initial.x.Twiss.etap:&nbsp; horizontal dispersion slope in
+meters</li>
+      <li>Initial.x.Twiss.nu:&nbsp; horizontal betatron phase in meters</li>
+    </ul>
+  </ul>
+  <li>Initial.y:&nbsp; vertical parameters, same syntax as Initial.x</li>
+  <li>Initial.zpos:&nbsp; c * arrival time in meters, zpos &lt; 0 ==
+early arrival wrt reference</li>
+  <li>Initial.SigPUncorrel:&nbsp; uncorrelated RMS momentum spread in
+GeV/c</li>
+  <li>Initial.PZCorrel:&nbsp; longitudinally-correlated momentum spread
+in GeV/c/m.</li>
+  <li>Initial.NBunch:&nbsp; number of bunches</li>
+  <li>Initial.BunchInterval:&nbsp; inter-bunch spacing in seconds.</li>
+  <li>Initial.Q:&nbsp; bunch charge in Coulombs.</li>
+</ul>
+
+By and large the parameters are initialized to zero with the exception
+of the twiss parameters, total momentum, number of bunches, and bunch
+interval, each of which is initialized to 1; and the bunch charge,
+which is initialized to 1.60217653e-19.&nbsp; The Initial structure has
+the same fields as the structure returned by <a href="lattice_generation.html#XSIFToLucretia">XSIFToLucretia</a> with
+the initial beam parameters obtained from the lattice file.&nbsp; The
+Twiss substructures are in the format required by the <a href="twiss.html#GetTwiss">GetTwiss</a> operation, and the Initial
+structure is also used by MakeBeam6DGauss, MakeBeam6DSparse,
+MakeBeamPZGauss, and MakeBeamPZGrid functions.<br>
+
+<br>
+
+<span style="font-weight: bold;"><a name="MakeBeam6DGauss"></a>MakeBeam6DGauss:</span><br>
+
+<br>
+
+Generate a beam with bunches that are Gaussian-distributed in
+6-dimensional phase space.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; beam = MakeBeam6DGauss(
+Initial, nray, nsigma, allsame )<br>
+
+<br>
+
+generates a beam with nray rays per bunch, in which the ray coordinates
+are set by a Gaussian-random distribution with truncation at nsigma
+sigmas.&nbsp; Argument nsigma can be a scalar (in which case all 6
+degrees of freedom are truncated at the same level) or a vector of
+length 6 (in which case the truncation is separately specified for each
+DOF).&nbsp; Argument nray can be a scalar (in which case each bunch has
+the same number of rays) or a vector of length nbunch (in which case
+the different bunches can have different numbers of rays).&nbsp;
+Initial is an initial condition structure in the format generated by <a href="#InitCondStruc">InitCondStruc</a>, and the ray distribution
+conforms to the parameters of Initial to the limit of statistics.&nbsp;
+Each ray has a charge of Initial.Q / nray.&nbsp; If argument allsame ==
+1, then one set of rays is generated for bunch 1 and copied to each
+additional bunch (ie, each bunch starts with the same distribution of
+rays), otherwise each bunch gets a unique set of rays which conform to
+the distribution requested in Initial.&nbsp; If allsame == 1, values of
+nray(2:end) are ignored (ie, allsame overrides nray in case of a
+conflict).<br>
+
+<br>
+
+This is the typical form of a beam distribution in a ray-tracking
+program such as DIMAD, MAD, or TURTLE.<br>
+
+<br>
+
+<span style="font-weight: bold;"><a name="MakeBeam6DSparse"></a>MakeBeam6DSparse:</span><br>
+
+<br>
+
+Generate a sparse beam which conforms to a desired set of beam
+parameters.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; beam = MakeBeam6DSparse(
+Initial, nsigmas, nzgrid, npgrid )<br>
+
+<br>
+
+generates a beam in which the rays are distributed according to a grid
+in the longitudinal phase plane, with nzgrid grid points in z and
+npgrid grid points in P.&nbsp; At each grid point 9 rays are
+assigned:&nbsp; one at the nominal centroid orbit, and the remaining 8
+at +/- sqrt(9/2) sigmas in each of x, px, y, py.&nbsp; All the rays at
+a given grid point have the same charge, but the total charge per grid
+point varies according to a Gaussian distribution, with truncation at
+nsigmas sigmas; nsigmas can be a scalar or a vector of length 2,
+depending on whether truncation should be equal in P and z or
+not.&nbsp; The practical upshot of all this is a beam which has first
+and second moments which match the Initial structure in all degrees of
+freedom, but which achieves that result with relatively few rays
+compared to the distribution made by <a href="#MakeBeam6DGauss">MakeBeam6DGauss</a>.&nbsp;
+This is an emulation of the "slices and macroparticles" beam typically
+used in linac codes such as LIAR.&nbsp; The main disadvantage of the
+6DSparse distribution is that its ability to represent non-Gaussian
+transverse distributions is almost but not quite nonexistent; on the
+other hand, a 6DSparse distribution can be tracked through the lattice
+quite quickly compared to a 6DGauss distribution which has enough rays
+to accurately represent the beam.<br>
+
+<br>
+
+<span style="font-weight: bold;"><a name="MakeBeam6DWeighted"></a>MakeBeam6DWeighted</span><br>
+
+<br>
+
+Generate a beam with a uniform random distribution in 6 dimensions with
+a gaussian distributed charge weighting. This distribution is helpful
+when looking at beam loss along the BEAMLINE for example, where small
+beam losses at the tails of the beam distribution are important.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; beam = MakeBeam6DWeighted(
+Initial, nray, nsigma, allsame ) <br>
+
+<br>
+
+returns a beam structure which is similar to the output from <a href="#MakeBeam6DGauss">MakeBeam6DGauss</a>, except that the rays are
+distributed according to the Matlab uniform random number distribution
+(max +/- nsigma). Argument nsigma can be a scalar (in which case all 6
+degrees of freedom are truncated at the same level) or a vector of
+length 6 (in which case the truncation is separately specified for each
+DOF). The charge of each macro particle is assigned according to a
+gaussian distribution. If argument allsame ==
+1, then one set of rays is generated for bunch 1 and copied to each
+additional bunch (ie, each bunch starts with the same distribution of
+rays), otherwise each bunch gets a unique set of rays which conform to
+the distribution requested in Initial.&nbsp; If allsame == 1, values of
+nray(2:end) are ignored (ie, allsame overrides nray in case of a
+conflict).<br>
+
+<br>
+
+<span style="font-weight: bold;"><a name="MakeBeamPZGauss"></a>MakeBeamPZGauss:</span><br>
+
+<br>
+
+Generate a beam with a Gaussian distribution in the longitudinal
+degrees of freedom.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; beam = MakeBeamPZGauss(
+Initial, nsigmas, nray ) <br>
+
+<br>
+
+returns a beam structure which is similar to the output from <a href="beam_generation.html#MakeBeam6DGauss">MakeBeam6DGauss</a>,
+except that all
+transverse coordinates are set to the desired centroid positions while
+the longitudinal coordinates are Gaussian distributed with truncation
+at nsigmas; nsigmas can be a scalar or a vector of length 2.&nbsp;
+Argument nray is a scalar, which forces each bunch to have the same
+number of rays, and each ray has the same charge of Initial.Q /
+nray.&nbsp; The P and z coordinate distributions in each bunch are
+distinct from one another, not duplicates of one another.<br>
+
+<br>
+
+<span style="font-weight: bold;"><a name="MakeBeamPZGrid"></a>MakeBeamPZGrid:</span><br>
+
+<br>
+
+Generate a beam with zero second moments in the transverse according to
+a weighted grid in the longitudinal degrees of freedom.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; beam = MakeBeamPZGrid(
+Initial, nisgmas, nzgrid, npgrid )<br>
+
+<br>
+
+produces a distribution similar to that generated by <a href="#MakeBeam6DSparse">MakeBeam6DSparse</a> except that there is
+only 1 ray at each grid point in longitudinal space, and its transverse
+coordinates are the desired centroid coordinates in Initial.&nbsp; Thus
+the transverse second moments are zero but the longitudinal
+distribution matches the requested initial values.<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; beam = MakeBeamPZGrid(
+Initial, nisgmas, nzgrid, npgrid, nray )<br>
+
+<br>
+
+produces the same ray except with nray equally-charged rays on each
+grid point.<br>
+
+<br>
+
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a>
+<a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+
+8-April-2014<br>
+
+<a href="http://www.slac.stanford.edu/detailed.html"><img src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page" alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;" align="right"></a><br>
+
+<br>
+
+</body></html>

@@ -1,0 +1,32 @@
+%================================================================
+%  MAT-LIAR simulation; 
+%     read ground motion parameters, generate harmonics 
+%     and save their amplitudes
+%
+%  A.S. Dec.29, 2001
+%================================================================
+%
+% Set up the ground motion model 
+mat_liar('define_gm_model,');
+mat_liar('pwkfile = ''gm_model_A.data'' ');
+mat_liar('print_pwk_param');
+%
+% prepare harmonics, save their amplitudes 
+mat_liar('prepare_gm_harmonics, pwksavefile = ''am_ams_A.out'' ');
+%
+% Set up the ground motion model 
+mat_liar('define_gm_model,');
+mat_liar('pwkfile = ''gm_model_B.data'' ');
+mat_liar('print_pwk_param');
+%
+% prepare harmonics, save their amplitudes 
+mat_liar('prepare_gm_harmonics, pwksavefile = ''am_ams_B.out'' ');
+%
+% Set up the ground motion model 
+mat_liar('define_gm_model,');
+mat_liar('pwkfile = ''gm_model_C.data'' ');
+mat_liar('print_pwk_param');
+%
+% prepare harmonics, save their amplitudes 
+mat_liar('prepare_gm_harmonics, pwksavefile = ''am_ams_C.out'' ');
+%

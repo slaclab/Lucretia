@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="en-us" http-equiv="Content-Language" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Untitled 0</title>
+</head>
+
+<body>
+
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;">
+	<img src="LucretiaLogo.gif"
+ alt="LucretiaLogo"
+ style="border: 0px solid ; width: 80px; height: 90px;" align="right"
+ hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Ground Motion<br>
+<br>
+</small></span><br>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">The ability to generate BEAMLINE element offsets 
+	due to natural and cultural ground motion sources is available through the 
+	GroundMotion/matgm.m function. This uses a simple &quot;ATL&quot; model for low 
+	frequencies and a parameterized P(w,k) response for measureable intermediate 
+	(~0.1-~kHz) frequencies. The <strong>matgm</strong> function utilizes the 
+	mex file <strong>matgm_mex</strong> to generate the ground motion response. 
+	This mex file is generated from fortran code extracted from the old Liar 
+	ground motion model written by A. Seryi. The source code is in src/mexsrc/matgm. 
+	Some description of the way the fortran code works is provided through the 
+	old Liar web page on ground motion <a href="LiarGM/index.html">here</a>.<br />
+	In addition the<strong> </strong>ground motion code allows the user to 
+	attach an arbitrary transfer function to any element to simulate passive or 
+	active support structures attached between the ground and the accelerator 
+	object.<br />
+	<blockquote>
+		<strong>[dx dy] = matgm( s_coords, time, gm_model [, TF_xlist, TF_ylist, 
+		nTF])</strong></blockquote>
+	Provide vector of s coordinate values<em> s_coords </em>(e.g. from 
+	BEAMLINE.S fields) for x and y displacements to be calculated at (output dx 
+	and dy vectors are of the same length as <em>s_coords</em>).<br />
+	Request the displacements at an absolute time <em>time </em>(in seconds).<br />
+	Note on random seed generation: the random number generator for this routine 
+	is initialized upon the first function call. Subsequent calls use the same 
+	initial seed (i.e. you get the same sequence of offsets for the same 
+	sequence of <em>time</em> values). Requesting a different <em>gm_model</em> 
+	from the last function call or requesting <em>time=0</em> causes a new 
+	random seed to be generated. Note that to reset the random seed it is needed 
+	to clear the mex function memory to reset the static variables inside
+	<strong>matgm_mex</strong>. There is no way to achieve this for just the one 
+	mex file, hence all mex file static variables will be cleared which you 
+	should be aware of in case you have any other user-supplied mex files in 
+	use.<br />
+	<em>gm_model </em>should be &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;K&#39;, &#39;ATFA&#39; or &#39;ATFB&#39;. This 
+	causes <strong>matgm_mex</strong> to load in the corresponding <strong>
+	gm_model_*.dat</strong> file. This file should exist in your working 
+	directory. The files corresponding to the aforementioned models are 
+	available in the GroundMotion directory. They correspond to fits to ground 
+	motion measurements at CERN (A), DESY (B), SLAC (C) and KEK (K) and have 
+	different cultural noise characteristics. Approximately speaking, A is 
+	quieter than B which is quieter than C and K. To supply your own ground 
+	motion spectra, you can edit one of these data files.<br />
+	To apply a transfer function (TF) to a given element there must exist data 
+	files in the format &quot;tfData_N.dat&quot; in the current working directory where 1 
+	&lt;= N &lt;= <em>nTF</em> (number of TF&#39;s used). These are Liar-format TF files 
+	(PSD data). <em>TF_xList</em> and <em>TF_yList</em> should be a vector of 
+	length <em>s_coords</em> with the TF id (file) to associate with the 
+	elements in <em>s_coords</em> (0 = nothing to be assigned).<br />
+	An example TF is supplied in the GroundMotion directory (<strong>tfData_1.dat</strong>). 
+	The format of the columns is frequency (Hz), TF gain, phase (radians).<br />
+	<br>
+<br>
+	<a
+ href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+	4-Oct-2011<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC detailed home page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+
+</html>

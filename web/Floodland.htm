@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="en-us" http-equiv="Content-Language" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Untitled 0</title>
+</head>
+
+<body>
+
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;">
+	<img src="LucretiaLogo.gif"
+ alt="LucretiaLogo"
+ style="border: 0px solid ; width: 80px; height: 90px;" align="right"
+ hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Floodland<br />
+	<em>(a work in progress)</em><br>
+<br>
+</small></span><br>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">Floodland is a module for Lucretia that extends 
+	the functionality of Lucretia to include the ability to integrate into live 
+	control systems to read data and affect changes to real accelerator beamline 
+	devices. For example, to synchronize the Lucretia lattice variables 
+	(BEAMLINE,PS,GIRDER,KLYSTRON arrays) with the values currently loaded into 
+	magnets on the accelerator. Also to change magnet strengths, RF 
+	voltages/phases, mover positions and so on. The idea here is to leverage the 
+	existing philosophy of Lucretia (to realistically simulate the way an 
+	accelerator is controlled) to extend to the control system proper. This 
+	enables user code written in the simulated environment to be easily ported 
+	to a working accelerator environment (and vice-versa).<br />
+	<br />
+	The currently supported control systems are:<br />
+&nbsp;&nbsp;&nbsp; <a href="http://www.aps.anl.gov/epics/">EPICS</a>
+	<a href="http://www.slac.stanford.edu/grp/cd/soft/aida/index.html">AIDA</a><br />
+	<br />
+	The Floodland module exists as a number of classes within the Lucretia/src/Floodland 
+	directory, <strong>Floodland</strong> being the main one. I call Floodland a 
+	&quot;module&quot; as it extends, but restricts, the normal working behavior of 
+	Lucretia. In order to get the full benefit of code that works both live on 
+	the accelerator and in simulation, you have to do things &quot;the Floodland 
+	way&quot;. If you write algorithms etc. using Floodland objects you will ensure 
+	proper functionality in both simulated and live environments. You can still 
+	co-mingle with the standard set of Lucretia functions however but you have 
+	to bear in mind how things will operate in the live environment.<br />
+	In the Floodland directory are both &quot;core classes and functions&quot; that form 
+	the backbone of the module and specify how it simulates accelerators and 
+	talks to them, but also the &quot;application classes&quot;, which is to say classes 
+	that use Floodland to achieve specific accelerator tasks (e.g. orbit 
+	feedback). For now I am keeping everything in the one directory, it may be 
+	in future that a re-structuring will be needed if the number of application 
+	classes grows large.<br />
+	<br />
+	The strength of writing a Floodland application to perform an accelerator 
+	task is that it should then be portable to different accelerator 
+	environments. Each accelerator environment should just have a different 
+	configuration file which sets up the linkages between the accelerator 
+	components (magnet power supplies, mover systems, RF etc.) and the Floodland 
+	(Lucretia) accelerator components (BEAMLINE,PS,GIRDER,KLYSTRON). In practice 
+	this is quite hard to achieve- every accelerator tends to have different 
+	ways of controlling accelerator components (e.g. there are a lot of 
+	different ways of powering magnets, by powering multiple magnets in series, 
+	having various trim coils etc. etc.). It is the aim to try and make 
+	Floodland smart enough to deal with any particular case, although in 
+	practice this means adding code to the core classes each time we come across 
+	a new case not yet thought about. Eventually we hope this will become a 
+	truly global environment for applying one set of accelerator tools to all 
+	accelerators.<br />
+	<br />
+	Below is a list of classes and functions which currently makes up the 
+	Floodland module with links to full descriptions of their use. I will also 
+	in time be adding some detailed examples in the <a href="examples.html">
+	examples</a> section of the main documentation to try and make the usage a 
+	little clearer.<br />
+	<br />
+	<strong>Core Classes and Functions:</strong><br />
+	Floodland<br />
+	FlApp<br />
+	FlGui<br />
+	FlMenu<br />
+	FlUtils<br />
+	FlCA<br />
+	FlIndex<br />
+	FlInstr<br />
+	<br />
+	<strong>Application Classes:</strong><br />
+	FlSaveRestore<br />
+	FlFeedback<br />
+	<br />
+	<em><strong>A note on the name (Floodland): </strong></em>Like Lucretia, 
+	this is just a name. It comes from the name of the album the song &quot;Lucretia 
+	my Reflection&quot; which inspired the name of this software package came from by 
+	the group &quot;The Sister&#39;s of Mercy&quot;.<br />
+	<h3>Floodland</h3>
+	The class <strong>Floodland</strong> is the central object you will use in 
+	dealing when simulating or carrying out hardware access commands. It 
+	contains properties with details about high-level definitions with 
+	information about the accelerator you are interfacing with and also 
+	simulation data about the beam types used in the simulation of the 
+	accelerator. This class works in conjunction with the regular Lucretia 
+	setup, you should first define the usual BEAMLINE,PS,GIRDER,KLYSTRON 
+	structures, the input beam conditions and define Lucretia beams for tracking 
+	etc. Then instantiate this class as your central definition of the 
+	accelerator you will be interfacing with. The instantiated object is passed 
+	by reference to other Floodland classes and functions and defines how they 
+	work (e.g. whether to simulate accelerator responses or to actually try to 
+	communicate with a real control system). It also contains the methods for 
+	simulating or actually getting data from control system variables.<br />
+	<br />
+	<strong>Constructor:</strong><br />
+	<br />
+&nbsp;&nbsp;&nbsp; FL = <strong>Floodland</strong>( 
+	exptName,latticeName,latticeDate,Initial)<br />
+	<br />
+	exptName: string describing experiment associated with this object<br />
+	latticeName: name describing lattice associated with this object<br />
+	latticeDate: lattice date tag (any supported Matlab date format)<br />
+	Initial: Lucretia Initial structure<br />
+	<br />
+	<strong>Main Public Methods:</strong><br />
+	<br />
+&nbsp;&nbsp;&nbsp; FL.<strong>hwGet</strong>( indxObj [,getList] )<br />
+	<br />
+	Read hardware channels into Lucretia<br />
+	indxObj: <strong>FlIndex</strong> object or an object that inherits from 
+	this class<br />
+	getList: (optional) [vector] Only get these elements of the provided indxObj<br />
+	<br />
+&nbsp;&nbsp;&nbsp; FL.<strong>hwSet</strong>( indxObj [,putList] )<br />
+	<br />
+	Trim hardware channels to values in SetPt<br />
+	indxObj: <strong>FlIndex</strong> object or an object that inherits from 
+	this<br />
+	% class<br />
+	% putList: (optional) [double vector] Only set these elements of<br />
+	% the provided indxOnj<br />
+	<br />
+	properties<br />
+	expt % Experiment name to associate with this object<br />
+	Initial % Lucretia Initial beam structure<br />
+	BeamSingle % Single ray<br />
+	BeamMacro % Macro-particle beam<br />
+	BeamSparse % Sparse beam<br />
+	Twiss % Lattice twiss parameters (generated from Initial beam structure)<br />
+	Nmacro=1000; % Number of macro-particles in BeamMacro type<br />
+	beamSigmaCut=3; % Number of sigmas to cut when generating Macro-particle 
+	beam<br />
+	sparse_Nslice=31; % Number of longitudinal slices per beam for sparse 
+	tracking<br />
+	sparse_Nener=11; % Number of energies per slice for sparse beam tracking<br />
+	issim=true; % Simulation switch, if true tracking and hardware get/put 
+	simulated else the control system is accessed<br />
+	repRate=10; % repetition rate of machine<br />
+	latticeName % Name of lattice associated with this Floodland instance<br />
+	latticeDate % Date of lattice, datenum format<br />
+	magTrimStyle=&#39;PTRB&#39;; % PTRB or TRIM (implemented by low level controls)<br />
+	timezone % hours east GMT (set by constructor)<br />
+	end<br />
+	properties(Access=private)<br />
+	seed % random number seed<br />
+	slices % BEAMLINE element slices<br />
+	blocks % BEAMLINE element blocks<br />
+	end<br />
+<br>
+	<a
+ href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+	5-Oct-2011<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC detailed home page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+
+</html>

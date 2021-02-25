@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: R-matrices</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>R-Matrix Operations<br>
+<br>
+</small></span><br>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">Lucretia has two functions which permit
+the user to calculate the linear transfer maps ("R-matrices") in a
+beamline.<br>
+<br>
+One important note is that both of these functions compute the transfer
+map of an element for the momentum specified by BEAMLINE{}.P, and they
+perform their calculation for the nominal centerline of the axis (ie,
+misalignments are ignored).&nbsp; Furthermore, any errors in element
+excitations are also ignored.&nbsp; Matrices are computed for a "flat",
+error-free lattice.&nbsp; <br>
+<br>
+<span style="font-weight: bold;">A Note on Momentum:</span><br>
+<br>
+Since the R-matrix functions compute the maps for a given momentum P at
+each element, dispersion and momentum compaction are defined in the
+conventional way, ie, R_16 is in meters per unit of fractional momentum
+error, etc.&nbsp; Since ray position vectors in Lucretia <a
+ href="beam.html">beams</a> use actual momentum in GeV/c as their 6th
+coordinate, multiplying a Lucretia ray vector and a Lucretia R-matrix
+will give the wrong answer.<br>
+<br>
+<span style="font-weight: bold;"><a name="GetRmats"></a>GetRmats:</span><br>
+<br>
+Function GetRmats computes the individual R-matrices of each element in
+a specified range, and returns each of them to a data structure:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat,R] = GetRmats(
+elem1, elem2 ) ;<br>
+<br>
+returns a Lucretia status cell array (see <a
+ href="function_status.html">here</a> for details on that), and a data
+structure array R.&nbsp; R has only one field, RMAT, so R(1).RMAT is
+the 6 x 6 transfer map of elem1, R(2).RMAT is the map of the second,
+etc.&nbsp; Argument elem1 must be &lt;= elem2 or an error will result.<br>
+<br>
+Ill-defined or invalid elements in the selected range can cause a
+return value stat{1} == -1; otherwise stat{1} will be +1.<br>
+<br>
+<span style="font-weight: bold;"><a name="RmatAtoB"></a>RmatAtoB:</span><br>
+<br>
+Function RmatAtoB computes the linear transfer map between two points:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat,R] = RmatAtoB(
+elem1, elem2 ) <br>
+<br>
+computes the map from the upstream face of elem1 to the downstream face
+of elem2.&nbsp; Argument elem1 &lt;= elem2, or an error will
+result.&nbsp; If any element in the selected range is invalid or
+ill-defined, RmatAtoB will return stat{1} == 0 and R will be empty.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; RmatAtoB('version')<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; GetRmats('version')<br>
+<br>
+return version information on the components used to build RmatAtoB and
+GetRmats.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+24-Mar-2005<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

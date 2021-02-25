@@ -1,0 +1,124 @@
+%================================================================
+%  MAT-LIAR simulation; 
+%     read matlab file with saved amplitudes of ground motion 
+%     harmonics am(i,j) and ams(j), then generate 
+%     example of ground motion 
+%       The method of GM generation, presented below, is similar to 
+%       what is used inside of LIAR (see code!), though less effisient. 
+%       (The code of LIAR is optimized to avoid unnecessary calculations) 
+%
+%  A.S. Dec.30, 2001
+%================================================================
+%
+load am_ams_B_save;
+%
+wh=zeros(Nw,1);
+kh=zeros(Nk,1);
+dskx=zeros(Nw,Nk) ;
+dckx=zeros(Nw,Nk) ;
+sw=zeros(Nw,1);
+cw=zeros(Nw,1);
+sk=zeros(Nk,1);
+ck=zeros(Nk,1);
+%
+dk=(kmax/kmin)^(1./(Nk-1));	
+dw=(wmax/wmin)^(1./(Nw-1)); 
+%
+% Generate frequencies of harmonics
+for i=1:Nw
+   wa=wmin*dw^(i-1);
+   wb=wa*dw;
+% take w between wa and wb (which was the interval of PWK integration)
+% with uniform distribution like here, so in principle, after many 
+% seeds all frequencies will be checked.
+   wh(i)=wa+rand*(wb-wa);
+end
+% (in LIAR, actually, wh is not the same for different j, but here it is)
+%
+%
+% Generate wave numbers
+for j=1:Nk
+   ka=kmin*dk^(j-1)      ;
+   kb=ka*dk              ;
+% we do for k the same as for w
+   kh(j)=ka+rand*(kb-ka) ;          
+end 
+% ( kh also can be made different for different i )
+%
+%
+for i=1:Nw
+  for j=1:Nk
+% generate random phase ij for horizontal motion
+      phase=pi*2.*rand     ;
+% and store sin and cos of this phase
+      dskx(i,j)=sin(phase) ;
+      dckx(i,j)=cos(phase) ;  
+% generate random phase ij for vertical motion
+      phase=pi*2.*rand     ;
+      dsky(i,j)=sin(phase) ;
+      dcky(i,j)=cos(phase) ;  
+  end
+end 
+%
+% At this point the w, k and random phases are prepared. 
+% Now, as example, generate ground position at time=t, position=s(:)
+%
+tt=0.0:0.02:0.64;
+ntime=length(tt);
+ss=0.0:20.0:2560.0;
+ns=length(ss);
+%
+x=zeros(ns,ntime);
+y=zeros(ns,ntime);
+%
+for itime=1:ntime
+%
+t=tt(itime)
+%
+for i=1:Nw
+ sw(i)=sin( t*wh(i) );
+ cw(i)=cos( t*wh(i) );
+end
+%
+for is=1:ns
+%
+s=ss(is)
+t
+%
+for j=1:Nk
+ sk(j)=sin(s*kh(j));
+ ck(j)=cos(s*kh(j));
+end
+%
+% clear variables, start of double sums 
+x(is,itime)=0.;
+y(is,itime)=0.;
+for i=1:Nw
+ for j=1:Nk         
+  sinkx=sk(j)*dckx(i,j)+ck(j)*dskx(i,j);
+  sinky=sk(j)*dcky(i,j)+ck(j)*dsky(i,j);
+   x(is,itime)=x(is,itime) + am(i,j) * ( sw(i)*sinkx + (cw(i)-1.0)*sinky )*0.5;
+   y(is,itime)=y(is,itime) + am(i,j) * ( sw(i)*sinky + (cw(i)-1.0)*sinkx )*0.5;
+ end
+end
+%
+% (here one should add systematic motion. we skip it in this example)
+%
+end % loop on is
+%
+xi=x(1,itime);
+yi=y(1,itime);
+xe=x(ns,itime);
+ye=y(ns,itime);
+
+%
+for is=1:ns
+x(is,itime)=x(is,itime)-xi-(xe-xi)*(ss(is)-ss(1))/(ss(ns)-ss(1));
+y(is,itime)=y(is,itime)-yi-(ye-yi)*(ss(is)-ss(1))/(ss(ns)-ss(1));
+end
+%
+end % loop on itime
+%
+clear i j itime is xi yi xe ye ka kb wa wb phase
+save gm_generated_B_save
+%

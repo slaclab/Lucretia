@@ -1,0 +1,130 @@
+Tree: 
+<UAP_root>
+   |- <AML_representation source_file_language = "AML" filename = "lucretiatest.aml">
+      |- <laboratory>
+         |- <controller name = "con1" attribute = "sextupole:k(n=2)" design = "2">
+            |- <slave target = "S01" expression = "2.3 * con1">
+         |- <set attribute = "con1[@design]" value = "3">
+         |- <girder name = "g1">
+         |- <sector ref = "r2" repeat = "2" reflection = "true" tag = "R#COUNT">
+         |- <sector name = "root" args = "A, B">
+            |- <element ref = "S01">
+            |- <element ref = "A" tag = "Z">
+            |- <element ref = "B">
+            |- <sector girder = "g1">
+               |- <element ref = "Q03">
+         |- <global name = "god">
+            |- <aaa>
+         |- <machine name = "FIRST">
+            |- <beam>
+               |- <abc design = "7">
+            |- <sector>
+               |- <element ref = "Q02">
+               |- <element ref = "TestBend">
+         |- <machine name = "CESR">
+            |- <beam>
+               |- <n_particles err = "3.e2">
+            |- <sector ref = "root" args = "S01, Q02">
+         |- <machine name = "sum">
+            |- <machine ref = "CESR">
+            |- <machine ref = "FIRST">
+         |- <element name = "TestBend">
+            |- <length design = "2.0">
+            |- <bend>
+               |- <g design = "0.1">
+               |- <e1 design = "0">
+               |- <e2 design = "0">
+               |- <h1 design = "0">
+               |- <h2 design = "0">
+         |- <element name = "S01">
+            |- <length design = "1.0">
+            |- <sextupole>
+               |- <k n = "2" design = "1.5" err = "0.1">
+         |- <element name = "Q02">
+            |- <length design = "2.0">
+         |- <element name = "Q03">
+            |- <length design = "2 * S01[sextupole:k(n=2)]">
+         |- <set attribute = "S01[length]" value = "1.1">
+         |- <beam name = "global_beam">
+            |- <n_particles design = "3.0e7">
+            |- <total_energy design = "1.0e10" err = "0.1e10">
+            |- <position>
+               |- <p_y design = "2.0e-4">
+         |- <lattice>
+            |- <floor>
+               |- <x design = "0.345">
+               |- <phi design = ".555">
+   |- <expanded_lattice>
+      |- <control_list>
+         |- <girder name = "g1">
+                Slave: <element name = "Q03">
+         |- <controller name = "con1" attribute = "sextupole:k(n=2)" design = "3" actual = "3">
+            |- <slave target = "S01" expression = "2.3 * con1">
+                   Slave: <element name = "S01">
+                   Slave: <element name = "S01">
+      |- <global name = "god">
+         |- <aaa>
+      |- <machine name = "CESR">
+         |- <tracking_lattice>
+            |- <element name = "beginning">
+               |- <marker>
+               |- <s actual = "0">
+            |- <element name = "S01">
+                   Controller: <controller name = "con1" attribute = "sextupole:k(n=2)" design = "3" actual = "3">
+                               <slave target = "S01" expression = "2.3 * con1">
+               |- <length design = "1.1" actual = "1.1">
+               |- <sextupole>
+                  |- <k n = "2" design = "1.5" err = "0.1" actual = "1.6">
+               |- <s actual = "1.1">
+            |- <element name = "S01">
+                   Controller: <controller name = "con1" attribute = "sextupole:k(n=2)" design = "3" actual = "3">
+                               <slave target = "S01" expression = "2.3 * con1">
+               |- <length design = "1.1" actual = "1.1">
+               |- <sextupole>
+                  |- <k n = "2" design = "1.5" err = "0.1" actual = "1.6">
+               |- <s actual = "2.2">
+            |- <element name = "Q02">
+               |- <length design = "2" actual = "2">
+               |- <s actual = "4.2">
+            |- <element name = "Q03">
+                   Master: <girder name = "g1">
+               |- <length design = "3" actual = "3">
+               |- <s actual = "7.2">
+         |- <master_list>
+         |- <beam name = "global_beam">
+            |- <n_particles design = "30000000" actual = "3.00003e+07" err = "300">
+            |- <total_energy design = "1e+10" err = "1e+09" actual = "1.1e+10">
+            |- <position>
+               |- <p_y design = "0.0002" actual = "0.0002">
+         |- <lattice>
+            |- <floor>
+               |- <x design = "0.345" actual = "0.345">
+               |- <phi design = "0.555" actual = "0.555">
+      |- <machine name = "FIRST">
+         |- <tracking_lattice>
+            |- <element name = "beginning">
+               |- <marker>
+               |- <s actual = "0">
+            |- <element name = "Q02">
+               |- <length design = "2" actual = "2">
+               |- <s actual = "2">
+            |- <element name = "TestBend">
+               |- <length design = "2" actual = "2">
+               |- <bend>
+                  |- <g design = "0.1" actual = "0.1">
+                  |- <e1 design = "0" actual = "0">
+                  |- <e2 design = "0" actual = "0">
+                  |- <h1 design = "0" actual = "0">
+                  |- <h2 design = "0" actual = "0">
+               |- <s actual = "4">
+         |- <master_list>
+         |- <beam name = "global_beam">
+            |- <n_particles design = "30000000" actual = "3e+07">
+            |- <total_energy design = "1e+10" err = "1e+09" actual = "1.1e+10">
+            |- <position>
+               |- <p_y design = "0.0002" actual = "0.0002">
+            |- <abc design = "7" actual = "7">
+         |- <lattice>
+            |- <floor>
+               |- <x design = "0.345" actual = "0.345">
+               |- <phi design = "0.555" actual = "0.555">

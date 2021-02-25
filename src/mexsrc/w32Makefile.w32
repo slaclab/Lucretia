@@ -1,0 +1,93 @@
+# 
+# Makefile for construction of LucretiaMain and
+# LucretiaMatlab static libraries on Solaris and linux.
+# Uses gnu-make (gmake), not vanilla unix make
+#
+# Auth:  PT, 30-Mar-2005
+# Mod: 
+#
+#=============================================================
+
+#LCLPATH = .
+#
+# System/platform dependencies #
+#ifeq (${OSTYPE},solaris)
+#  OSSUF = _sun
+#  CCOMP = cc
+#  CFLAGS= -c -KPIC -dalign -xlibmieee -D__EXTENSIONS__ -D_POSIX_C_SOURCE=199506L -mt
+#  COPTIMFLAGS= -xO3 -xlibmil -DNDEBUG
+#endif
+#ifeq (${OSTYPE},linux)
+  OSSUF = _w32
+  CCOMP = gcc
+#  CCOMP = icc
+  CFLAGS= -c -fPIC -ansi -D_GNU_SOURCE -pthread
+  COPTIMFLAGS= -O -DNDEBUG
+#  COPTIMFLAGS = -g
+#endif
+#ifeq (${OSTYPE},linux-gnu)
+#  OSSUF = _linux
+#  CCOMP = gcc
+##  CCOMP = icc
+#  CFLAGS= -c -fPIC -ansi -D_GNU_SOURCE -pthread
+#  COPTIMFLAGS= -O -DNDEBUG
+#  COPTIMFLAGS = -g
+#endif
+
+ LMAIN  = libLucretiaMain$(OSSUF).a
+ LMATL  = libLucretiaMatlab$(OSSUF).a
+
+ MATLAB = /cygdrive/c/Program\ Files/MATLAB/R2008a
+ MATPATH = $(MATLAB)/extern/include
+
+# LucretiaMain library:
+
+ $(LMAIN) : $(LMATL)\
+	$(LMAIN)(LucretiaCommon.o) \
+	$(LMAIN)(LucretiaPhysics.o) 
+
+# LucretiaMatlab library
+
+ $(LMATL) : \
+	$(LMATL)(LucretiaMatlab.o) \
+	$(LMATL)(LucretiaMatlabErrMsg.o)
+	
+clean::
+	-rm -f *.o
+	-rm -f *.lst
+	-rm -f *.a
+
+# now for the next level of dependencies:
+
+$(LMAIN)(LucretiaCommon.o) : \
+   LucretiaCommon.c LucretiaCommon.h LucretiaPhysics.h \
+   LucretiaGlobalAccess.h LucretiaVersionProto.h \
+   LucretiaDictionary.h
+	$(CCOMP) $(CFLAGS) $(COPTIMFLAGS) LucretiaCommon.c
+	ar -ru $(LMAIN) LucretiaCommon.o
+	rm LucretiaCommon.o
+	sleep 1
+
+$(LMAIN)(LucretiaPhysics.o) : \
+   LucretiaPhysics.c LucretiaCommon.h LucretiaPhysics.h \
+   LucretiaGlobalAccess.h LucretiaVersionProto.h 
+	$(CCOMP) $(CFLAGS) $(COPTIMFLAGS) LucretiaPhysics.c
+	ar -ru $(LMAIN) LucretiaPhysics.o
+	rm LucretiaPhysics.o
+	sleep 1
+
+$(LMATL)(LucretiaMatlab.o) : \
+   LucretiaMatlab.c LucretiaGlobalAccess.h LucretiaMatlab.h \
+   LucretiaVersionProto.h
+	$(CCOMP) $(CFLAGS) $(COPTIMFLAGS) -I$(MATPATH) LucretiaMatlab.c
+	ar -ru $(LMATL) LucretiaMatlab.o
+	rm LucretiaMatlab.o
+	sleep 1
+	
+$(LMATL)(LucretiaMatlabErrMsg.o) : \
+   LucretiaMatlabErrMsg.c LucretiaGlobalAccess.h
+	$(CCOMP) $(CFLAGS) $(COPTIMFLAGS) -I$(MATPATH) LucretiaMatlabErrMsg.c
+	ar -ru $(LMATL) LucretiaMatlabErrMsg.o
+	rm LucretiaMatlabErrMsg.o
+	sleep 1
+	

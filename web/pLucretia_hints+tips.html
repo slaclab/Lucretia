@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Examples</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+	</span><font size="5">Hints and Tips for Parallel Lucretia Coding</font><span style="font-size: 24pt;"><small><br>
+<br>
+</small></span></div>
+This is a place for general comments on parallel coding in the Matlab 
+environment, I'll put more stuff here as I come across it. This is also a place 
+for examples of use of parallel coding using Lucretia, please email any 
+experience you have with this to me.<p>
+<a href="http://www.llnl.gov/computing/tutorials/parallel_comp/">A good website 
+giving an introduction to parallel computing terminology and concepts.</a><br>
+<br>
+Good practices for writing parallel code under the Matlab environment:</p>
+<ul>
+	<li>First, write good efficient serial code and use the Matlab
+	<a href="http://www.mathworks.com/access/helpdesk/help/techdoc/index.html?/access/helpdesk/help/techdoc/ref/profile.html&http://www.mathworks.com/cgi-bin/texis/webinator/search/?db=MSS&prox=page&rorder=750&rprox=750&rdfreq=500&rwfreq=500&rlead=250&sufs=0&order=r&is">
+	profiler</a> to identify the slowest pieces.</li>
+	<li>It is easy to identify parallelisable pieces of code, it is much harder 
+	to identify parts that are going to actually run faster when parallelised. 
+	There is always a fixed overhead to parallelising a piece of code, because 
+	invariably you will need to broadcast data to the parallel worker nodes and 
+	collect data back on the master node. Obviously, the overhead time should be 
+	short with respect to the processing time per node. This will depend on the 
+	number and size of data types you need to share (you should work hard to 
+	ensure that no more data passing than is strictly necessary happens) as well 
+	as the nature of the physical interconnects between your processing nodes. 
+	There are also start-up costs to think about, usually once-off transactions, 
+	where services are started up on worker nodes and data buffers are 
+	initialised etc.</li>
+	<li>When you start to to parallelise code parts, it is a good idea to code 
+	in a way that enables you to disable or scale the degree of parallelisation. 
+	So, you should have an environment variable that enables the simulation to 
+	be run as the original serial case, and with a variable number of compute 
+	nodes for the parallel version. This enables you to check the parallel 
+	speed-up and how this scales with the number of nodes.</li>
+	<li>To speed test your code changes, first run with 1 node (the serial case) 
+	and check that your code changes haven't by themselves slowed down the 
+	simulation. Then check with progressively more compute nodes to see how the 
+	simulation time scales. Without heroic efforts, the best you can hope for is 
+	to achieve a linear speed up with number of compute nodes used. And most of 
+	the time, this isn't achievable. Depending on the specific network 
+	architecture your compute nodes sit on, there will be a saturation point 
+	where adding nodes to your parallelisation problem doesn't increase the 
+	speed of execution any more. Understanding where you start to get 
+	diminishing returns from adding processors to a parallel problem is 
+	important so you don't waste resources, especially if you are distributing 
+	separate instances of the parallel code.</li>
+	<li>Whenever you make ANY change to your code, no matter how insignificant, 
+	always go through the process of speed testing to check you haven't slowed 
+	the simulation down. It is much easier and quicker to catch bugs that may 
+	creep in at this stage than later after your code has been deployed on a 
+	larger scale.</li>
+	<li>I'll say it again because you probably didn't believe me the first time, 
+	always, ALWAYS do the speed test after ANY code change- you will thank me in 
+	the end.</li>
+	<li>Some methods of parallelising your code require the entry point to be a 
+	Matlab function and not a script,&nbsp; scripts can be called from within 
+	this or other nested functions, but the main routine itself must be a 
+	function. Note, this can have consequences for any other parts of your code 
+	which may rely on variables being declared in the base Matlab workspace (for 
+	example Simulink code that uses Matlab variables- you should pass these as 
+	globals instead in this circumstance).</li>
+	<li>If you are running parallel jobs which write their results out as a 
+	file, be warned that you may run into problems with large numbers of jobs 
+	simultaneously trying to write files to the same directory or filesystem, 
+	filesystems such as NFS get easily overloaded causing unpredictable results. 
+	There are such things as parallel file systems, but unless one is being 
+	maintained for you this may constitute a lot of work to put in place 
+	depending on your level of computing expertise. One work-around if you find 
+	this to be a problem is to institute directory blocking in your code 
+	whenever a write action is performed such that only one task can write to 
+	disk at any time (or some other reduced number). How much of an impact this 
+	has on your code depends on the ratio of time a task is writing to disk 
+	compared to running.</li>
+	<li>From R2007a, Matlab is now multi-threaded. An increasing number of the 
+	built-in functions are taking advantage of this. If you have a multi-core 
+	processor you can take advantage of this by switching on the multithreading 
+	(off by default) under <i>file&gt;preferences&gt;general:multithreading</i>. 
+	Experiment with changing the number of cores used if you have more than 2- 
+	be aware, under some circumstances having multithreading switched on doesn't 
+	help, and can even make the performance of your simulation worse.</li>
+</ul>
+<p>There is an example in the <a href="pLucretia_dct.html">DCT/DCE section</a> 
+of the steps taken to parallelise Lucretia tracking for an ILC simulation that 
+provides some insight into the parallelisation process.</p>
+<p><a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>24-May-2007<br>
+<a href="http://www.slac.stanford.edu/detailed.html">
+<img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br></p>
+</body>
+</html>

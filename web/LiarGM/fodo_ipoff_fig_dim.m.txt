@@ -1,0 +1,32 @@
+
+load dimad_gm_twofodo_ipbboff_save
+
+rmsx=zeros(nsample,1);
+rmsy=zeros(nsample,1);
+
+for isample=1:nsample
+ xdiff=bpmrx(1,isample,:)-bpmrx(2,isample,:);
+ ydiff=bpmry(1,isample,:)-bpmry(2,isample,:);
+  xdiff=squeeze(xdiff);
+  ydiff=squeeze(ydiff);
+ rmsx(isample)=std(xdiff);
+ rmsy(isample)=std(ydiff);
+end
+
+figure;hs=loglog(tsample,rmsx,'r.',tsample,rmsy,'b*');
+
+sss=load('fodo12_G_pwk_int.dat')
+tff=sss(:,1);
+xff=sss(:,2);
+hold on 
+hs=loglog(tff,xff,'g-');
+
+hc=title('Two FODO linacs, relative e+ e- rms beam offset at the IP');
+    set(hc,'FontSize',14);  
+  hc=ylabel('relative e+ e- rms beam offset, m');
+    set(hc,'FontSize',12);
+  hc=xlabel('time, s');
+    set(hc,'FontSize',12);  
+  axis([0.001 100 3.e-10 5.e-7 ]); 
+  legend('x_{DIMAD in LIAR}','y_{DIMAD in LIAR}','analytics',2);
+  

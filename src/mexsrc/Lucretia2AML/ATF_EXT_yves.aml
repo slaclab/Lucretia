@@ -1,0 +1,1540 @@
+<laboratory xmlns:xi = "http://www.w3.org/2001/XInclude" aml_version = "1">
+  <comment text = "  TITLE ``ATF EXT: EXT_4ws_000418_mod``" />
+  <comment text = "  ASSIGN, PRINT=``EXT.print``" />
+  <comment text = "  ASSIGN, ECHO=``EXT.echo``" />
+  <comment text = "  OPTION, -ECHO, VERIFY, DOUBLE" />
+  <comment text = " ==============================================================================" />
+  <comment text = " 07-MAR-2005, M. Woodley [SLAC]" />
+  <comment text = "    Installed locations and naming convention for sextupoles per N. Terunuma" />
+  <comment text = " 19-JAN-2005, M. Woodley [SLAC]" />
+  <comment text = "    Add FFTB-style sextupoles for 2nd order dispersion correction; new" />
+  <comment text = "    diagnostic device location per visual survey" />
+  <comment text = " 09-DEC-2002, M. Woodley [SLAC]" />
+  <comment text = "    Add kicker for tiltmeter studies" />
+  <comment text = " 19-APR-2002, M. Woodley [SLAC]" />
+  <comment text = "    Change air-core skew quad names to QS1X and QS2X; RFBPM4 is now the beam" />
+  <comment text = "    ``tilt meter``" />
+  <comment text = " 07-APR-2001, M. Woodley [SLAC]" />
+  <comment text = "    Device locations per visual survey" />
+  <comment text = " 15-JUN-2000, M. Woodley [SLAC]" />
+  <comment text = "    New optics EXT_4ws_000418_mod; add tolerance-level sextupole component to" />
+  <comment text = "    BH1/2/3" />
+  <comment text = " 19-NOV-1999, M. Woodley [SLAC]" />
+  <comment text = "    Add skew quads; device locations per visual survey and T. Okugirsquos new EXT" />
+  <comment text = "    daihon; optics from K. Kubo; magnet effective lengths from Okugirsquos deck" />
+  <comment text = " 19-NOV-1997, M. Woodley [SLAC]" />
+  <comment text = "    Optics from EXT_dr90deg.sad; input beam from DR90DEG optics" />
+  <comment text = " 15-NOV-1997, M. Woodley [SLAC]" />
+  <comment text = "    Device locations per visual survey" />
+  <comment text = " 24-OCT-1997, M. Woodley [SLAC]" />
+  <comment text = "    From vesta::kuroda/atfext12.sad " />
+  <comment text = " ==============================================================================" />
+  <comment text = " initial conditions (entrance to DR extraction kicker)" />
+  <comment text = "design beam energy (GeV)" />
+  <constant name = "e0d" design = "1.542282" />
+  <comment text = "operating beam energy (GeV)" />
+  <constant name = "e0" design = "1.28" />
+  <comment text = "geometric horizontal emittance (m)" />
+  <constant name = "emitx" design = "2e-09" />
+  <comment text = "geometric vertical emittance (m)" />
+  <constant name = "emity" design = "2e-11" />
+  <comment text = "bunch length (m)" />
+  <constant name = "bleng" design = "0.009" />
+  <comment text = "energy spread (1)" />
+  <constant name = "esprd" design = "0.0008" />
+  <comment text = "twiss beta x (m)" />
+  <constant name = "tbetx" design = "7.2123362" />
+  <comment text = "twiss alpha x" />
+  <constant name = "talfx" design = "1.1509976" />
+  <comment text = "twiss beta y (m)" />
+  <constant name = "tbety" design = "2.9030719" />
+  <comment text = "twiss alpha y" />
+  <constant name = "talfy" design = "-1.7211736" />
+  <comment text = "eta x (m)" />
+  <constant name = "tdx" design = "0" />
+  <comment text = "etarsquo x" />
+  <constant name = "tdpx" design = "0" />
+  <comment text = "eta y (m)" />
+  <constant name = "tdy" design = "0" />
+  <comment text = "etarsquo y" />
+  <constant name = "tdpy" design = "0" />
+  <comment text = " construct input beam matrix" />
+  <constant name = "tgamx" design = "0.32233598" />
+  <constant name = "tgamy" design = "1.3649123" />
+  <constant name = "sig11" design = "1.4424672e-08" />
+  <constant name = "sig21" design = "-2.3019952e-09" />
+  <constant name = "sig22" design = "6.4467196e-10" />
+  <constant name = "sig33" design = "5.8061438e-11" />
+  <constant name = "sig43" design = "3.4423472e-11" />
+  <constant name = "sig44" design = "2.7298246e-11" />
+  <constant name = "c21" design = "-0.75488718" />
+  <constant name = "c43" design = "0.86465609" />
+  <comment text = "  SIG0  : SIGMA0, SIGX=SQRT(SIG11), SIGPX=SQRT(SIG22), R21=C21, &amp;" />
+  <comment text = "                  SIGY=SQRT(SIG33), SIGPY=SQRT(SIG44), R43=C43, &amp;" />
+  <comment text = "                  SIGT=BLENG      , SIGPT=ESPRD" />
+  <element name = "beam_in">
+    <beambeam />
+  </element>
+  <comment text = " global parameters" />
+  <constant name = "cb" design = "33.35646" />
+  <constant name = "brho" design = "51.445068" />
+  <comment text = " ==============================================================================" />
+  <comment text = " BENDs" />
+  <comment text = " ------------------------------------------------------------------------------" />
+  <constant name = "lbhitachih" design = "0.79778" />
+  <constant name = "lbhitachic" design = "1.34314" />
+  <constant name = "akick" design = "0.0025" />
+  <constant name = "asep1" design = "0.014017833" />
+  <constant name = "asep2" design = "0.037171683" />
+  <constant name = "asep3" design = "0.11751101" />
+  <constant name = "abh1" design = "0.093504331" />
+  <constant name = "abh2" design = "-0.093504331" />
+  <constant name = "abh3" design = "-0.093504331" />
+  <constant name = "abh4" design = "-0.15619959" />
+  <constant name = "abh5" design = "0.15619959" />
+  <comment text = " Kickers" />
+  <element name = "ke1x_1">
+    <bend>
+      <g design = "0.01" />
+      <e1 design = "0" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.25" />
+  </element>
+  <element name = "ke1x_2">
+    <bend>
+      <g design = "0.01" />
+      <e2 design = "0.005" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.25" />
+  </element>
+  <element name = "ke2x_1">
+    <bend>
+      <g design = "0.01" />
+      <e1 design = "0.0025" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.25" />
+  </element>
+  <element name = "ke2x_2">
+    <bend>
+      <g design = "0.01" />
+      <e2 design = "0.0025" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.25" />
+  </element>
+  <comment text = " Septa" />
+  <element name = "bs1x_1">
+    <bend>
+      <g design = "0.04672611" />
+      <e1 design = "0" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.3" />
+  </element>
+  <element name = "bs1x_2">
+    <bend>
+      <g design = "0.04672611" />
+      <e2 design = "0" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.3" />
+  </element>
+  <element name = "bs2x_1">
+    <bend>
+      <g design = "0.092929207" />
+      <e1 design = "0" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.4" />
+  </element>
+  <element name = "bs2x_2">
+    <bend>
+      <g design = "0.092929207" />
+      <e2 design = "0" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.4" />
+  </element>
+  <element name = "bs3x_1">
+    <bend>
+      <g design = "0.23502202" />
+      <e1 design = "0" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.5" />
+  </element>
+  <element name = "bs3x_2">
+    <bend>
+      <g design = "0.23502202" />
+      <e2 design = "0" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.5" />
+  </element>
+  <comment text = " Hitachi type H (Lcore=0.80)" />
+  <element name = "bh1x_1">
+    <bend>
+      <g design = "0.23441132" />
+      <e1 design = "0" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.39889" />
+  </element>
+  <element name = "bh1x_2">
+    <bend>
+      <g design = "0.23441132" />
+      <e2 design = "0" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.39889" />
+  </element>
+  <element name = "bh2x_1">
+    <bend>
+      <g design = "-0.23441132" />
+      <e1 design = "0" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.39889" />
+  </element>
+  <element name = "bh2x_2">
+    <bend>
+      <g design = "-0.23441132" />
+      <e2 design = "0" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.39889" />
+  </element>
+  <element name = "bh3x_1">
+    <bend>
+      <g design = "-0.23441132" />
+      <e1 design = "0" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.39889" />
+  </element>
+  <element name = "bh3x_2">
+    <bend>
+      <g design = "-0.23441132" />
+      <e2 design = "0" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.39889" />
+  </element>
+  <comment text = " Hitachi type C (Lcore=1.35)" />
+  <element name = "bh4x_1">
+    <bend>
+      <g design = "-0.2325887" />
+      <e1 design = "0" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.67157" />
+  </element>
+  <element name = "bh4x_2">
+    <bend>
+      <g design = "-0.2325887" />
+      <e2 design = "0" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.67157" />
+  </element>
+  <element name = "bh5x_1">
+    <bend>
+      <g design = "0.2325887" />
+      <e1 design = "0" />
+      <f_int1 design = "0.5" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.67157" />
+  </element>
+  <element name = "bh5x_2">
+    <bend>
+      <g design = "0.2325887" />
+      <e2 design = "0" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0.5" />
+    </bend>
+    <length design = "0.67157" />
+  </element>
+  <comment text = " define tolerance-level sextupole component for the BH1rsquos" />
+  <comment text = " ((B-B0)/B0 = -0.05% @ X= +-16 mm)" />
+  <constant name = "k2bh1x" design = "-0.91566921" />
+  <constant name = "k2bh2x" design = "0.91566921" />
+  <constant name = "k2bh3x" design = "0.91566921" />
+  <comment text = "VALUE, K2BH1X*LBHitachiH" />
+  <comment text = "COMMENT" />
+  <comment text = " add tolerance-level sextupole content to BH1 dipoles" />
+  <comment text = "    BH1X_1, K2=K2BH1X" />
+  <comment text = "    BH1X_2, K2=K2BH1X" />
+  <comment text = "    BH2X_1, K2=K2BH2X" />
+  <comment text = "    BH2X_2, K2=K2BH2X" />
+  <comment text = "    BH3X_1, K2=K2BH3X" />
+  <comment text = "    BH3X_2, K2=K2BH3X" />
+  <comment text = "ENDCOMMENT" />
+  <comment text = " ==============================================================================" />
+  <comment text = " QUADs" />
+  <comment text = " ------------------------------------------------------------------------------" />
+  <constant name = "lqhitachi1" design = "0.078765" />
+  <constant name = "lqhitachi2" design = "0.07867" />
+  <constant name = "lqhitachi4" design = "0.198745" />
+  <constant name = "lqhitachi5" design = "0.19861" />
+  <constant name = "lqtokin6" design = "0.078907" />
+  <comment text = " this value was set to be same as Hitachi type 2" />
+  <constant name = "lqidxskew" design = "0.07867" />
+  <constant name = "ksqm6r" design = "-0.71211753" />
+  <constant name = "ksqm7r" design = "0.3980779" />
+  <constant name = "ksqd1x" design = "-0.0480042" />
+  <constant name = "ksqd2x" design = "-0.4565547" />
+  <constant name = "ksqf1x" design = "0.3943593" />
+  <constant name = "ksqf2x" design = "0.1703535" />
+  <constant name = "ksqd3x" design = "-0.4485866" />
+  <comment text = "  1.0458" />
+  <constant name = "ksqf3x" design = "1.0851727" />
+  <comment text = "  1.5059" />
+  <constant name = "ksqf4x" design = "1.4903833" />
+  <constant name = "ksqd4x" design = "-0.7009099" />
+  <constant name = "ksqd5x" design = "-0.3025255" />
+  <constant name = "ksqf5x" design = "0.130114" />
+  <constant name = "ksqk1x" design = "0" />
+  <constant name = "ksqd6x" design = "0.2288789" />
+  <constant name = "ksqk2x" design = "0" />
+  <constant name = "ksqd7x" design = "-0.2274885" />
+  <constant name = "ksqk3x" design = "0" />
+  <constant name = "ksqf6x" design = "0.2803407" />
+  <constant name = "ksqk4x" design = "0" />
+  <constant name = "ksqd8x" design = "-0.3704479" />
+  <constant name = "ksqf7x" design = "0.5007563" />
+  <constant name = "ksqd9x" design = "-0.37" />
+  <comment text = "QM6R : QUAD, L=LQHitachi4/2, K1=KsQM6R/LQHitachi4" />
+  <comment text = "QM7R : QUAD, L=LQTokin6/2,   K1=KsQM7R/LQTokin6" />
+  <element name = "qd1x">
+    <quadrupole>
+      <k n = "1" design = "-0.61019703" />
+    </quadrupole>
+    <length design = "0.039335" />
+  </element>
+  <element name = "qd2x">
+    <quadrupole>
+      <k n = "1" design = "-5.8034155" />
+    </quadrupole>
+    <length design = "0.039335" />
+  </element>
+  <element name = "qf1x">
+    <quadrupole>
+      <k n = "1" design = "5.0128295" />
+    </quadrupole>
+    <length design = "0.039335" />
+  </element>
+  <element name = "qf2x">
+    <quadrupole>
+      <k n = "1" design = "2.1628071" />
+    </quadrupole>
+    <length design = "0.0393825" />
+  </element>
+  <element name = "qd3x">
+    <quadrupole>
+      <k n = "1" design = "-2.2586305" />
+    </quadrupole>
+    <length design = "0.099305" />
+  </element>
+  <element name = "qf3x">
+    <quadrupole>
+      <k n = "1" design = "5.4638372" />
+    </quadrupole>
+    <length design = "0.099305" />
+  </element>
+  <element name = "qf4x">
+    <quadrupole>
+      <k n = "1" design = "7.5040698" />
+    </quadrupole>
+    <length design = "0.099305" />
+  </element>
+  <element name = "qd4x">
+    <quadrupole>
+      <k n = "1" design = "-3.5290766" />
+    </quadrupole>
+    <length design = "0.099305" />
+  </element>
+  <element name = "qd5x">
+    <quadrupole>
+      <k n = "1" design = "-1.5232138" />
+    </quadrupole>
+    <length design = "0.099305" />
+  </element>
+  <element name = "qf5x">
+    <quadrupole>
+      <k n = "1" design = "0.65512311" />
+    </quadrupole>
+    <length design = "0.099305" />
+  </element>
+  <element name = "qk1x">
+    <quadrupole>
+      <k n = "1" design = "0" />
+    </quadrupole>
+    <length design = "0.039335" />
+    <orientaton>
+      <tilt design = "0.7853975" />
+    </orientaton>
+  </element>
+  <element name = "qd6x">
+    <quadrupole>
+      <k n = "1" design = "2.9006159" />
+    </quadrupole>
+    <length design = "0.0394535" />
+  </element>
+  <element name = "qk2x">
+    <quadrupole>
+      <k n = "1" design = "0" />
+    </quadrupole>
+    <length design = "0.039335" />
+    <orientaton>
+      <tilt design = "0.7853975" />
+    </orientaton>
+  </element>
+  <element name = "qd7x">
+    <quadrupole>
+      <k n = "1" design = "-1.1454031" />
+    </quadrupole>
+    <length design = "0.099305" />
+  </element>
+  <element name = "qk3x">
+    <quadrupole>
+      <k n = "1" design = "0" />
+    </quadrupole>
+    <length design = "0.039335" />
+    <orientaton>
+      <tilt design = "0.7853975" />
+    </orientaton>
+  </element>
+  <element name = "qf6x">
+    <quadrupole>
+      <k n = "1" design = "1.4115135" />
+    </quadrupole>
+    <length design = "0.099305" />
+  </element>
+  <element name = "qk4x">
+    <quadrupole>
+      <k n = "1" design = "0" />
+    </quadrupole>
+    <length design = "0.039335" />
+    <orientaton>
+      <tilt design = "0.7853975" />
+    </orientaton>
+  </element>
+  <element name = "qd8x">
+    <quadrupole>
+      <k n = "1" design = "-1.8639357" />
+    </quadrupole>
+    <length design = "0.0993725" />
+  </element>
+  <element name = "qf7x">
+    <quadrupole>
+      <k n = "1" design = "2.5195919" />
+    </quadrupole>
+    <length design = "0.0993725" />
+  </element>
+  <element name = "qd9x">
+    <quadrupole>
+      <k n = "1" design = "-1.8639357" />
+    </quadrupole>
+    <length design = "0.0993725" />
+  </element>
+  <comment text = " air-core skew quads" />
+  <element name = "qk0x">
+    <quadrupole>
+      <k n = "1" design = "0" />
+    </quadrupole>
+    <length design = "0.0425" />
+    <orientaton>
+      <tilt design = "0.7853975" />
+    </orientaton>
+  </element>
+  <element name = "qs1x">
+    <quadrupole>
+      <k n = "1" design = "0" />
+    </quadrupole>
+    <length design = "0.0391" />
+    <orientaton>
+      <tilt design = "0.7853975" />
+    </orientaton>
+  </element>
+  <element name = "qs2x">
+    <quadrupole>
+      <k n = "1" design = "0" />
+    </quadrupole>
+    <length design = "0.0391" />
+    <orientaton>
+      <tilt design = "0.7853975" />
+    </orientaton>
+  </element>
+  <comment text = " DR extraction" />
+  <comment text = " dipole field (kG)" />
+  <constant name = "bqm6r" design = "1.197188" />
+  <comment text = " bend angle (rad)" />
+  <constant name = "aqm6r" design = "0.0046250328" />
+  <comment text = " dipole field (kG)" />
+  <constant name = "bqm7r" design = "-5.829951" />
+  <comment text = " bend angle (rad)" />
+  <constant name = "aqm7r" design = "-0.0089420417" />
+  <element name = "qm6r">
+    <bend>
+      <g design = "0.023271191" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.0993725" />
+    <thick_multipole>
+      <k n = "1" design = "-3.5830714" />
+    </thick_multipole>
+  </element>
+  <element name = "qm7r">
+    <bend>
+      <g design = "-0.11332381" />
+      <f_int1 design = "0" />
+      <f_int2 design = "0" />
+    </bend>
+    <length design = "0.0394535" />
+    <thick_multipole>
+      <k n = "1" design = "5.0448997" />
+    </thick_multipole>
+  </element>
+  <comment text = " ==============================================================================" />
+  <comment text = " SEXTs" />
+  <comment text = " ------------------------------------------------------------------------------" />
+  <element name = "sd1x">
+    <sextupole>
+      <k n = "2" design = "-9.2357365" />
+    </sextupole>
+    <length design = "0.05" />
+  </element>
+  <element name = "sd2x">
+    <sextupole>
+      <k n = "2" design = "-40.083364" />
+    </sextupole>
+    <length design = "0.05" />
+  </element>
+  <element name = "sf1x">
+    <sextupole>
+      <k n = "2" design = "22.315028" />
+    </sextupole>
+    <length design = "0.05" />
+  </element>
+  <comment text = " ==============================================================================" />
+  <comment text = " correctors" />
+  <comment text = " ------------------------------------------------------------------------------" />
+  <constant name = "lcnkkh" design = "0.111921" />
+  <constant name = "lcnkkv" design = "0.1248" />
+  <comment text = " trims" />
+  <element name = "zs1x">
+    <kicker />
+    <length design = "0" />
+  </element>
+  <element name = "zs2x">
+    <kicker />
+    <length design = "0" />
+  </element>
+  <element name = "zs3x">
+    <kicker />
+    <length design = "0" />
+  </element>
+  <element name = "zx1x">
+    <kicker />
+    <length design = "0" />
+  </element>
+  <element name = "zx2x">
+    <kicker />
+    <length design = "0" />
+  </element>
+  <element name = "zx3x">
+    <kicker />
+    <length design = "0" />
+  </element>
+  <element name = "zx4x">
+    <kicker />
+    <length design = "0" />
+  </element>
+  <element name = "zx5x">
+    <kicker />
+    <length design = "0" />
+  </element>
+  <comment text = " NKK type H (Lcore=0.06)" />
+  <element name = "zh1x">
+    <kicker />
+    <length design = "0.111921" />
+  </element>
+  <element name = "zh2x">
+    <kicker />
+    <length design = "0.111921" />
+  </element>
+  <element name = "zh3x">
+    <kicker />
+    <length design = "0.111921" />
+  </element>
+  <element name = "zh4x">
+    <kicker />
+    <length design = "0.111921" />
+  </element>
+  <element name = "zh5x">
+    <kicker />
+    <length design = "0.111921" />
+  </element>
+  <element name = "zh6x">
+    <kicker />
+    <length design = "0.111921" />
+  </element>
+  <element name = "zh7x">
+    <kicker />
+    <length design = "0.111921" />
+  </element>
+  <comment text = " NKK type V (Lcore=0.06)" />
+  <element name = "zv1x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <element name = "zv2x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <element name = "zv3x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <element name = "zv4x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <element name = "zv5x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <element name = "zv6x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <element name = "zv7x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <element name = "zv8x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <element name = "zv9x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <element name = "zv10x">
+    <kicker />
+    <length design = "0.1248" />
+  </element>
+  <comment text = " ==============================================================================" />
+  <comment text = " DRIFs" />
+  <comment text = " ------------------------------------------------------------------------------" />
+  <element name = "l001">
+    <length design = "0.9231275" />
+  </element>
+  <comment text = "L002 : DRIF, L=1.4631275" />
+  <element name = "l003">
+    <length design = "0.0855465" />
+  </element>
+  <element name = "l004">
+    <length design = "0.1505465" />
+  </element>
+  <element name = "l005">
+    <length design = "0.2" />
+  </element>
+  <element name = "l006">
+    <length design = "0.1" />
+  </element>
+  <element name = "l007">
+    <length design = "0.1" />
+  </element>
+  <element name = "l101">
+    <length design = "0.24" />
+  </element>
+  <element name = "l102">
+    <length design = "0.3476" />
+  </element>
+  <element name = "l103">
+    <length design = "0.1176" />
+  </element>
+  <element name = "l104">
+    <length design = "0.2" />
+  </element>
+  <element name = "l105">
+    <length design = "0.020665" />
+  </element>
+  <element name = "l106">
+    <length design = "0.351775" />
+  </element>
+  <element name = "l201">
+    <length design = "0.291775" />
+  </element>
+  <element name = "l202">
+    <length design = "0.158265" />
+  </element>
+  <comment text = "L203 : DRIF, L=0.4426" />
+  <element name = "l204">
+    <length design = "0.020665" />
+  </element>
+  <comment text = "L205 : DRIF, L=0.326775" />
+  <comment text = "L301 : DRIF, L=1.11111" />
+  <element name = "l302">
+    <length design = "0.0206175" />
+  </element>
+  <element name = "l303">
+    <length design = "0.5182175" />
+  </element>
+  <element name = "l304">
+    <length design = "0.1116395" />
+  </element>
+  <element name = "l305">
+    <length design = "0.4866395" />
+  </element>
+  <element name = "l306">
+    <length design = "0.3226" />
+  </element>
+  <element name = "l307">
+    <length design = "0.020695" />
+  </element>
+  <element name = "l308">
+    <length design = "0.153295" />
+  </element>
+  <element name = "l309">
+    <length design = "0.7326" />
+  </element>
+  <element name = "l310">
+    <length design = "0.2740395" />
+  </element>
+  <element name = "l311">
+    <length design = "0.1840395" />
+  </element>
+  <element name = "l312">
+    <length design = "0.26" />
+  </element>
+  <element name = "l313">
+    <length design = "0.020695" />
+  </element>
+  <comment text = "L314 : DRIF, L=0.710695" />
+  <element name = "l315">
+    <length design = "0.27111" />
+  </element>
+  <comment text = "L401 : DRIF, L=0.37111" />
+  <element name = "l402">
+    <length design = "0.020695" />
+  </element>
+  <comment text = "L403 : DRIF, L=0.46139" />
+  <element name = "l404">
+    <length design = "0.088295" />
+  </element>
+  <element name = "l405">
+    <length design = "0.1166395" />
+  </element>
+  <comment text = "L406 : DRIF, L=0.8590395" />
+  <comment text = "0.310279 !0.5140395" />
+  <element name = "l407">
+    <length design = "0.4522395" />
+  </element>
+  <comment text = "L408 : DRIF, L=0.1440395" />
+  <element name = "l409">
+    <length design = "0.020695" />
+  </element>
+  <element name = "l410">
+    <length design = "0.375695" />
+  </element>
+  <element name = "l411">
+    <length design = "0.22243" />
+  </element>
+  <element name = "l501">
+    <length design = "0.379125" />
+  </element>
+  <element name = "l502">
+    <length design = "0.07136" />
+  </element>
+  <element name = "l503">
+    <length design = "0.1562115" />
+  </element>
+  <element name = "l504">
+    <length design = "0.0605465" />
+  </element>
+  <element name = "l505">
+    <length design = "0.2826" />
+  </element>
+  <comment text = "L506 : DRIF, L=0.3776" />
+  <element name = "l507">
+    <length design = "0.2540395" />
+  </element>
+  <element name = "l508">
+    <length design = "0.0147045" />
+  </element>
+  <element name = "l509">
+    <length design = "0.07636" />
+  </element>
+  <element name = "l510">
+    <length design = "0.060695" />
+  </element>
+  <comment text = "L511 : DRIF, L=0.2776" />
+  <comment text = "L512 : DRIF, L=1.3146395" />
+  <comment text = "0.0167045" />
+  <element name = "l513">
+    <length design = "0.0273545" />
+  </element>
+  <element name = "l514">
+    <length design = "0.07636" />
+  </element>
+  <element name = "l515">
+    <length design = "0.060695" />
+  </element>
+  <element name = "l516">
+    <length design = "0.23" />
+  </element>
+  <element name = "l517">
+    <length design = "0.35" />
+  </element>
+  <comment text = "L518 : DRIF, L=1.0676" />
+  <element name = "l519">
+    <length design = "0.023265" />
+  </element>
+  <element name = "l520">
+    <length design = "0.0662925" />
+  </element>
+  <element name = "l521">
+    <length design = "0.0606275" />
+  </element>
+  <element name = "l522">
+    <length design = "0.245" />
+  </element>
+  <comment text = "L523 : DRIF, L=1.4190395" />
+  <element name = "l524">
+    <length design = "0.164667" />
+  </element>
+  <element name = "l525">
+    <length design = "0.0606275" />
+  </element>
+  <element name = "l526">
+    <length design = "0.26" />
+  </element>
+  <comment text = "0.4750" />
+  <element name = "l527">
+    <length design = "0.41295" />
+  </element>
+  <comment text = "L528 : DRIF, L=0.3150" />
+  <comment text = "0.6076" />
+  <element name = "l529">
+    <length design = "0.42585" />
+  </element>
+  <element name = "l530">
+    <length design = "0.1582275" />
+  </element>
+  <element name = "l531">
+    <length design = "0.0606275" />
+  </element>
+  <element name = "l532">
+    <length design = "0.24" />
+  </element>
+  <element name = "l533">
+    <length design = "0.32843" />
+  </element>
+  <element name = "l601">
+    <length design = "0.67343" />
+  </element>
+  <element name = "l602">
+    <length design = "0.685" />
+  </element>
+  <element name = "l002a">
+    <length design = "1.3981275" />
+  </element>
+  <element name = "l002b">
+    <length design = "0.065" />
+  </element>
+  <element name = "l203a">
+    <length design = "0.1026" />
+  </element>
+  <element name = "l203b">
+    <length design = "0.34" />
+  </element>
+  <element name = "l205a">
+    <length design = "0.025665" />
+  </element>
+  <element name = "l205b">
+    <length design = "0.21611" />
+  </element>
+  <element name = "l301a">
+    <length design = "0.7796925" />
+  </element>
+  <element name = "l301b">
+    <length design = "0.109" />
+  </element>
+  <element name = "l301c">
+    <length design = "0.0442175" />
+  </element>
+  <element name = "l314a">
+    <length design = "0.590695" />
+  </element>
+  <element name = "l314b">
+    <length design = "0.13" />
+  </element>
+  <element name = "l401a">
+    <length design = "0.160115" />
+  </element>
+  <element name = "l401b">
+    <length design = "0.110995" />
+  </element>
+  <element name = "l403a">
+    <length design = "0.366595" />
+  </element>
+  <element name = "l403b">
+    <length design = "0.016595" />
+  </element>
+  <element name = "l406a">
+    <length design = "0.3390395" />
+  </element>
+  <element name = "l406b">
+    <length design = "0.2" />
+  </element>
+  <element name = "l406c">
+    <length design = "0.17" />
+  </element>
+  <element name = "l406d">
+    <length design = "0.15" />
+  </element>
+  <element name = "l408a">
+    <length design = "0.0034395" />
+  </element>
+  <element name = "l408b">
+    <length design = "0.1024" />
+  </element>
+  <element name = "l506a">
+    <length design = "0.1226" />
+  </element>
+  <element name = "l506b">
+    <length design = "0.255" />
+  </element>
+  <element name = "l511a">
+    <length design = "0.2" />
+  </element>
+  <element name = "l511b">
+    <length design = "0.0776" />
+  </element>
+  <element name = "l512a">
+    <length design = "0.235625" />
+  </element>
+  <element name = "l512b">
+    <length design = "0.3048" />
+  </element>
+  <element name = "l512c">
+    <length design = "0.3048" />
+  </element>
+  <element name = "l512d">
+    <length design = "0.4587645" />
+  </element>
+  <element name = "l518a">
+    <length design = "0.2016" />
+  </element>
+  <element name = "l518b">
+    <length design = "0.371475" />
+  </element>
+  <element name = "l518c">
+    <length design = "0.494525" />
+  </element>
+  <element name = "l523a">
+    <length design = "0.196175" />
+  </element>
+  <element name = "l523b">
+    <length design = "0.492125" />
+  </element>
+  <element name = "l523c">
+    <length design = "0.3193895" />
+  </element>
+  <element name = "l523c1">
+    <length design = "0.1351" />
+  </element>
+  <element name = "l523d">
+    <length design = "0.27625" />
+  </element>
+  <element name = "l528a">
+    <length design = "0.2794" />
+  </element>
+  <element name = "l528b">
+    <length design = "0.2794" />
+  </element>
+  <comment text = " ==============================================================================" />
+  <comment text = " diagnostic devices" />
+  <comment text = " ------------------------------------------------------------------------------" />
+  <element name = "mb1x">
+    <instrument />
+  </element>
+  <element name = "mb2x">
+    <instrument />
+  </element>
+  <element name = "ml1x">
+    <instrument />
+  </element>
+  <element name = "ml2x">
+    <instrument />
+  </element>
+  <element name = "ml3x">
+    <instrument />
+  </element>
+  <element name = "ml4x">
+    <instrument />
+  </element>
+  <element name = "ml5x">
+    <instrument />
+  </element>
+  <element name = "ml6x">
+    <instrument />
+  </element>
+  <element name = "ml7x">
+    <instrument />
+  </element>
+  <element name = "ml8x">
+    <instrument />
+  </element>
+  <element name = "ml9x">
+    <instrument />
+  </element>
+  <element name = "ml10x">
+    <instrument />
+  </element>
+  <element name = "ml11x">
+    <instrument />
+  </element>
+  <element name = "ml12x">
+    <instrument />
+  </element>
+  <element name = "ml13x">
+    <instrument />
+  </element>
+  <element name = "ml14x">
+    <instrument />
+  </element>
+  <element name = "ms1x">
+    <instrument />
+  </element>
+  <element name = "ms2x">
+    <instrument />
+  </element>
+  <element name = "ms3x">
+    <instrument />
+  </element>
+  <element name = "ms4x">
+    <instrument />
+  </element>
+  <element name = "ms5x">
+    <instrument />
+  </element>
+  <element name = "ms6x">
+    <instrument />
+  </element>
+  <element name = "mw0x">
+    <instrument />
+  </element>
+  <element name = "mw1x">
+    <instrument />
+  </element>
+  <element name = "mw2x">
+    <instrument />
+  </element>
+  <element name = "mw3x">
+    <instrument />
+  </element>
+  <element name = "mw4x">
+    <instrument />
+  </element>
+  <comment text = " ==============================================================================" />
+  <comment text = " MARKERs" />
+  <comment text = " ------------------------------------------------------------------------------" />
+  <comment text = " BETX= 7.212336223404444, ALFX=  1.1509975629194" />
+  <element name = "iex">
+    <marker />
+  </element>
+  <comment text = " BETY= 2.903071934784747, ALFY= -1.7211735963534" />
+  <comment text = " EMITX= 1.5e-09, EMITY= 1.0e-10, DP= 6.0e-4" />
+  <element name = "iex1">
+    <marker />
+  </element>
+  <comment text = " start of dispersion-free diagnostic straight section" />
+  <element name = "ip2">
+    <marker />
+  </element>
+  <comment text = " end of dispersion-free diagnostic straight section" />
+  <element name = "ip3">
+    <marker />
+  </element>
+  <element name = "iex3">
+    <marker />
+  </element>
+  <element name = "ip01">
+    <marker />
+  </element>
+  <element name = "ip02">
+    <marker />
+  </element>
+  <element name = "ipt1">
+    <marker />
+  </element>
+  <element name = "ipt2">
+    <marker />
+  </element>
+  <comment text = " COORD  C1      = ( DX =  5.91250000000e-3 CHI1 =  5.0000000000e-3 DIR = 1 )" />
+  <comment text = "        C2      = ( DX =  7.21506000000e-3 CHI1 = -9.4728400000e-3 DIR = 0 )" />
+  <comment text = "        C3      = ( DX = 22.06400000000e-3 CHI1 =  9.4728400000e-3 DIR = 1 )" />
+  <comment text = "        C4      = ( DX = 22.38000000000e-3 CHI1 = -1.0253300000e-3 DIR = 0 )" />
+  <comment text = "        CC1     = ( DX = -5.33509413516e-6 CHI1 = -9.1335655955e-5 DIR = 0 )" />
+  <comment text = "        CC2     = ( DX = -2.60968933239e-7 CHI1 = -2.2971681536e-5 DIR = 0 )" />
+  <element name = "c1">
+    <marker />
+  </element>
+  <element name = "c2">
+    <marker />
+  </element>
+  <element name = "c3">
+    <marker />
+  </element>
+  <element name = "c4">
+    <marker />
+  </element>
+  <element name = "cc1">
+    <marker />
+  </element>
+  <element name = "cc2">
+    <marker />
+  </element>
+  <element name = "coll">
+    <marker />
+  </element>
+  <element name = "gv1">
+    <marker />
+  </element>
+  <element name = "gv2">
+    <marker />
+  </element>
+  <element name = "bpm1b">
+    <marker />
+  </element>
+  <element name = "laser">
+    <marker />
+  </element>
+  <element name = "bpm2b">
+    <marker />
+  </element>
+  <element name = "gv3">
+    <marker />
+  </element>
+  <element name = "rfbpm1">
+    <marker />
+  </element>
+  <element name = "cbpm1s">
+    <marker />
+    <description>
+      <type string = "SLAC" />
+    </description>
+  </element>
+  <element name = "cbpm2s">
+    <marker />
+    <description>
+      <type string = "SLAC" />
+    </description>
+  </element>
+  <element name = "cbpm3s">
+    <marker />
+    <description>
+      <type string = "SLAC" />
+    </description>
+  </element>
+  <element name = "rfbpm2">
+    <marker />
+  </element>
+  <element name = "fkick">
+    <marker />
+    <description>
+      <type string = "FEATHER" />
+    </description>
+  </element>
+  <element name = "fbpm">
+    <marker />
+    <description>
+      <type string = "FEATHER" />
+    </description>
+  </element>
+  <element name = "odr">
+    <marker />
+  </element>
+  <element name = "cbpm1k">
+    <marker />
+    <description>
+      <type string = "KEK" />
+    </description>
+  </element>
+  <element name = "cbpm2k">
+    <marker />
+    <description>
+      <type string = "KEK" />
+    </description>
+  </element>
+  <element name = "cbpm3k">
+    <marker />
+    <description>
+      <type string = "KEK" />
+    </description>
+  </element>
+  <element name = "cbpmk2">
+    <marker />
+    <description>
+      <type string = "KEK2" />
+    </description>
+  </element>
+  <comment text = " ==============================================================================" />
+  <comment text = " BEAMLINEs" />
+  <comment text = " ------------------------------------------------------------------------------" />
+  <sector name = "lke1">
+    <element ref = "ke1x_1" />
+    <element ref = "ip01" />
+    <element ref = "ke1x_2" />
+  </sector>
+  <sector name = "lke2">
+    <element ref = "ke2x_1" />
+    <element ref = "ip02" />
+    <element ref = "ke2x_2" />
+  </sector>
+  <sector name = "lbs1">
+    <element ref = "bs1x_1" />
+    <element ref = "zs1x" />
+    <element ref = "bs1x_2" />
+  </sector>
+  <sector name = "lbs2">
+    <element ref = "bs2x_1" />
+    <element ref = "zs2x" />
+    <element ref = "bs2x_2" />
+  </sector>
+  <sector name = "lbs3">
+    <element ref = "bs3x_1" />
+    <element ref = "zs3x" />
+    <element ref = "bs3x_2" />
+  </sector>
+  <sector name = "lbh1">
+    <element ref = "bh1x_1" />
+    <element ref = "zx1x" />
+    <element ref = "bh1x_2" />
+  </sector>
+  <sector name = "lbh2">
+    <element ref = "bh2x_1" />
+    <element ref = "zx2x" />
+    <element ref = "bh2x_2" />
+  </sector>
+  <sector name = "lbh3">
+    <element ref = "bh3x_1" />
+    <element ref = "zx3x" />
+    <element ref = "bh3x_2" />
+  </sector>
+  <sector name = "lbh4">
+    <element ref = "bh4x_1" />
+    <element ref = "zx4x" />
+    <element ref = "bh4x_2" />
+  </sector>
+  <sector name = "lbh5">
+    <element ref = "bh5x_1" />
+    <element ref = "zx5x" />
+    <element ref = "bh5x_2" />
+  </sector>
+  <sector name = "lqm6">
+    <element ref = "c1" />
+    <element ref = "qm6r" />
+    <element ref = "qm6r" />
+    <element ref = "c2" />
+    <element ref = "ipt1" />
+    <element ref = "cc1" />
+  </sector>
+  <sector name = "lqm7">
+    <element ref = "c3" />
+    <element ref = "qm7r" />
+    <element ref = "qm7r" />
+    <element ref = "c4" />
+    <element ref = "ipt2" />
+    <element ref = "cc2" />
+  </sector>
+  <sector name = "lqd1">
+    <element ref = "qd1x" />
+    <element ref = "qd1x" />
+  </sector>
+  <sector name = "lqd2">
+    <element ref = "qd2x" />
+    <element ref = "qd2x" />
+  </sector>
+  <sector name = "lqd3">
+    <element ref = "qd3x" />
+    <element ref = "qd3x" />
+  </sector>
+  <sector name = "lqd4">
+    <element ref = "qd4x" />
+    <element ref = "qd4x" />
+  </sector>
+  <sector name = "lqd5">
+    <element ref = "qd5x" />
+    <element ref = "qd5x" />
+  </sector>
+  <sector name = "lqd6">
+    <element ref = "qd6x" />
+    <element ref = "qd6x" />
+  </sector>
+  <sector name = "lqd7">
+    <element ref = "qd7x" />
+    <element ref = "qd7x" />
+  </sector>
+  <sector name = "lqd8">
+    <element ref = "qd8x" />
+    <element ref = "qd8x" />
+  </sector>
+  <sector name = "lqd9">
+    <element ref = "qd9x" />
+    <element ref = "qd9x" />
+  </sector>
+  <sector name = "lqf1">
+    <element ref = "qf1x" />
+    <element ref = "qf1x" />
+  </sector>
+  <sector name = "lqf2">
+    <element ref = "qf2x" />
+    <element ref = "qf2x" />
+  </sector>
+  <sector name = "lqf3">
+    <element ref = "qf3x" />
+    <element ref = "qf3x" />
+  </sector>
+  <sector name = "lqf4">
+    <element ref = "qf4x" />
+    <element ref = "qf4x" />
+  </sector>
+  <sector name = "lqf5">
+    <element ref = "qf5x" />
+    <element ref = "qf5x" />
+  </sector>
+  <sector name = "lqf6">
+    <element ref = "qf6x" />
+    <element ref = "qf6x" />
+  </sector>
+  <sector name = "lqf7">
+    <element ref = "qf7x" />
+    <element ref = "qf7x" />
+  </sector>
+  <sector name = "lqk1">
+    <element ref = "qk1x" />
+    <element ref = "qk1x" />
+  </sector>
+  <sector name = "lqk2">
+    <element ref = "qk2x" />
+    <element ref = "qk2x" />
+  </sector>
+  <sector name = "lqk3">
+    <element ref = "qk3x" />
+    <element ref = "qk3x" />
+  </sector>
+  <sector name = "lqk4">
+    <element ref = "qk4x" />
+    <element ref = "qk4x" />
+  </sector>
+  <sector name = "l002">
+    <element ref = "l002a" />
+    <element ref = "coll" />
+    <element ref = "l002b" />
+  </sector>
+  <sector name = "l203">
+    <element ref = "l203a" />
+    <element ref = "gv1" />
+    <element ref = "l203b" />
+  </sector>
+  <sector name = "l205">
+    <element ref = "l205a" />
+    <element ref = "qk0x" />
+    <element ref = "qk0x" />
+    <element ref = "l205b" />
+  </sector>
+  <sector name = "l301">
+    <element ref = "l301a" />
+    <element ref = "qs1x" />
+    <element ref = "qs1x" />
+    <element ref = "l301b" />
+    <element ref = "sd1x" />
+    <element ref = "sd1x" />
+    <element ref = "l301c" />
+  </sector>
+  <sector name = "l314">
+    <element ref = "l314a" />
+    <element ref = "gv2" />
+    <element ref = "l314b" />
+  </sector>
+  <sector name = "l401">
+    <element ref = "l401a" />
+    <element ref = "sd2x" />
+    <element ref = "sd2x" />
+    <element ref = "l401b" />
+  </sector>
+  <sector name = "l403">
+    <element ref = "l403a" />
+    <element ref = "qs2x" />
+    <element ref = "qs2x" />
+    <element ref = "l403b" />
+  </sector>
+  <sector name = "l406">
+    <element ref = "l406a" />
+    <element ref = "coll" />
+    <element ref = "l406b" />
+    <element ref = "bpm1b" />
+    <element ref = "l406c" />
+    <element ref = "laser" />
+    <element ref = "l406d" />
+  </sector>
+  <comment text = "L407 : LINE=( L407a,   LASER,   L407b,   BPM2B,   L407c    )" />
+  <sector name = "l408">
+    <element ref = "l408a" />
+    <element ref = "sf1x" />
+    <element ref = "sf1x" />
+    <element ref = "l408b" />
+  </sector>
+  <sector name = "l506">
+    <element ref = "l506a" />
+    <element ref = "gv3" />
+    <element ref = "l506b" />
+  </sector>
+  <sector name = "l511">
+    <element ref = "l511a" />
+    <element ref = "rfbpm1" />
+    <element ref = "l511b" />
+  </sector>
+  <sector name = "l512">
+    <element ref = "l512a" />
+    <element ref = "cbpm1s" />
+    <element ref = "l512b" />
+    <element ref = "cbpm2s" />
+    <element ref = "l512c" />
+    <element ref = "cbpm3s" />
+    <element ref = "l512d" />
+  </sector>
+  <sector name = "l518">
+    <element ref = "l518a" />
+    <element ref = "rfbpm2" />
+    <element ref = "l518b" />
+    <element ref = "fkick" />
+    <element ref = "l518c" />
+  </sector>
+  <sector name = "l523">
+    <element ref = "l523a" />
+    <element ref = "fbpm" />
+    <element ref = "l523b" />
+    <element ref = "odr" />
+    <element ref = "l523c" />
+  </sector>
+  <sector name = "l528">
+    <element ref = "cbpm1k" />
+    <element ref = "l528a" />
+    <element ref = "cbpm2k" />
+    <element ref = "l528b" />
+    <element ref = "cbpm3k" />
+  </sector>
+  <comment text = " Definition of the LINE for KEK-ATF extraction line." />
+  <sector name = "ex0">
+    <element ref = "iex" />
+    <sector ref = "lke1" />
+    <element ref = "l001" />
+    <sector ref = "lqm6" />
+    <sector ref = "l002" />
+    <element ref = "mb1x" />
+    <element ref = "l003" />
+    <sector ref = "lqm7" />
+    <element ref = "l004" />
+    <sector ref = "lbs1" />
+    <element ref = "l005" />
+    <sector ref = "lbs2" />
+    <element ref = "l006" />
+    <element ref = "mb2x" />
+    <element ref = "l007" />
+    <sector ref = "lbs3" />
+  </sector>
+  <sector name = "ex1">
+    <element ref = "iex1" />
+    <element ref = "l101" />
+  </sector>
+  <sector name = "ex2">
+    <element ref = "ip2" />
+    <element ref = "l501" />
+    <sector ref = "lqf5" />
+    <element ref = "l502" />
+    <sector ref = "lqk1" />
+    <element ref = "l503" />
+    <sector ref = "lqd6" />
+    <element ref = "l504" />
+    <element ref = "ml8x" />
+    <element ref = "l505" />
+    <element ref = "zv7x" />
+    <sector ref = "l506" />
+    <element ref = "mw0x" />
+    <element ref = "l507" />
+    <element ref = "zh4x" />
+    <element ref = "l508" />
+    <sector ref = "lqk2" />
+    <element ref = "l509" />
+    <sector ref = "lqd7" />
+    <element ref = "l510" />
+    <element ref = "ml9x" />
+    <sector ref = "l511" />
+    <element ref = "zv8x" />
+    <sector ref = "l512" />
+    <element ref = "zh5x" />
+    <element ref = "l513" />
+    <sector ref = "lqk3" />
+    <element ref = "l514" />
+    <sector ref = "lqf6" />
+    <element ref = "l515" />
+    <element ref = "ml10x" />
+    <element ref = "l516" />
+    <element ref = "ms5x" />
+    <element ref = "l517" />
+    <element ref = "mw1x" />
+    <sector ref = "l518" />
+    <element ref = "zv9x" />
+    <element ref = "l519" />
+    <sector ref = "lqk4" />
+    <element ref = "l520" />
+    <sector ref = "lqd8" />
+    <element ref = "l521" />
+    <element ref = "ml11x" />
+    <element ref = "l522" />
+    <element ref = "mw2x" />
+    <sector ref = "l523" />
+    <element ref = "zh6x" />
+    <element ref = "l524" />
+    <sector ref = "lqf7" />
+    <element ref = "l525" />
+    <element ref = "ml12x" />
+    <element ref = "l526" />
+    <element ref = "mw3x" />
+    <element ref = "l527" />
+  </sector>
+  <sector name = "ext">
+    <sector ref = "ex0" />
+    <sector ref = "ex1" />
+    <sector ref = "ex2" />
+  </sector>
+  <comment text = "RETURN" />
+</laboratory>

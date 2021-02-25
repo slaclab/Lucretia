@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Errors and Misalignments</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img alt="LucretiaLogo"
+ title="Lucretia home page" src="LucretiaLogo.gif"
+ style="border: 0px solid ; width: 80px; height: 90px;" align="right"
+ hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Errors and Misalignments<br>
+<br>
+</small></span></div>
+Lucretia uses a specialized data structure called an <span
+ style="font-style: italic;">error group</span> to manage its errors
+and misalignments.&nbsp; An error group, as the name suggests, is a
+collection of elements, slices, or blocks which will have errors and
+misalignments applied to them.&nbsp; Consider for example the case of
+the International Linear Collider:&nbsp; the magnets in the linac are
+superconducting magnets which share a common cryostat with several
+accelerating structures, while the beam delivery system magnets are
+almost all room-temperature iron-dominated magnets.&nbsp; It is likely
+that the misalignments of the linac magnets can be represented by a
+Gaussian distribution of some width, while the beam delivery system
+magnet misalignments can be represented by a Gaussian distribution of a
+different width.&nbsp; Ensuring that all the linac magnets get one
+distribution of errors, while all the BDS magnets get a different one,
+can be achieved by defining an error group for the linac magnets and a
+different error group for the BDS magnets.<br>
+<br>
+<span style="font-weight: bold;"><a name="MakeErrorGroup"></a>MakeErrorGroup:</span><br>
+<br>
+Define an error group.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat, group] =
+MakeErrorGroup( table, range, errorname, use_sliceblock, comment )<br>
+<br>
+selects a subset of the members of a data structure to be part of the
+error group.&nbsp; Arguments are as follows:<br>
+<ul>
+  <li>table:&nbsp; either a string or a cell array of strings.&nbsp;
+The first string must be the name of the Lucretia data strucutre which
+has the members of the error group, and can be 'BEAMLINE', 'KLYSTRON',
+'PS', or 'GIRDER'.&nbsp; If table{1} == 'BEAMLINE', then table{2} and
+table{3} are optional parameters which allow selection of only certain
+classes or certain named elements.&nbsp; For example, if table{2} ==
+'LCAV' then only RF structures will be included in the error group; if
+table{2} == 'LCAV' and table{3} == 'LCAV01' then only RF structures
+named 'LCAV01' will be included.&nbsp; Multiple classes can be included
+in one error group by using a cell array of class names for Table{2}
+(ie, if Table{2} == {'LCAV' , 'TCAV'} then the error group will include
+both accelerating structures and deflecting structures).&nbsp;
+Similarly, if Table{3} is a cell array of element names, then multiple
+element names can be included in the error group.&nbsp; Finally, the
+names in Table{3} can be Matlab regular expressions, in which case all
+the elements with names which fit the expression will be included.<br>
+  </li>
+  <li>range:&nbsp; a 1 x 2 vector with the starting and ending index
+values of the error group members in the table.&nbsp; <br>
+  </li>
+  <li>errorname:&nbsp; name of a valid error for the group, which is
+'Offset' for GIRDERs, 'dAmpl' or 'dPhase' for KLYSTRONs, 'dAmpl' for
+PS's, 'dB', 'dB(1)', 'dB(2)', or 'Offset' for magnet members of
+BEAMLINE, 'dV', 'dPhase',
+'Offset', or 'BPMOffset' for LCAV members of BEAMLINE, 'dScale',
+'Offset' or
+'ElecOffset' for BPM members of BEAMLINE, and 'Offset' for instrument
+members of BEAMLINE.<br>
+  </li>
+  <li>use_sliceblock:&nbsp; if this scalar == 0, then slices and blocks
+will be ignored when applying errors (ie, each entry in BEAMLINE can
+potentially get unique errors).&nbsp; If use_sliceblock == 2, then
+slices and blocks will be respected when applying errors.&nbsp; If
+use_sliceblock == 1, then slices and blocks will be respected, BUT only
+elements in the slice/block which have the class and/or name selected
+by table{2} and/or table{3} will be respected.&nbsp; This last is the
+option to use if, for example, you have blocks which contain quads and
+captive BPMs and you want to misalign the quads in a block but not
+misalign the BPMs with them.</li>
+  <li>comment:&nbsp; a text string which is attached to the resulting
+error group.</li>
+</ul>
+Return variable group is the error group:&nbsp; it includes the
+requested comment, a list of data entries which are to have errors
+applied to them (including any slice/block correlations that must be
+respected), and text instructions which can be used to apply the errors
+(via the Matlab feval statement).&nbsp; Possible returned status values
+include stat{1} == 1 indicating success, or stat{1} == 0 if an invalid
+combination of arguments is supplied (asking for dV on magnets, for
+example).<br>
+<br>
+Most elements in BEAMLINE will have a scalar dB, while others
+(specifically certain gradient bends) can have a dB which is 1 x
+2.&nbsp; An error group which uses 'dB' for its error name will ignore
+any device with a 1 x 2 dB data slot; similarly, specifying 'dB(1)' or
+'dB(2)' for the error name will cause MakeErrorGroup to generate an
+error group in which any element with a scalar dB is ignored.<br>
+<br>
+What do you do when you've got an error group? You apply errors to it!<br>
+<br>
+<span style="font-weight: bold;"><a name="ErrorGroupGaussErrors"></a>ErrorGroupGaussErrors:</span><br>
+<br>
+Apply Gaussian-distributed errors to the members of an error group.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; [stat,error_values] =
+ErrorGroupGaussErrors( group, meanvalue, rmsvalue, keepoldvalue )<br>
+<br>
+applies the requested distribution of errors to the members of the
+group.&nbsp; Argument meanvalue is the requested mean of the
+distribution, rmsvalue is the standard deviation of the distribution,
+and keepoldvalue indicates that existing errors should be discarded
+(keepoldvalue == 0) or kept and added to (keepoldvalue == 1).&nbsp; The
+arguments meanvalue, rmsvalue, keepoldvalue are all scalars for dAmpl,
+dPhase, dV, dB errors; they are all 1 x 2 vectors for BPMOffset and
+ElecOffset errors ; and they are 1 x 6 for Offset errors.<br>
+<br>
+Returned variable error_values contains several fields:&nbsp; The mean
+and RMS of the applied
+values, which have the same dimensions as meanvalue, rmsvalue, and
+keepoldvalue; the applied (new) errors, which have nError rows and the
+same number of columns as meanvalue, rmsvalue, and keepoldvalue; and
+the total errors, including old errors which were kept, which has the
+same dimensions as the matrix of new errors.&nbsp; Possible return
+status values are stat{1} == +1 for
+success, and stat{1} == 0 for invalid arguments (inconsistent and/or
+wrong lengths, etc).<br>
+<br>
+<span style="font-weight: bold;"><a name="SetGaussianErrors"></a>SetGaussianErrors:</span><br>
+<br>
+Apply gaussian errors to the lattice, and no tricks!<br>
+<br>
+<div style="margin-left: 40px;">[stat, error_values] =
+SetGaussianErrors( table, range, meanvalue, rmsvalue, errorname,
+use_sliceblock, keepoldvalue )<br>
+</div>
+<br>
+simply executes <a href="#MakeErrorGroup">MakeErrorGroup</a> followed
+by <a href="#ErrorGroupGaussErrors">ErrorGroupGaussErrors</a>.&nbsp;
+All arguments are defined identically as in those two functions.<br>
+<br>
+Given that we have SetGaussianErrors, why would anybody use
+MakeErrorGroup and ErrorGroupGaussErrors?&nbsp; The main reason is
+execution speed:&nbsp; the process of finding all the elements which
+are to receive errors takes a long time compared to simply applying the
+errors.&nbsp; Any simulation which is going to repeatedly apply errors
+to to the same cluster of elements is well-advised to generate an error
+group once and use ErrorGroupGaussErrors repeatedly rather than using
+SetGaussianErrors repeatedly.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+21-Apr-2006<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</body>
+</html>

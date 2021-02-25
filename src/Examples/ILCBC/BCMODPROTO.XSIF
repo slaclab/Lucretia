@@ -1,0 +1,100 @@
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! This file contains all parameters needed to describe a 12-meter, 8-cavity
+! cryomodule which is an emulation of the TTF module.  Parameters are taken
+! from the 1995 TTF CDR,
+!
+!    http://tesla.desy.de/new_pages/TTFcdrTab.html
+! 
+! except as noted.
+!
+! AUTH:   PT,        24-jan-2005
+! MOD:    
+!         PT,        18-Apr-2005
+!            correct capitalization for SRWF files (dang unix!)
+!         PT,        09-mar-2005
+!            reactivate default srwfs.
+!         A. Wolski, 11-feb-2005
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! RF Module Parameters
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+  F_TESLA    := 1300.0                              ! frequency (MHz)
+  L_CAV      :=    4.5 * CLIGHT / (1E6 * F_TESLA)   ! cavity length (m): length = no. of cells x wavelength / 2
+  L_BPM      :=    0.052                            ! length of BPM (m)
+  L_QUAD     :=    0.57                             ! length of quadrupole (m)
+  L_BELLOWS  :=    0.0995                           ! length of quad bellows (m)
+  L_QTB      :=    0.0475                           ! BPM-to-quad drift length (m)
+  L_END      :=    0.065                            ! end-module drift length (m)
+  L_MODULE   :=   12.2                              ! total length of cryomodule (m)
+
+  L_CPTTOT   :=   2*L_END + L_QTB  + L_BPM + &
+                L_BELLOWS + L_QUAD + 8*L_CAV        ! total length of components
+
+  L_CC       := (L_MODULE - L_CPTTOT)/7             ! drift between cavities
+
+  QUAD_APER  := 0.078 / 2                           ! quad aperture (m)
+  RF_APER    := 0.070 / 2                           ! rf aperture (m)
+
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! Element definitions
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! BPMs
+
+  BPM       : MONI,  L = L_BPM
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Steering magnets
+
+  XTTF      : HKICK
+  YTTF      : VKICK
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Drifts
+
+  BELLOWS   : DRIFT, L = L_BELLOWS
+  DQTB      : DRIFT, L = L_QTB
+
+! end and inter-cavity drifts
+
+  D_END   : DRIFT, L = L_END
+  D_CC    : DRIFT, L = L_CC
+
+! In modules without a quad package, an equivalent drift space is needed 
+
+  DQPKG   : DRIFT, L = L_BPM + L_QUAD + L_BELLOWS + L_QTB
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Quadrupoles
+
+  BCMQUAD : QUAD, L = L_QUAD/2, APERTURE = QUAD_APER
+  QTTF    : QUAD, L = L_QUAD/2, APERTURE = QUAD_APER
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! RF structures
+
+  TTFCAV       : LCAV, L = L_CAV, APERTURE = RF_APER, FREQ = F_TESLA, &
+                       ELOSS = L_CAV * 1.432E13,                      &
+                       LFILE =   "ilc2005.lwake.sr.data",             &
+            TFILE =              "ilc2005.twake.sr.data"
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Macros
+
+  ! Quad package
+  QPKG(MAGNET)    : LINE = (BELLOWS, BPM, DQTB, XTTF, MAGNET, MAGNET, YTTF)
+
+  ! 8-cavity module
+  MODULE(CAV,PKG) : LINE = (D_END, 7*(CAV, D_CC), CAV, PKG, D_END)
+
+  ! Special case -- module with a drift instead of a quad package
+  DRIFMOD(CAV)    : LINE = ( MODULE(CAV,DQPKG) )

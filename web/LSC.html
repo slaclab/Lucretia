@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+  
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"><title>Lucretia: Space Charge</title>
+  
+
+  
+  
+  <meta name="author" content="Peter Tenenbaum"></head><body>
+<div style="text-align: center;"><a href="home.html"><span style="font-size: 24pt;"><img style="border: 0px solid ; width: 80px; height: 90px;" alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif" align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Space Charge<br>
+<br>
+</small></span></div>
+<br>
+<h2>Longitudinal Space Charge<br>
+</h2>
+Elements with the <span style="font-style: italic; font-weight: bold;">LSC</span> field of their <span style="font-style: italic; font-weight: bold;">TrackFlag</span> field set to 1 implement a simulation of longitudinal space charge using the method described in <span style="font-style: italic;">(Z. Huang </span><em style="font-style: italic;">et al.</em><span style="font-style: italic;">, Phys. Rev. ST Accel. Beams </span><b style="font-style: italic;">7</b><span style="font-style: italic;"> 074401 (2004))</span>.<br>
+The simulation is based on the longitudinal space charge impedance per unit length described therein <span style="font-style: italic;">(see Appendix A)</span> using the approach adopted in the tracking code <a href="http://www.aps.anl.gov/Accelerator_Systems_Division/Accelerator_Operations_Physics/manuals/elegant_latest/node142.html">Elegant</a>.
+The BEAMLINE element must have finite length; the LSC simulation
+automatically splits the element based on the beam properties at
+tracking time. This can be overridden by defining a <span style="font-weight: bold;"><span style="font-style: italic;">TrackFlag.Split</span></span> field with the desired number of splits. Other aspects of the LSC simulation can be controlled via other <span style="font-weight: bold;"><span style="font-style: italic;">TrackFlag</span></span> fields listed below.<br>
+The LSC simulation is controlled by the <a href="tracking.html#TrackThru"><span style="font-style: italic;"><span style="font-style: italic;">TackThru</span></span></a> mex function, but applied through the native Matlab function <span style="font-style: italic;">applyLSC</span>.
+If requested, useful data pertaining to the LSC simulation is stored
+within persisient variables in this Matlab function. This is useful
+when determining the optimal simulation parameters to use, see notes
+below of the <span style="font-style: italic;">applyLSC</span> function.<br>
+<br>
+<h3>LSC TrackFlag options:</h3>
+If not defined, the default values listed are assumed.<br>
+<br>
+<table style="text-align: left; width: 924px; height: 154px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">TrackFlag field name<br>
+      </td>
+      <td style="vertical-align: top;">Default Value<br>
+      </td>
+      <td style="vertical-align: top;">Description<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">LSC<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">Set 1 to enable LSC simulation for this element<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">LSC_cutoffFreq<br>
+      </td>
+      <td style="vertical-align: top;">0.9<br>
+      </td>
+      <td style="vertical-align: top;">Maximum frequency to compute and apply LSC wake, in units of Nyquist frequency (dependent on number of histogram bins used)<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">LSC_smoothFactor<br>
+      </td>
+      <td style="vertical-align: top;">500<br>
+      </td>
+      <td style="vertical-align: top;">Amount of smoothing to apply to
+the current histogram, the larger the integer the more smoothing is
+applied. Setting 0 will result in the smoothing algorithm being
+bypassed.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">LSC_npow2Bins<br>
+      </td>
+      <td style="vertical-align: top;">12<br>
+      </td>
+      <td style="vertical-align: top;">The number of bins to use for the current histogram and FFT thereof (in powers of 2, e.g. 2^12=4096 by default)<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">LSC_storeData<br>
+      </td>
+      <td style="vertical-align: top;">0<br>
+      </td>
+      <td style="vertical-align: top;">If 1 then the applyCSR function will store data internally for later inspection.<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<h3>applyLSC Matlab Function (provided in src/Tracking):</h3>
+Setting the <span style="font-weight: bold;"><span style="font-style: italic;">LSC_storeData</span></span>
+field to 1 will cause data from the LSC simulation to be stored within
+the applyLSC function. After tracking this is available for inspection
+or extraction via the <span style="font-style: italic;">plot</span> and <span style="font-style: italic;">getdata</span> commands listed in the functions help documentation:<br>
+&nbsp;<br>
+&nbsp; applyLSC('plot',dataLoc [,figureHandle])<br>
+&nbsp; Analysis plots from stored data in previous function call(s).<br>
+&nbsp;&nbsp;&nbsp; dataLoc=[elemno bunchno]<br>
+&nbsp;&nbsp;&nbsp; figureHandle (Optional) = plot to give figure handle, else make a new one<br>
+&nbsp;<br>
+&nbsp; data = applyLSC('getdata');<br>
+&nbsp;&nbsp;&nbsp; Return any stored data:<br>
+&nbsp;&nbsp;&nbsp; data.tbins : time bins<br>
+&nbsp;&nbsp;&nbsp; data.I : current histogram enries / kA<br>
+&nbsp;&nbsp;&nbsp; data.I_ns : as above without smoothing applied<br>
+&nbsp;&nbsp;&nbsp; data.Y : fft of current histogram<br>
+&nbsp;&nbsp;&nbsp; data.f : frequency data points<br>
+&nbsp;&nbsp;&nbsp; data.V : computed energy modulation<br>
+&nbsp;&nbsp;&nbsp; data.Z : LSC impedance<br>
+&nbsp;&nbsp;&nbsp; data.L : drift length over which LSC applied<br>
+
+<br>
+&nbsp;<a href="http://www.slac.stanford.edu/owner/whitegr">whitegr</a><br>
+
+28-April-2014<br>
+
+<a href="http://www.slac.stanford.edu/detailed.html"><img src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page" alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;" align="right"></a><br>
+
+<br>
+</body></html>

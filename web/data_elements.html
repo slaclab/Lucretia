@@ -1,0 +1,796 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Accelerator Data Elements</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Accelerator Data Elements<br>
+<br>
+</small></span>
+<div style="text-align: left;">As described in the <a
+ href="overview.html">Overview</a>, all of the data needed to represent
+the accelerator is stored in Matlab (ie, nothing is "resident" in the
+DLLs which perform tracking or R-matrix calculations).&nbsp; There are
+a total of 5 data elements which are used to represent the accelerator
+model:&nbsp; the <a href="#BEAMLINE">Beamline</a>, the <a
+ href="#GIRDER">Girders</a>, the <a href="#PS">Power Supplies</a>, the
+<a href="#KLYSTRON">Klystrons</a>, and the
+<a href="#WF">Wakefields</a>.&nbsp; In order for Lucretia to work
+properly, all of these
+objects must be declared to have global scope in Matlab.<br>
+</div>
+<div style="text-align: left;"><br>
+</div>
+<a name="BEAMLINE"></a><font size="+1">BEAMLINE cell array</font><br>
+<br>
+<div style="text-align: left;">The BEAMLINE array is pretty much
+self-descriptive:&nbsp; it contains the data, in S position order, for
+the elements which are actually on the beamline (magnets, drift spaces,
+RF structures, instruments, collimators, plus miscellaneous items such
+as changes in beamline geometry and marker points).&nbsp; BEAMLINE is
+fully instantiated:&nbsp; every element has an entry in BEAMLINE.&nbsp;
+<br>
+<br>
+Since BEAMLINE contains the actual data of each element (ie, it's not
+just a list of index numbers to elements stored in some other table
+somewhere), and the different elements need wildly different data to
+describe them, BEAMLINE is a cell array (a Matlab ordered list of
+heterogeneous data structures).&nbsp; Matlab cell arrays are indexed
+with curly braces instead of parentheses (ie, it's BEAMLINE{1}, not
+BEAMLINE(1)).&nbsp; Each entry in BEAMLINE is a 1 x 1 data structure
+representing an element.&nbsp; The data fields of each element are
+discussed on the <a href="element_classes.html">elements</a> page.<br>
+<br>
+Note that in actual point of fact, any number of disjoint beamlines can
+be stored in BEAMLINE (ie, BEAMLINE{1} through BEAMLINE{1000} can be
+one line, BEAMLINE{1001} through BEAMLINE{2000}can be a completely
+disjoint transport line), and Lucretia supports operations which go
+from high- to low-indices as well as more conventional
+low-to-high.&nbsp; Thus, for example, one could imagine storing the
+electron LET of a linear collider in the first portion of BEAMLINE,
+with the positron portion in the second (with opposite indexing, so
+that, for example, both BEAMLINEs terminate at a common IP), and
+electron and positron extraction lines stored even later in
+BEAMLINE.&nbsp; Although it is potentially convenient to do colliding
+beams this way (to have the elements in order in BEAMLINE in the order
+they have "in the tunnel", with one line at S&lt;0, one line at S&gt;0,
+and S=0 at the IP), it is not required -- it is perfectly acceptable
+for both e+ and e- beamlines to be indexed with the BC at a low value
+and the IP at a high one.<br>
+<br>
+<div style="text-align: center;"><font size="+1"><a name="GIRDER"></a>GIRDER
+cell array</font><br>
+</div>
+</div>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;"><br>
+The GIRDER array represents the mechanical support for one or more
+elements, with the intent that one can use the GIRDER array to generate
+the sorts of correlated misalignments which occur in a real beamline
+when several elements are on one girder which happens to be misaligned
+in some way.&nbsp; Like BEAMLINE, GIRDER is a cell array and the
+indexing syntax is curly braces.&nbsp; This is because not all GIRDERs
+have the same fields:&nbsp; some GIRDERs have some sort of
+remote-controlled translation stage ("mover"), others do not.&nbsp; <br>
+<br>
+Data fields:&nbsp; All GIRDERs have the following fields:<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; text-align: center;">Field<br>
+      </th>
+      <th style="vertical-align: top; text-align: center; width: 8%;">Size<br>
+      </th>
+      <th style="vertical-align: top; text-align: center; width: 15%;">Units<br>
+      </th>
+      <th style="vertical-align: top;">Description<br>
+      </th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">S<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 8%;">1
+x 1<br>
+1 x 2<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 15%;">m<br>
+[m m]<br>
+      </td>
+      <td style="vertical-align: top;">S position of girder's supports
+in the
+global coordinate system.&nbsp; S can be a scalar, indicating a "short"
+girder (support is basically at a single longitudinal point); S can
+also be a 1 x 2 vector, with the 2 values indicating the low-S and
+high-S support points<br>
+of the girder.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Element<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 8%;">1
+x n<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 15%;">-<br>
+      </td>
+      <td style="vertical-align: top;">Index into BEAMLINE of all the
+elements on the girder.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Offset<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 8%;">1
+x 6<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 15%;">[m
+rad m rad
+m rad]<br>
+      </td>
+      <td style="vertical-align: top;">Offset in x, xz angle, y, yz
+angle, S position, xy rotation with respect to the ideal survey line of
+the accelerator.&nbsp; The offsets are the positions and angles of the
+longitudinal center of the girder.<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+In addition, all GIRDERs with a mover have the following fields, and
+all the fields are required to be vectors of the same length:<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; text-align: center;">Field<br>
+      </th>
+      <th style="vertical-align: top; text-align: center;">Size<br>
+      </th>
+      <th style="vertical-align: top; text-align: center;">Units<br>
+      </th>
+      <th style="vertical-align: top;">Description<br>
+      </th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Mover<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x n,<br>
+n between 1 and 6<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">-<br>
+      </td>
+      <td style="vertical-align: top;">Indices of the mover degrees of
+freedom, in the same order as the Offset field.&nbsp; For example,
+Mover = [1 3 6] means a mover with x, y, and xy rotation degrees of
+freedom.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">MoverPos<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">Same as Mover<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">m or rad,
+depending<br>
+      </td>
+      <td style="vertical-align: top;">Actual position of the mover
+with respect to the ideal survey line of the accelerator.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">MoverSetPt<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">Same as Mover<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;"><br>
+      </td>
+      <td style="vertical-align: top;">Desired position of the mover
+with respect to the ideal survey line.&nbsp; This can be different from
+MoverPos because of finite mover step size (see below) or because the
+user has decided to simulate a "drifting" mover.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">MoverStep<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">Same as Mover<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;"><br>
+      </td>
+      <td style="vertical-align: top;">Step size of the mover in each
+DOF.<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+Note that when Lucretia computes the position of an element with
+respect to the survey line, it adds the element's Offset, the offset
+due to its GIRDER (taking into account the x and y angles and the
+distance of the element from the center of the girder), and the offset
+due to the mover on the GIRDER (again taking into account any S
+positions which are relevant).&nbsp; Function <a
+ href="tuning_analysis.html#MoverTrim">MoverTrim</a> can be used to
+set a mover's actual position (MoverPos) as close as possible to its
+desired position (MoverSetPt), taking into account its step size
+(MoverStep).<br>
+<br>
+<div style="text-align: center;"><font size="+1"><a name="PS"></a>Power
+Supply (PS) structure array<br>
+<br>
+</font>
+<div style="text-align: left;">The PS data structure represents a
+common excitation for one or more non-RF beamline elements.&nbsp; Use
+of the PS structure allows emulation of multiple magnets powered in
+series and finite granularity to power supply control; it also, more
+prosaically, allows the user to power two longitudinal slices of a
+given magnet from a common supply, thus ensuring that one does not
+accidentally change the strength of one slice but not the other (a
+reasonable but not great solution to the problem of "split magnets" in
+decks).&nbsp; All power supplies have the same attributes, so PS is a
+structure array:&nbsp; PS(indexno).Field is the correct syntax for
+accessing power supply data.<br>
+<br>
+Data fields:&nbsp; All power supplies have the following fields, and
+all fields are dimensionless:<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; text-align: center;">Name<br>
+      </th>
+      <th style="vertical-align: top; text-align: center;">Size<br>
+      </th>
+      <th style="vertical-align: top;">Description<br>
+      </th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Ampl<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top;">Excitation of the power supply
+-- the power supply "readback."<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">dAmpl<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top;">Fractional error in power supply
+excitation:&nbsp; Ampl(real) = Ampl * (1+dAmpl).<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">SetPt<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top;">Desired excitation of the power
+supply.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Step<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top;">Step size of the power supply
+excitation.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Element<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x n<br>
+      </td>
+      <td style="vertical-align: top;">Index into BEAMLINE of each
+element powered by the power supply.<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+</div>
+<div style="text-align: left;">Function <a
+ href="tuning_analysis.html#PSTrim">PSTrim</a>
+can be used to set the power supply's Ampl as close as possible to the
+SetPt, given the finite Step.<br>
+</div>
+<div style="text-align: left;"><br>
+<div style="text-align: center;"><font size="+1"><a name="KLYSTRON"></a>KLYSTRON
+structure array<br>
+<br>
+</font>
+<div style="text-align: left;">The KLYSTRON data structure represents a
+common excitation for one or more RF-based beamline elements.&nbsp; Use
+of the KLYSTRON structure allows emulation of multiple beamline RF
+units with common phase and amplitude errors, and allows the user to
+emulate limitations arising from such common excitation (ie, two RF
+units energized by a common KLYSTRON cannot have their phases set
+independently).&nbsp; All klystrons have the same attributes, so
+KLYSTRON is a structure array:&nbsp; KLYSTRON(indexno).Field is the
+correct syntax for accessing klystron data.<br>
+<br>
+Data fields:&nbsp; All klystrons have the following fields:<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; text-align: center;">Field<br>
+      </th>
+      <th style="vertical-align: top; text-align: center;">Size<br>
+      </th>
+      <th style="vertical-align: top; text-align: center;">Units<br>
+      </th>
+      <th style="vertical-align: top;">Description<br>
+      </th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Ampl<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">-<br>
+      </td>
+      <td style="vertical-align: top;">Excitation of the klystron --
+its amplitude "readback"<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">AmplSetPt<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">-<br>
+      </td>
+      <td style="vertical-align: top;">Desired excitation of the
+klystron<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">AmplStep<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">-<br>
+      </td>
+      <td style="vertical-align: top;">Granularity of AmplSetPt<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Phase<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">degrees<br>
+      </td>
+      <td style="vertical-align: top;">Phase "readback" of the klystron<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">PhaseSetPt<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">degrees<br>
+      </td>
+      <td style="vertical-align: top;">Desired phase of the klystron<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">PhaseStep<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">degrees<br>
+      </td>
+      <td style="vertical-align: top;">Granularity of PhaseSetPt<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">dAmpl<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">-<br>
+      </td>
+      <td style="vertical-align: top;">Fractional error in
+excitation:&nbsp; Ampl(real) = Ampl * (1+dAmpl)<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">dPhase<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">degrees<br>
+      </td>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Additive</span>
+phase error of klystron<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Element<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x n<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">-<br>
+      </td>
+      <td style="vertical-align: top;">Index into BEAMLINE of all
+elements excited by the klystron.<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+Note that the amplitude error is a fractional error, but the phase
+error is additive!&nbsp; Use function <a
+ href="tuning_analysis.html#KlystronTrim">KlystronTrim</a>
+to set a klystron's phase and amplitude as close as possible to the set
+points, given the finite step sizes for these parameters.<br>
+<br>
+In addition to the numeric fields listed above, the KLYSTRON structure
+has a string field, Stat.&nbsp; This is the klystron's status, and
+there are five valid values for KLYSTRON(indexno).Stat:&nbsp; ON,
+STANDBY, MAKEUP, TRIPPED, and TRIPSTANDBY.&nbsp; What do these states
+mean?&nbsp; Briefly:<br>
+<br>
+<div style="margin-left: 40px;">A klystron which is ON is providing
+energization to its RF units, and it is in its design state.&nbsp; The
+klystron's energization is included when calculating the momentum
+profile of the accelerator (see ComputeMomentumProfile in Energy
+Profile Management) and when tracking bunches through the accelerator.<br>
+<br>
+A klystron which is STANDBY is not providing energization to its RF
+units, and is in its design state.&nbsp; This is a klystron which is
+intended to be a "hot spare" -- to be switched to MAKEUP (see below)
+when a klystron which is ON faults (see TRIPPED, below).&nbsp; RF units
+supported by this klystron are assumed to be inert when calculating the
+momentum profile of the accelerator and when tracking bunches.<br>
+<br>
+A klystron which is in MAKEUP is providing energization to its RF
+units, but is not in its design state.&nbsp; The design state of such a
+klystron is STANDBY.&nbsp; A klystron in MAKEUP was changed from
+STANDBY to "make up" the energization of another klystron which has
+unexpectedly changed state from ON to TRIPPED (see below).&nbsp; RF
+units supported by this klystron are assumed to be inert when
+calculating the momentum profile, but are assumed to be active when
+tracking a beam (ie, their design state is STANDBY, reflected by their
+absence from the momentum profile calculation; but their actual state
+is ON, reflected by their involvement in tracking).<br>
+<br>
+A klystron which is TRIPPED is not providing energization to its RF
+units, and is not in its design state.&nbsp; A TRIPPED klystron is a
+klystron which was ON until a fault condition occurred.&nbsp; Since its
+design state is ON, the energization of a TRIPPED klystron is included
+in momentum profile calculations; but since its real state is not
+providing energization, its RF units are assumed to be inert during
+tracking.<br>
+<br>
+A klystron which is in TRIPSTANDBY is a klystron that was originally a
+"hot spare" but which faulted while in this condition.&nbsp; RF units
+which are supported by a TRIPSTANDBY klystron are assumed inert for
+both momentum profile and for tracking operations.&nbsp; Basically a
+TRIPSTANDBY klystron is the same as a STANDBY klystron except that,
+since it is faulted, it cannot be promoted to MAKEUP.<br>
+<br>
+</div>
+The reason for all the complexity is that during operations, klystrons
+can change from ON to TRIPPED and back again, or be promoted/demoted
+between STANDBY and MAKEUP, without necessarily updating the expected
+momentum versus S profile or scaling the magnets to preserve their
+steering and focusing strengths.&nbsp; Thus, these changes in status
+can cause a mismatch of the actual and expected properties of the
+accelerator, and the many possible status values and their various
+usages are needed to properly simulate that mismatching.<br>
+</div>
+<br>
+<br>
+<div style="text-align: center;"><font size="+1"><a name="WF"></a>WF
+structure array (Wakefields)<br>
+<br>
+</font>
+<div style="text-align: left;">The WF data structure contains all
+information related to wakefields, including transverse and
+longitudinal, single- and multi-bunch, design and error wakes.&nbsp;
+Because it contains such a wealth of data, it has a somewhat more
+complicated structure than the data objects described above.&nbsp; <br>
+<br>
+<span style="font-weight: bold;">Short Range Wakefields:</span><br>
+<br>
+The WF
+fields WF.ZSR and WF.TSR contain the short-range (single-bunch)
+longitudinal and
+transverse wakefields, respectively.&nbsp; Each of these is an array,
+properly referenced with the syntax WF.ZSR(j) or WF.TSR(j).&nbsp; Each
+of these arrays is itself a data structure which tabulates the wake
+function as a function of z with the following fields:<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top; text-align: center;">Field<br>
+      </th>
+      <th style="vertical-align: top; text-align: center; width: 10%;">Size<br>
+      </th>
+      <th style="vertical-align: top; text-align: center; width: 15%;">Units<br>
+      </th>
+      <th style="vertical-align: top;">Description<br>
+      </th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">z<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 10%;">1
+x n<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 15%;">m<br>
+      </td>
+      <td style="vertical-align: top;">Trailing distance behind the
+particle generating the wakefield.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">K<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 10%;">Same
+as z<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 15%;">V/C/m
+(ZSR)<br>
+V/C/m^2 (TSR)<br>
+      </td>
+      <td style="vertical-align: top;">Value of wake function.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">BinWidth<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 10%;">1
+x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center; width: 15%;">-</td>
+      <td style="vertical-align: top;">Spacing of bins when beam
+bunches are histogrammed, in units of bunch length.&nbsp; A BinWidth of
+0.1 means that when a bunch is binned the bin spacing will be 0.1
+sigma_z.&nbsp; <br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<span style="font-weight: bold;">Long Range Transverse Wakefields:<br>
+<br>
+</span>The WF field WF.TLR contains data for the long-range
+(bunch-to-bunch) transverse wakefields.&nbsp; At this time only
+frequency-domain wakefields are supported, but ultimately time-domain
+wakes will also be supported.&nbsp; For implementation reasons related
+to preserving the capability for time-domain wakes later, WF.TLR is a
+cell array, properly referenced with the syntax WF.TLR{j}.&nbsp; Each
+member of the array is a structure with the following fields:<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: top; text-align: center; font-weight: bold;">Field<br>
+      </td>
+      <td
+ style="vertical-align: top; text-align: center; font-weight: bold;">Size<br>
+      </td>
+      <td
+ style="vertical-align: top; text-align: center; font-weight: bold;">Units<br>
+      </td>
+      <td style="vertical-align: top; font-weight: bold;">Description<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Class<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x n char
+string<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">--<br>
+      </td>
+      <td style="vertical-align: top;">Contains either the work "Time"
+(time-domain wake) or "Frequency" (frequency domain wake)<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Freq</td>
+      <td style="vertical-align: top; text-align: center;">2 x nmodes<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">MHz<br>
+      </td>
+      <td style="vertical-align: top;">Central frequencies of the 2
+polarizations of the modes
+which comprise the wakefield<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Q<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">same as Freq<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">--<br>
+      </td>
+      <td style="vertical-align: top;">Q of each polarization of each
+mode <br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">K<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x nmodes
+(TLR)<br>
+2 x nmodes (Freq) (TLRErr)<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">V/C/m^2
+[WF.TLR]<br>
+V/C/m [WF.TLRErr]<br>
+      </td>
+      <td style="vertical-align: top;">Kick factor of each mode<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">Tilt<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">same as Freq<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">radians<br>
+      </td>
+      <td style="vertical-align: top;">xy rotation of mode axes with
+respect to the nominal element x and y axes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">BinWidth<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">1 x 1<br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">--<br>
+      </td>
+      <td style="vertical-align: top;">Spacing of bins when beam
+bunches are histogrammed, in units of bunch length.<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+The field WF.TLRErr contains error wakefields.&nbsp; Like WF.TLR,
+WF.TLRErr is a cell array, and the fields of WF.TLRErr are identical to
+the fields for WF.TLR.<br>
+<br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div style="text-align: left;">For a more complete description of the
+implementation of
+wakefields, see the <a href="element_classes.html#Lcav">LCAV</a>
+section on the
+<a href="element_classes.html">Element Classes</a> page, or the <a
+ href="wakefields.html">Wakefields</a> page.<br>
+<br>
+<div style="text-align: center;"><font size="+1"><a name="Interactions"></a>Interactions
+between BEAMLINE and other Arrays<br>
+<br>
+</font>
+<div style="text-align: left;">Lucretia was designed to be able to
+operate with the GIRDER, PS, and KLYSTRON arrays or without them.&nbsp;
+The way the arrays work together (or don't) is as follows:<br>
+<br>
+<ul>
+  <li>If an element does not have a GIRDER, its Offset field (if
+present) is used as the the element's position with respect to the
+survey line.</li>
+  <li>If an element does have a GIRDER, the GIRDER.Offset is combined
+with the element's Offset field, taking into account the distance
+between the center of the girder and the center of the element.</li>
+  <li>If a magnet has no PS, the excitation used for R-matrix
+calculations is stored in field B, and the excitation used for tracking
+is B(1+dB).&nbsp; <br>
+  </li>
+  <li>If a magnet does have a PS, the excitation used for R-matrix
+calculations is the element's B * PS.Ampl, and the excitation used for
+tracking is B(1+dB)Ampl(1+dAmpl).</li>
+  <li>If an RF unit has no klystron, its on-crest voltage in R-matrix
+calculations is given by the Egain value, the voltage used for voltage
+slope calculations in the R matrix is given by Volt, and its phase
+offset by the element Phase value.&nbsp; For tracking, the on-crest
+voltage is given by the Volt value and the phase offset by Phase +
+dPhase.&nbsp; The reason that the voltage for R-matrices is different
+from the voltage for tracking is that the former has to take the mean
+single-bunch loading loss into effect, while in the latter case this is
+calculated by wakefields.</li>
+  <li>An RF unit with a KLYSTRON has an on-crest voltage for R-matrix
+calculations given by Egain, a voltage for the voltage slope
+calculations in the R-matrix given by Volt * KLYSTRON.Ampl, and a phase
+given by Phase + KLYSTRON.Phase.&nbsp; For tracking, the on-crest
+voltage is given by Volt*(1+dV)*KLYSTRON.Ampl*(1+KLYSTRON.dAmpl); the
+phase is given by Phase + dPhase + KLYSTRON.Phase + KLYSTRON.dPhase.</li>
+</ul>
+This can get somewhat confusing, especially if one adjusts the power
+supplies for tuning purposes -- since the design B of a magnet is B *
+PS.Ampl, for example, if PS.Ampl = 1.01 and B = 10 T, then the actual
+strength of the magnet, 10.1 T, is not equal to the value of B in its
+data structure!<br>
+<br>
+In order to avoid this confusion, I like to exchange the parameters
+between the BEAMLINE and the other arrays.&nbsp; Once this is done the
+magnet B values are typically 0.5 or 1 and the Ampl of the power supply
+is the actual strength in T.&nbsp; That way when I adjst the Ampl
+(which is a more appropriate tuning knob than the magnet B), its value
+continues to reflect the actual magnet strength -- the magnet B value
+becomes a PS scaling factor instead of an absolute strength.<br>
+<br>
+Neither choice is fundamental -- Lucretia will work if the BEAMLINE
+elements have dimensionful quantities and the other arrays just supply
+scale factors, or it will work with dimensionful strengths in the other
+arrays and the scale factors in the BEAMLINE.&nbsp; I find the latter
+less confusing.&nbsp; The dimensionful quantities can be moved out of
+the BEAMLINE array using the <a
+ href="lattice_generation.html#MovePhysicsVarsToKlystron">MovePhysicsVarsToKlystron</a>
+and <a href="lattice_generation.html#MovePhysicsVarsToPS">MovePhysicsVarsToPS</a>
+functions; the
+reverse process (moving dimensionful quantities back to BEAMLINE) can
+be performed using <a
+ href="lattice_generation.html#RenormalizeKlystron">RenormalizeKlystron</a>
+and <a href="lattice_generation.html#RenormalizePS">RenormalizePS</a>
+functions.&nbsp; The
+actual strengths, voltages, phases, etc (ie, the
+element parameters taking into account both BEAMLINE parameters and
+PS/KLYSTRON parametes) can be obtained with <a
+ href="tuning_analysis.html#GetTrueStrength">GetTrueStrength</a>,
+<a href="tuning_analysis.html#GetTrueVoltage">GetTrueVoltage</a>, <a
+ href="tuning_analysis.html#GetTruePhase">GetTruePhase</a> functions.<br>
+</div>
+</div>
+</div>
+<br>
+<div style="text-align: left;"><a
+ href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+</div>
+<div style="text-align: left;">14-Apr-2005.<br>
+</div>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

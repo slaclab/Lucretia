@@ -1,0 +1,10 @@
+*.mexglx
+*.mexmaci64
+*.mexw32
+src/Libs/mexmaci64/*
+src/Libs/mexmaci64
+src/Libs/linux-x86/*
+src/Libs/linux-x86
+package/*
+package
+

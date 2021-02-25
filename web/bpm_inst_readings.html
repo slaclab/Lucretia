@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: BPM and Instrument Readings</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img hspace="20" align="right"
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"></span></a><span
+ style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>BPM and Instrument Readings<br>
+<br>
+</small></span>
+<div style="text-align: left;"><br>
+</div>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">Lucretia supports three types of beam
+instrumentation:&nbsp; <br>
+<ul>
+  <li>standard beamline <a href="element_classes.html#BPM">BPM</a>s,
+with class HMON, VMON, or MONI;</li>
+  <li>other forms of standard <a href="element_classes.html#INST">instrumentation</a>
+with class INST, PROF, WIRE, BLMO, SLMO, IMON</li>
+  <li>higher-order mode BPMs in <a href="element_classes.html#LCAV">LCAV</a>s.</li>
+</ul>
+When one or more bunches are tracked through an element with one of the
+classes listed above, the tracker can generate simulated instrument
+data for that element which is then returned to the user.&nbsp; In
+addition, depending on the options, HMON, VMON, and MONI elements can
+generate additional information which would not under ordinary
+circumstances be available at a real BPM.&nbsp; <br>
+<br>
+<div style="text-align: center;"><big>Selecting Devices to Return Data</big><br>
+</div>
+<br>
+The selection of devices which will return data is accomplished with
+tracking flags:<br>
+<br>
+<ul>
+  <li>Any BPM for which the GetBPMData flag is set to zero returns no
+BPM readings; if the flag is set to 1, BPM readings are returned.</li>
+  <li>Any BPM for which the GetBPMBeamPars flag is set to zero will not
+return any additional information on the beam distribution; if the flag
+is set to 1, additional information will be returned.</li>
+  <li>Any instrument for which the GetInstData flag is set to zero will
+not return any readings; if the flag is set to 1, instrument readings
+will be returned.</li>
+  <li>Any LCAV for which the GetSBPMData flag is set to zero will not
+return any HOM BPM readings; if the flag is set to 1, all HOM BPMs on
+the given LCAV will return position data.</li>
+  <li>BPMs and instruments also have a MultiBunch flag:&nbsp; setting
+MultiBunch == 0 causes the device to return data for all tracked
+bunches as an aggregate, whereas setting MultiBunch == 1 causes
+readings for each individual bunch to be returned.&nbsp; The HOM BPMs
+do not have this option; they always return readings for all the
+tracked bunches as an aggregate.&nbsp; Note that by "tracked bunches" I
+mean "bunches tracked in a given call to TrackThru."&nbsp; At the end
+of execution TrackThru returns any data which was requested and deletes
+it from its internal buffers, so if you track bunch 1 of a beam, return
+to the Matlab prompt, and then track bunch 2, the readings at the end
+of the second bunch tracking will never aggregate bunches 1 and
+2.&nbsp; <br>
+  </li>
+</ul>
+One benefit of selecting and deselecting devices which are to return
+information to the user is that reducing the number of devices which
+return data improves execution speed.&nbsp; In my experience the factor
+of improvement is not huge, but you may find it worthwhile to limit BPM
+and instrument use to just those which you really care about at the
+moment.&nbsp; A much more important factor (to me) is that limiting the
+number of devices which return data can help prevent you from drowning
+in the stuff.&nbsp; A linear collider can have 10,000 RF structures per
+side, and each of those can have one or more HOM BPM; that kind of data
+volume can beome a headache...<br>
+<br>
+<div style="text-align: center;"><big>Format of Returned Data<big><br>
+</big></big></div>
+<br>
+All BPMs, instruments, and HOM BPMs return their readings in the third
+return argument of TrackThru:<br>
+<br>
+&nbsp;&nbsp;&nbsp; [stat,beam2,readings] = TrackThru(elem1,elem2,
+beam1, bunch1, bunch2, 0) ;<br>
+<br>
+argument readings is a 1 x 3 cell array of instrument data.&nbsp; Note
+that TrackThru can be called with only 2 return arguments:&nbsp; in
+this case, if there is no third return argument for TrackThru, tracking
+will proceed as though all instrument data flags were set to
+zero.&nbsp; This is a simpler way to suppress all instrument data than
+changing all the actual flag values throughout BEAMLINE.<br>
+<br>
+<span style="font-weight: bold;">BPMs:&nbsp; </span><br>
+<br>
+Cell 1 of readings is a data structure full of BPM information; the
+correct notation for accessing this is readings{1}(1), readings{1}(2),
+etc.&nbsp; The fields in the structure are as follows:<br>
+<ul>
+  <li><span style="font-weight: bold;">Index:</span>&nbsp; pointer into
+the BEAMLINE cell array position of the BPM.</li>
+  <li><span style="font-weight: bold;">S:</span>&nbsp; S position of
+the BPM.</li>
+  <li><span style="font-weight: bold;">Pmod:</span>&nbsp; design
+centroid momentum at the BPM.</li>
+  <li><span style="font-weight: bold;">x:</span>&nbsp; horizontal
+position reading</li>
+  <li><span style="font-weight: bold;">y:</span>&nbsp; vertical
+position reading.</li>
+  <li><span style="font-weight: bold;">z:</span>&nbsp; arrival time at
+BPM * c.</li>
+  <li><span style="font-weight: bold;">P:</span>&nbsp; actual centroid
+momentum at the BPM.</li>
+  <li><span style="font-weight: bold;">sigma:</span>&nbsp; matrix of
+second moments at the BPM.</li>
+</ul>
+The BPM data structure only has values for BPMs which had their data
+collection tracking flags set; there are not "blank" entries for BPMs
+which had their collection flags turned off (ie, if BPMs 1 and 3 have
+GetBPMData == 1 but BPM 2 has GetBPMData == 0, there will be 2 entries
+in readings{1}, where readings{1}(1) has BPM 1 returned values and
+readings{1}(2) has BPM 3 returned values).&nbsp; The Index, S, Pmod, x,
+and y fields are filled for all BPMs with either GetBPMData or
+GetBPMBeamPars set to 1.&nbsp; If GetBPMBeamPars is set to zero, the z,
+P, and sigma fields will be present but blank.<br>
+<br>
+For BPMs with MultiBunch == 0, fields x, y, z, and P are scalars, sigma
+is a 6 x 6 matrix.&nbsp; If MultiBunch == 1, fields x, y, z, and P are
+1 x nbunch vectors, and sigma is a 6 x 6 x nbunch matrix.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+23-Feb-2005<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

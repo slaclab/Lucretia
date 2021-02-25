@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Lucretia: Function status and error messages</title>
+  <meta name="author" content="Peter Tenenbaum">
+</head>
+<body>
+<div style="text-align: center;"><a
+ href="http://www.slac.stanford.edu/accel/ilc/codes/Lucretia/"><span
+ style="font-size: 24pt;"><img
+ style="border: 0px solid ; width: 80px; height: 90px;"
+ alt="LucretiaLogo" title="Lucretia home page" src="LucretiaLogo.gif"
+ align="right" hspace="20"></span></a><span style="font-size: 24pt;"><br>
+</span>
+<div style="text-align: center;"><span style="font-size: 24pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+The <span style="color: rgb(214, 0, 147);">LUCRETIA</span>
+Project</span><br>
+</div>
+<span style="font-size: 24pt;"><br>
+<small>Function Status and Error Messages<br>
+<br>
+</small></span>
+<div style="text-align: left;">Many Lucretia functions return a set of
+status indicators and messages in addition to whatever other data or
+stuff they are expected to return.&nbsp; All Lucretia functions that
+return status do so via a one-dimensional cell array:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; [stat,stuff] =
+GenericLucretiaFunction( ) ;&nbsp;&nbsp; % stat is a cell array...<br>
+</div>
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="text-align: center;">
+<div style="text-align: left;"><br>
+The first cell in the array is a number indicating overall
+status:&nbsp; +1 always indicates success with no funny business; 0
+always indicates complete failure.&nbsp; Other return values usually
+vary depending on the calling function (for example, some functions
+have many ways that they can fail abjectly; in this case the stat{1}
+cell can have a variety of values which indicate abject failure); in
+some cases return values can indicate partial failure and/or
+warning.&nbsp; See the help for a given function to see the meaning of
+its return values.<br>
+<br>
+Subsequent entries in the status cell array are text messages which
+give more detailed information on what went wrong.&nbsp; Functions
+which are successful without funny business typically do not generate
+text messages.<br>
+<br>
+The description above should be sufficient information for the casual
+user of Lucretia.&nbsp; For the user who wants to write their own
+Lucretia functions using the status cell array, a few tools have been
+developed to simplify the job.<br>
+<br>
+<span style="font-weight: bold;"><a name="InitializeMessageStack"></a>InitializeMessageStack:</span><br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat =
+InitializeMessageStack( )<br>
+<br>
+returns a blank status cell array, with length(stat) == 1 and stat{1}
+== 1.<br>
+<br>
+<span style="font-weight: bold;"><a name="AddMessageToStack"></a>AddMessageToStack:</span><br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat1 = AddMessageToStack(
+stat0, message )<br>
+<br>
+appends a new text message to the end of existing cell array stat0,
+returning the expanded array as stat1.<br>
+<br>
+<span style="font-weight: bold;"><a name="AddStackToStack"></a>AddStackToStack:</span><br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; stat2 = AddStackToStack( stat0, stat1 )<br>
+<br>
+appends the messages in stat1 to the messages in stat0, and returns the
+expanded cell array as stat2.&nbsp; Note that AddStackToStack only
+combines the text messages; the value of stat2{1} is set to stat0{1}
+and the value of stat1{1} is lost.<br>
+<br>
+<span style="font-weight: bold;"><a name="AddStackToMasterStack"></a>AddStackToMasterStack:</span><br>
+<br>
+Combine multiple message stacks into one "master stack," which contains
+the status reports from all "sub-stacks."<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; stat2 =
+AddStackToMasterStack( stat0, stat1, FunctionName )<br>
+<br>
+combines message stack stat1 with master stack stat0 in the following
+way:<br>
+<ol>
+  <li>stat2{1} = [stat0{1} stat1{1}].&nbsp; In other words, the status
+integers of each "sub-stack" combined into the master stack is
+preserved.</li>
+  <li>The messages in stat1 are appended to the messages in stat0; if
+there are no messages in stat1, then the message:&nbsp; FunctionName":
+OK" is appended to the stat0 message stack.<br>
+  </li>
+</ol>
+The differences between this and simply calling AddStackToStack are
+twofold.&nbsp; First, every status integer is preserved using
+AddStackToMasterStack.&nbsp; Second, if there are no messages in the
+"sub-stack," an "OK" message is appended to the master stack, so there
+is at least 1 text message for each "sub-stack" that has been combined
+into the master, even if there was no error condition to be reported.<br>
+<br>
+<span style="font-weight: bold;"><a name="DisplayMessageStack"></a>DisplayMessageStack:</span><br>
+<br>
+Display the contents of a message stack.<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; DisplayMessageStack( stat )<br>
+<br>
+will display the contents of the stat message stack to the screen.<br>
+<br>
+<a href="http://www.slac.stanford.edu/owner/quarkpt">quarkpt</a><br>
+06-Mar-2008<br>
+<a href="http://www.slac.stanford.edu/detailed.html"><img
+ src="SLAC_whitebkgd.jpg" title="Return to SLAC Detailed Home Page"
+ alt="SLAC-logo" style="border: 0px solid ; width: 100px; height: 39px;"
+ align="right"></a><br>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

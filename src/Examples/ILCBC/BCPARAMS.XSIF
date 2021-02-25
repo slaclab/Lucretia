@@ -1,0 +1,39 @@
+!========1=========2=========3=========4=========5=========6=========7=========8
+!
+! This file defines the basic RF and wiggler parameters for the bunch compressor.
+!
+! IMPORTANT NOTES:
+!   Number of modules specified must correspond to beamline definitions.
+!   R56 specifications are used by MAD matching commands, and are otherwise ignored.
+!
+!
+! AUTH:   A. Wolski, 11-feb-2005
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Stage 1 Parameters
+
+  BC1RFVOLT  :=  1275.2                    ! Total RF Voltage [MV]
+  BC1NMOD    :=     6                      ! Number of RF modules - must match beamline definition
+  BC1RFPHASE :=  -119.5/360                ! RF phase [2pi]
+  BC1R56     :=     0.1475                 ! Wiggler R56 [m] - used only in matching routines
+
+  BC1CAVVOLT := BC1RFVOLT/(8*BC1NMOD)
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Initial beam parameters
+
+  BC0BETA0   : BETA0, BETX =  7.3799, ALFX = -0.4788, &
+                      BETY = 40.4215, ALFY =  2.3944
+
+  E0         :=   5.00                  ! Beam energy [GeV]
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Final beam parameters
+
+  BCXBETA0   : BETA0, BETX = 40.0, ALFX = -2.4, &
+                      BETY =  7.0, ALFY =  0.2
+
+RETURN

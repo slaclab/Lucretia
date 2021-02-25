@@ -1,0 +1,18 @@
+AML2Lucretia is a Matlab mex function used to convert an AML lattice to Lucretia format.
+
+It is primarily intended for use with the Floodland Flight Simulator environment at ATF2,
+and, as such, will make certain assumptions about the contents of the AML file.  This is
+necessary since AML is such a flexible format, that it is not possible (given my time and
+salary) to code up a converter that can deal with any and all legal AML syntax.
+
+At the moment these routines are appalling "alpha" in nature, and SHOULD NOT BE USED BY
+ANYONE AT ANY TIME FOR ANY PURPOSE.
+
+USE OF THESE ROUTINES ARE KNOWN TO CAUSE FEVER, NAUSEA, HALITOSIS, ERECTILE DYSFUNTION,
+MALE-PATTERN BALDING, LOSS OF BLADDER CONTROL, GLOBAL WARMING, LIVER SPOTS, URBAN DECAY,
+ACID RAIN, DISAPPEARANCE OF HONEY BEES, AND AN INEXPLICABLE FANATICISM FOR THE MUSIC OF MC HAMMER.
+
+You have been warned.
+
+Stop.  Hammer time.
+

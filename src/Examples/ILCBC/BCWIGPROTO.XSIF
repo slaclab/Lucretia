@@ -1,0 +1,63 @@
+!========1=========2=========3=========4=========5=========6=========7=========8
+! 
+! This file contains element size parameters needed to define a wiggler cell
+! with a 12.2 m z length (not S length), and some other useful macros.
+!
+! AUTH:  PT,        25-jan-2005
+! MOD:   A. Wolski, 11-feb-2005
+!
+!========1=========2=========3=========4=========5=========6=========7=========8
+
+! Rectangular lengths of elements
+
+  LZBEND      := 8.0
+  LQ          := 0.5
+  LZCELL      := 2 * 12.2
+  LZDFT       := (LZCELL - 2*LQ - 2*LZBEND) / 4
+  LZMATCHBEND := 3.0
+  APER_ALL    := 0.078
+  LZBB        := 0.3
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Wiggler Quadrupoles
+
+  BCWQUAD     : QUAD, L=LQ/2, APERTURE = APER_ALL/2
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Wiggler Bends
+
+  BCPLUS_A      : SBEND, L    = LZBEND/2, E2    = 0,    &
+                         FINT = 0.5,      FINTX = 0,    &
+                         HGAP = APER_ALL/2
+
+  BCPLUS_B      : SBEND, L    = LZBEND/2, E1    = 0,    &
+                         FINT = 0,        FINTX = 0.5,  &
+                         HGAP = APER_ALL/2
+
+  BCMINUS_A     : SBEND, L    = LZBEND/2, E2    = 0,    &
+                         FINT = 0.5,      FINTX = 0,    &
+                         HGAP = APER_ALL/2
+
+  BCMINUS_B     : SBEND, L    = LZBEND/2, E1    = 0,    &
+                         FINT = 0,        FINTX = 0.5,  &
+                         HGAP = APER_ALL/2
+
+  BCMATCHMINUS  : SBEND,                  E1    = 0,    &
+                         FINT = 0.5,      FINTX = 0.5,  &
+                         HGAP = APER_ALL/2
+
+  BCMATCHPLUS   : SBEND,                  E2    = 0,    &
+                         FINT = 0.5,      FINTX = 0.5,  &
+                         HGAP = APER_ALL/2
+
+!--------1---------2---------3---------4---------5---------6---------7---------8
+! Macros
+
+  BCBPM          : MONITOR
+  BCXCORR        : HKICK
+  BCYCORR        : VKICK
+
+  BCQDBPM(MAGNET) : LINE = (MAGNET, BCBPM, BCXCORR, BCYCORR)
+
+
+  RETURN

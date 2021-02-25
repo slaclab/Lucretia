@@ -1,0 +1,108 @@
+! ==============================================================================
+! Configuration patch for EFFH operating at low
+!    energies (around 250 GeV/beam).  The relevant features include:
+! -->  Definition of the region downstream of the MUSP2 spoiler to
+! 	exclude the B2B bending magnet.
+! -->  Definition of the elements on the IR raft, and line thereof.
+! ------------------------------------------------------------------------------
+! 30-jul-2003, PT:
+!    move QF5 through QD2A K values from EFFH deck to here.
+! 25-jul-2003, PT:
+!    first version.
+! ------------------------------------------------------------------------------
+
+! Bend angle definition for 250 GeV/beam
+
+  TBS1   := BSIGN * (-116.895390E-06)
+  TB5    := BSIGN * ( 121.315215E-06)
+!
+  TB2    := BSIGN * (  99.147361E-06)
+  TB1    := BSIGN * (  35.767879E-06)
+  
+! D3C definition
+
+  D3D : DRIFT, L = 24.89536
+
+  D3C : LINE = (D3D)
+
+! Sextupole strengths
+
+  KSF6 := BSIGN * (-1.66104392)
+  KSF5 := BSIGN * ( 0.43354602)
+  KSD4 := BSIGN * (-3.29125076)
+  KSF1 := BSIGN * ( 7.17242846)
+  KSD0 := BSIGN * (-7.71895462)
+
+! Octupole strengths
+
+  KOC7E := -4075.304 * 1.3
+  KOC7D :=  3372.665 * 1.3
+  KOC7C := -3864.512 * 1.3
+  KOC7B :=  4026.119 * 1.3
+  KOC7A := -1756.596 * 1.3
+  KOC10 :=    5.91716
+  KOC1  :=  -32.54437
+  KOC0  :=  307.69222
+
+! Decapole strengths
+
+  KDEC4L := BSIGN * (-177514)
+  KDEC6L := BSIGN * (-177514)
+
+! ------------------------------------------------------------------------------
+
+! Final telescope quad strengths
+
+  KQF5  :=  0.01098440
+  KQD4  := -0.00866400
+  KQD2B := -0.00202270
+  KQF3  :=  0.01252071
+  KQD2A := -0.01126068
+
+! Interaction region raft and such:  the raft starts at the ST4 tune-up
+! stopper.  Define things that are different between low- and high-energy
+! configurations now:
+
+! QF1 package
+
+  QF1 : QUAD, L = 2.0/2, APERTURE = 0.01, K1 = 0.09626012
+
+  DPF : DRIFT, L = 1.E-06 ! pro-forma drift to separate elements
+
+  QF1PKG : LINE = (DPF, DPF, QF1, BPMQ079, QF1)
+
+! QD0 magnet
+
+  QD0 : QUAD, L = 2.2/2, APERTURE = 0.01, K1 =  -0.16982715
+
+  QD0PKG : LINE = (QD0, BPMQ079, QD0)
+
+! Drifts that vary
+
+  D1B : DRIFT, L = 1.35
+  D2B : DRIFT, L = 34.825
+
+! ------------------------------------------------------------------------------
+
+! matching conditions at entrance to final focus (beta* = 8x0.11 mm)
+
+  MBETX := 33.333
+  MALFX := 0
+  MBETY := 5.3333
+  MALFY := 0
+
+! beta match and extraction section (beta* = 8x0.11 mm)
+
+  BQMD5 :=  3.208548333911*Efact
+  BQMD6 :=  3.761546774079*Efact
+  BQMD7 := -4.741540393616*Efact
+  BQMD8 := -0.028339222131*Efact
+  BQXL1 :=  5.360659432621*Efact
+  BQXL2 := -4.268577121664*Efact
+  BQXL3 :=  3.79902339761*Efact
+  BQXL4 := -4.287087017739*Efact
+  BQXL5 :=  5.006058033132*Efact
+  BQXL6 := -8.397199667916*Efact
+  BQXL7 :=  2.135186696931*Efact
+
+  RETURN
