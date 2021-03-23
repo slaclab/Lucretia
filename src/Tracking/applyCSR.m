@@ -266,7 +266,13 @@ if isfield(BEAMLINE{itrack},'TrackFlag') && isfield(BEAMLINE{itrack}.TrackFlag,'
   % If request 2D CSR calculation, then just compute transient 1D wake not
   % included in 2D CSR steady-state solution
   if isfield(BEAMLINE{itrack}.TrackFlag,'CSR_2D') && BEAMLINE{itrack}.TrackFlag.CSR_2D>0 && strcmp(BEAMLINE{itrack}.Class,'SBEN')
-    W=-(4/(R*PHI)).*q(I1)' ; % Transient 1-d wake potential
+    SLss=(R*abs(BEAMLINE{iele}.Angle(1))^3)/24;
+    ZINTss=zeros(nbin,1,'like',z);
+    for is=1:nbin
+      isp=z>=(z(is)-SLss) & (1:length(z))<is ;
+      ZINTss(is)=sum((1./(z(is)-z(isp)).^(1/3)).*dq(isp).*bw);
+    end
+    W=-(4/(R*PHI)).*q(I1) + (4/(R*PHI)).*q(I2) + (2/((3*R^2)^(1/3))).*(ZINT-ZINTss); % Transient part of 1-d wake potential
     if abs(dodiag)>1 % also store 1d wake calculation if diagnostics mode enabled
       W_1d=-(4/(R*PHI)).*q(I1)' + (4/(R*PHI)).*q(I2)' + (2/((3*R^2)^(1/3))).*ZINT;
     end
@@ -289,11 +295,7 @@ if isfield(BEAMLINE{itrack},'TrackFlag') && isfield(BEAMLINE{itrack}.TrackFlag,'
     else
       dogpu=false;
     end
-    if abs(dodiag)
-      [dE2d,dXP]=csr2dfun(gscale,R,BEAMLINE{itrack}.Angle,gamma,beam(:,~stop),beamQ,nbin,smoothVal,dodiag,xmean0,dogpu);
-    else
-      [dE2d,dXP]=csr2dfun(gscale,R,BEAMLINE{itrack}.Angle,gamma,beam(:,~stop),beamQ,nbin,smoothVal,dodiag,xmean0,dogpu);
-    end
+    [dE2d,dXP]=csr2dfun(gscale,R,BEAMLINE{itrack}.Angle,gamma,beam(:,~stop),beamQ,nbin,smoothVal,dodiag,xmean0,dogpu);
     dE2d = dE2d .* BEAMLINE{itrack}.L./nsplit ; % dE/E
     dXP = dXP .* BEAMLINE{itrack}.L./nsplit ;
   else
