@@ -112,6 +112,11 @@ else
   error('Wrong number of output arguments')
 end 
 
+% multidimensional input reshape
+F = reshape(F,size(a1));
+E = reshape(E,size(a1));
+P = reshape(P,size(a1));
+
 end
 
 function [F,E]=elliptic12c(m)
@@ -614,7 +619,7 @@ end
 
 if( ~isempty(I) ) 
     lambda(I) = acot( sqrt(X1(I)) ); 
-    mu(I)     = atan( sqrt(complex(1./m(I).*(tan(phi(I)).^2.*cot(lambda(I)).^2 - 1)) ));
+    mu(I)     = atan( sqrt(1./m(I).*(tan(phi(I)).^2.*cot(lambda(I)).^2 - 1)) );
 end
 if( ~isempty(J) ) 
     lambda(J) = acot( sqrt(X2(J)) ); 
@@ -842,8 +847,9 @@ Q0 = 1;
 QQ = Q0;
 
 ss = ones(size(m));
+Q1 = ones(size(m));
 
-while max(ss(:)) > eps % assume ellip2 converges slower than ellip3
+while max(abs([ss(:);Q1(:)])) > eps
   
   % for Elliptic I
   a1 = (a0+g0)/2;
@@ -891,13 +897,14 @@ g0 = sqrt(1-m);
 s0 = m;
 nn = 0;
 
-p0 = sqrt(1-(m/n));
+p0 = sqrt(1-(m./n));
 Q0 = 1;
 QQ = Q0;
 
 ss = ones(size(m));
+Q1 = ones(size(m));
 
-while max(ss(:)) > eps % assume ellip2 converges slower than ellip3
+while max(abs([ss(:);Q1(:)])) > eps
   
   % for Elliptic I
   a1 = (a0+g0)/2;
@@ -922,7 +929,7 @@ while max(ss(:)) > eps % assume ellip2 converges slower than ellip3
   
 end
 
-PI = pi./(4.*a1).*((m/(m-n)).*QQ);
+PI = pi/(4*a1).*m./(m-n).*QQ;
 
 im = find(m == 1);
 if ~isempty(im)
