@@ -115,7 +115,9 @@ end
 % multidimensional input reshape
 F = reshape(F,size(a1));
 E = reshape(E,size(a1));
-P = reshape(P,size(a1));
+if nargout==3
+  P = reshape(P,size(a1));
+end
 
 end
 
@@ -223,8 +225,8 @@ if any(mneg_ind)
   
   mm=m(mneg_ind);
   bb=b(mneg_ind);
-  
-  t=asin((sin(bb).*sqrt(1-mm))./sqrt(1-mm.*(sin(bb)).^2));
+  arg=(sin(bb).*sqrt(1-mm))./sqrt(1-mm.*(sin(bb)).^2); arg(arg>1)=1; arg(arg<0)=0;
+  t=asin(arg);
   F(mneg_ind)=(1./sqrt(1-mm)).*elliptic12i(t,-mm./(1-mm));
   
 end
@@ -280,7 +282,8 @@ if nargout>1
     mm=m(mneg_ind);
     bb=b(mneg_ind);
     
-    t=asin((sin(bb).*sqrt(1-mm))./sqrt(1-mm.*(sin(bb)).^2));
+    arg=(sin(bb).*sqrt(1-mm))./sqrt(1-mm.*(sin(bb)).^2); arg(arg>1)=1;
+    t=asin(arg);
     [FF,EE]= elliptic12i(t,-mm./(1-mm)); %to define if your using the F output in elliptic12 or the E output
     E(mneg_ind)=mm.*(sin(t).*cos(t)./sqrt(1-mm.*(cos(t)).^2))+sqrt(1-mm).*EE;
   end
@@ -619,7 +622,8 @@ end
 
 if( ~isempty(I) ) 
     lambda(I) = acot( sqrt(X1(I)) ); 
-    mu(I)     = atan( sqrt(1./m(I).*(tan(phi(I)).^2.*cot(lambda(I)).^2 - 1)) );
+    arg=1./m(I).*(tan(phi(I)).^2.*cot(lambda(I)).^2 - 1); arg(arg<0)=0;
+    mu(I)     = atan( sqrt(arg) );
 end
 if( ~isempty(J) ) 
     lambda(J) = acot( sqrt(X2(J)) ); 

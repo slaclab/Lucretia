@@ -1893,7 +1893,18 @@ classdef DeckTool < handle
       % Flip the order of all elements
       BEAMLINE=flip(BEAMLINE);
       SetSPositions(1,length(BEAMLINE),0);
-      SetFloorCoordinates(1,length(BEAMLINE),zeros(1,6));
+      for iele=1:length(BEAMLINE)
+        if isfield(BEAMLINE{iele},'Coordi')
+          ci=BEAMLINE{iele}.Coordi;
+          ai=BEAMLINE{iele}.Anglei;
+          BEAMLINE{iele}.Coordi=BEAMLINE{iele}.Coordf;
+          BEAMLINE{iele}.Anglei=BEAMLINE{iele}.Anglef;
+          BEAMLINE{iele}.Coordf=ci;
+          BEAMLINE{iele}.Anglef=ai;
+          BEAMLINE{iele}.Anglei(1)=BEAMLINE{iele}.Anglei(1)+pi;
+          BEAMLINE{iele}.Anglef(1)=BEAMLINE{iele}.Anglef(1)+pi;
+        end
+      end
       % Re-order bend magnet slice information
       for iele=findcells(BEAMLINE,'Class','SBEN')
         BEAMLINE{iele}.EdgeAngle=flip(BEAMLINE{iele}.EdgeAngle);
