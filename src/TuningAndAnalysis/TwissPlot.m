@@ -95,6 +95,8 @@ if ~isempty(dL)
           BL.HGAP=[0 0];
           BL.FINT=[0 0];
           BL.EdgeCurvature=[0 0];
+        elseif isfield(BL,'Volt') && isplit>1
+          BL.P=BL.P+BL.Egain*1e-3;
         end
         BL_new{end+1}=BL; %#ok<AGROW>
       end
@@ -164,4 +166,4 @@ if ~isempty(dL)
   PS=PS1;
 end
 % Add Magnet plot
-[h0,h1]=AddMagnetPlot(istart1,iend1); %#ok<ASGLU>
+[h0,h1]=AddMagnetPlot(istart1,iend1);
