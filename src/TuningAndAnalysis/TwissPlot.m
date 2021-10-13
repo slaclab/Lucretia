@@ -35,9 +35,9 @@ if ~isempty(dL)
       RenormalizePS(ips);
       for iele=PS(ips).Element
         if PS(ips).Ampl==0
-          BEAMLINE{iele}.B=BEAMLINE{iele}.B*0;
+          BEAMLINE{iele}.B=BEAMLINE{iele}.B.*0;
         end
-        BEAMLINE{iele}.PS=0;
+        BEAMLINE{iele}.PS=zeros(size(BEAMLINE{iele}.PS));
       end
     end
   end

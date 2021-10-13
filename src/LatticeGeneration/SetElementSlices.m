@@ -24,11 +24,10 @@ function [stat,varargout] = SetElementSlices( istart, iend )
 
   stat = InitializeMessageStack( ) ;
   slices = {} ; 
-  ThisSlice = [] ;
   nslices = 0 ;
   global BEAMLINE ;
   
-  if ( (istart < 0) | (iend > length(BEAMLINE)) )
+  if ( (istart < 0) || (iend > length(BEAMLINE)) )
       stat{1} = 0 ;
       stat = AddMessageToStack(stat,...
           'Error in range for SetElementSlices') ;
@@ -48,8 +47,6 @@ function [stat,varargout] = SetElementSlices( istart, iend )
   ValidClass{8}  = 'YCOR' ;
   ValidClass{9}  = 'TCAV' ;
   ValidClass{10} = 'SOLENOID' ;
-  
-  AllOfClass = [] ;
 
 % loop over classes and find all instances of each class  
   
@@ -57,7 +54,7 @@ function [stat,varargout] = SetElementSlices( istart, iend )
       
       AllOfClass = findcells(BEAMLINE,'Class',...
                              ValidClass{ClassCount}) ;
-      if (length(AllOfClass) == 0)
+      if isempty(AllOfClass)
           continue ;
       end
       AOC_ptr = 0 ;
@@ -82,8 +79,8 @@ function [stat,varargout] = SetElementSlices( istart, iend )
 % if we have a ThisSlice open and this element should go into it, then 
 % put it in
 
-          if ( (~isempty(ThisSlice)) & (NewS == OldS) & (elemno <= iend) )
-              ThisSlice = [ThisSlice elemno] ;
+          if ( (~isempty(ThisSlice)) && (NewS == OldS) && (elemno <= iend) )
+              ThisSlice = [ThisSlice elemno] ; %#ok<*AGROW> 
           else
               SliceOpen = 1 ;
           end
@@ -92,7 +89,7 @@ function [stat,varargout] = SetElementSlices( istart, iend )
 % range, file the slice if it is valid.  Note that a slice with only one
 % element in it is not valid!
 
-          if ( (SliceOpen ==1) | (elemno <=iend) )
+          if ( (SliceOpen ==1) || (elemno <=iend) )
               
             if (length(ThisSlice)>1)
               nslices = nslices + 1 ;
@@ -126,7 +123,7 @@ function [stat,varargout] = SetElementSlices( istart, iend )
 % can now commit the slices to the BEAMLINE elements
 
   for count = 1:nslices
-      for count2 = 1:length(slices{count}) ;          
+      for count2 = 1:length(slices{count})       
           BEAMLINE{slices{count}(count2)}.Slices = slices{count} ;          
       end      
   end

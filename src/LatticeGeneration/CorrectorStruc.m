@@ -36,6 +36,9 @@ S.L = L ; S.B = B ;
 if (type == 3)
   S.dB = [0 0] ;
   S.PS = [0 0] ;
+  if length(S.B)==1
+    S.B=[S.B S.B];
+  end
 else
   S.dB = 0 ;
   S.PS = 0 ;
