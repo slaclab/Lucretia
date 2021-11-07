@@ -150,9 +150,42 @@ classdef DeckTool < handle
           txt=obj.XSIFRead(filename);
           % parse deck to Lucretia format
           Initial = obj.XSIFParse(txt,linename,betaname,beamname) ;
-          SetSPositions(1,length(BEAMLINE),0);
-          SetFloorCoordinates(1,length(BEAMLINE),zeros(1,6));
       end
+      % Convert any bends with K2 elements temp stored in B(3)- use Multipole components
+      isb=findcells(BEAMLINE,'Class','SBEN');
+      isb=isb(arrayfun(@(x) length(BEAMLINE{x}.B)>2,isb));
+      if ~isempty(isb)
+        if isb(1)>1
+          BLnew=BEAMLINE(1:isb(1)-1);
+        else
+          BLnew={};
+        end
+        nsb=1;
+        while nsb<=length(isb)
+          bele=BEAMLINE{isb(nsb)};
+          k2ele = MultStruc(0,bele.B(3)/2,0,2,[0 0],1,sprintf('%s_K2',bele.Name)) ;
+          k2ele.P=bele.P;
+          if bele.B(2)==0
+            bele.B=bele.B(1);
+          else
+            bele.B=bele.B(1:2);
+          end
+          BLnew=[BLnew; k2ele; bele; k2ele];
+          nsb=nsb+1;
+          if nsb>length(isb) && length(BLnew)<length(BEAMLINE)
+            BLnew=[BLnew; BEAMLINE(isb(end)+1:end)];
+          elseif nsb<=length(isb) && (isb(nsb)-isb(nsb-1))>1
+            BLnew=[BLnew; BEAMLINE(isb(nsb-1)+1:isb(nsb)-1)];
+          end
+        end
+        if isb(end)<length(BEAMLINE)
+          BEAMLINE=[BLnew; BEAMLINE(isb(end)+1:end)];
+        else
+          BEAMLINE=BLnew;
+        end
+      end
+      SetSPositions(1,length(BEAMLINE),0);
+      SetFloorCoordinates(1,length(BEAMLINE),zeros(1,6));
     end
     function WriteDeck(obj,Initial,filename,linename,useline)
       % Write deck out to chosen file format
@@ -1207,7 +1240,18 @@ classdef DeckTool < handle
               % deal with possible name[par] format
               if contains(tok{2},'[')
                 tok{2}=regexprep(tok{2},'\[np\.(\w+)','[$1');
-                tok{2}=regexprep(tok{2},'np\.(\w+)\[(\w+)\]','en.$1.$2');
+                tokex = regexp(tok{2},'np\.(\w+)\[(\w+)\]','tokens','once');
+                if ~isfield(en.(tokex{1}),tokex{2}) % looking for keyword concatination
+                  fn=fieldnames(en.(tokex{1}));
+                  for ifn=1:length(fn)
+                    if startsWith(string(tokex{2}),fn{ifn}) || startsWith(fn{ifn},tokex{2})
+                      tok{2}=sprintf('en.%s.%s',tokex{1},fn{ifn});
+                      break;
+                    end
+                  end
+                else
+                  tok{2}=regexprep(tok{2},'np\.(\w+)\[(\w+)\]','en.$1.$2');
+                end
               end
               expval=eval(tok{2});
               ndef(ismember(ndef,itxt))=[];
@@ -1307,17 +1351,31 @@ classdef DeckTool < handle
 %       txt(inp)=[];
       % Parse element list
       fn=fieldnames(en); lines=[]; ifn=1;
+      plist={'MARK' 'DRIF' 'QUAD' 'SEXT' 'OCTU' 'MULT' 'SBEN' 'SOLE' 'LCAV' 'DRIF' 'HKIC' ...
+            'VKIC' 'KICK' 'MONI' 'HMON' 'VMON' 'INST' 'PROF' 'WIRE' 'BLMO' 'SLMO' 'IMON' ...
+            'COLL' 'MATR' 'BETA' 'BEAM' 'LINE' 'SIGM' 'RCOL' 'ECOL' 'SROT' 'ROLL' 'ZROT' 'YROT' 'GKIC'};
       while ifn<=length(fn) %for ifn=1:length(fn)
         % if no class field at this stage, then it is a marker
         if ~isfield(en.(fn{ifn}),'Class')
           en.(fn{ifn}).Class='marker';
+        end
+        % Inherting from another element?
+        if length(en.(fn{ifn}).Class)<4 || ~ismember(upper(en.(fn{ifn}).Class(1:4)),plist)
+          iobj = en.(en.(fn{ifn}).Class) ;
+          en.(fn{ifn}).Class = iobj.Class ;
+          fn2=fieldnames(iobj);
+          for ifn2=1:length(fn2)
+            if ~isfield(en.(fn{ifn}),fn2{ifn2})
+              en.(fn{ifn}).(fn2{ifn2}) = iobj.(fn2{ifn2}) ;
+            end
+          end
         end
         switch upper(en.(fn{ifn}).Class(1:4))
           case 'DRIF'
             L=obj.collectPar(en.(fn{ifn}),'l');
             en.(fn{ifn}).LucretiaElement = DrifStruc( L, fn{ifn} ) ;
           case {'SBEN','RBEN'}
-            [L,ANG,K1,E1,E2,Tilt,H1,H2,Hgap,Fint,Hgap2,Fint2,Type]=obj.collectPar(en.(fn{ifn}),'l','angle','k1','e1','e2','tilt','h1','h2','hgap','fint','hgapx','fintx','type');
+            [L,ANG,K1,K2,E1,E2,Tilt,H1,H2,Hgap,Fint,Hgap2,Fint2,Type]=obj.collectPar(en.(fn{ifn}),'l','angle','k1','k2','e1','e2','tilt','h1','h2','hgap','fint','hgapx','fintx','type');
             E=[E1,E2];
             H=[H1,H2];
             if L==0
@@ -1343,6 +1401,16 @@ classdef DeckTool < handle
             end
             en.(fn{ifn}).LucretiaElement = SBendStruc( L, BField.*L, ANG, E, H, Hgap, Fint, Tilt, fn{ifn} ) ;
             en.(fn{ifn}).LucretiaElement.Type=Type;
+            % Deal with design sextupole field content - later gets turned
+            % into MULT elements either side of bend
+            if ~isnan(K2) && abs(K2)>0
+              if length(BField)==2
+                BField=[BField,-K2*sign(ANG)];
+              else
+                BField=[BField,0,-K2*sign(ANG)];
+              end
+              en.(fn{ifn}).LucretiaElement.B = BField.*L ;
+            end
           case 'QUAD'
             [L, B, Tilt, aper, Type] = obj.collectPar(en.(fn{ifn}),'l','k1','tilt','aperture','type') ;
             if L==0
@@ -1695,12 +1763,7 @@ classdef DeckTool < handle
       for iline=1:length(line)
         % Check for repeated element command
         if ~isempty(regexp(char(line(iline)),'\d\*', 'once'))
-          if str2double(obj.verinfo.Version)>9.1 % behaviour of regexp with 'once' option changed
-            r=regexp(line(iline),'(\d+)\*','tokens','once');
-            nrep=round(double(r{1}{1}));
-          else
-            nrep=round(double(regexp(line(iline),'(\d+)\*','tokens','once')));
-          end
+          nrep=double(string(regexp(line(iline),'(\d+)\*','tokens','once')));
           line(iline)=regexprep(line(iline),'\d+\*','');
         else
           nrep=1;

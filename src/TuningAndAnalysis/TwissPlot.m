@@ -165,5 +165,6 @@ if ~isempty(dL)
   BEAMLINE=BL1;
   PS=PS1;
 end
+yyaxis left
 % Add Magnet plot
 [h0,h1]=AddMagnetPlot(istart1,iend1);
