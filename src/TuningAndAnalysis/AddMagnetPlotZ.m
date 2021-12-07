@@ -138,9 +138,15 @@ barHeight = barHeight(1:nElem) ;
 bottom=[];
 top=[];
 frac=1;
+if string(get(han,'Type')) == "axes" && ~isequal(lower(opt),'replace')
+  han=han.Parent;
+end
 if exist('opt','var') && isequal(lower(opt),'replace')
-  h0=get(han,'Children');
-  if isprop(han,'XLim'); h0=han; end
+  if string(get(han,'Type')) ~= "axes"
+    h0=get(han,'Children');
+  else
+    h0=han;
+  end
   v=get(h0(1),'Position');
   bottom=min([bottom,v(2)]);
   top=max([top,v(2)+v(4)]);
@@ -173,9 +179,12 @@ v0=axis(h0(1));
 n=0;
 while ((n<length(h0))&&(~found))
   n=n+1;
-  ht=get(h0(n),'Title');
-  tt=get(ht,'String');
-  found=(~isempty(tt));
+  try
+    ht=get(h0(n),'Title');
+    tt=get(ht,'String');
+    found=(~isempty(tt));
+  catch
+  end
 end
 if (found)
   set(ht,'String',[])
@@ -209,8 +218,8 @@ for count = 1:nElem
       y = -barHeight(count) ; h = barHeight(count) ;
   end
   color = barColor(count) ;
-  rhan=rectangle('Position',[x,y,w,h],'FaceColor',color,'Parent',h1,'LineStyle','none') ;
-%   rhan=rectangle('Position',[x,y,w,h],'FaceColor',color,'Parent',h1) ;
+%   rhan=rectangle('Position',[x,y,w,h],'FaceColor',color,'Parent',h1,'LineStyle','none') ;
+  rhan=rectangle('Position',[x,y,w,h],'FaceColor',color,'Parent',h1) ;
   % Set internal data identifying this object if clicked on
   set(rhan,'ButtonDownFcn',@AddMagnetPlot)
   set(rhan,'Tag',num2str(eletag(count)));
@@ -220,18 +229,21 @@ end
 hold(h1,'off');
 
 % Link x-axis for original and magnet bar plots
-hl=linkprop([h0(1) h1],'XLim');
-if ~isempty(HLINK)
-  dhl=[];
-  for iH=1:length(HLINK)
-    if ~any(ishandle(HLINK(iH).Targets))
-      dhl(end+1)=iH;
+try
+  hl=linkaxes([h0(1) h1],'x');
+  if ~isempty(HLINK)
+    dhl=[];
+    for iH=1:length(HLINK)
+      if ~any(ishandle(HLINK(iH).Targets))
+        dhl(end+1)=iH;
+      end
     end
+    HLINK(dhl)=[];
+    HLINK(end+1)=hl;
+  else
+    HLINK=hl;
   end
-  HLINK(dhl)=[];
-  HLINK(end+1)=hl;
-else
-  HLINK=hl;
+catch
 end
 
 % stick the title over everything
