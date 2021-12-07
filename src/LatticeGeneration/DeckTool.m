@@ -1889,7 +1889,7 @@ classdef DeckTool < handle
   methods(Static)
     function FlipLattice
       %FLIPDECK Flip the order of the BEAMLINE lattice
-      global BEAMLINE
+      global BEAMLINE GIRDER
       % Flip the order of all elements
       BEAMLINE=flip(BEAMLINE);
       SetSPositions(1,length(BEAMLINE),0);
@@ -1911,6 +1911,20 @@ classdef DeckTool < handle
         BEAMLINE{iele}.HGAP=flip(BEAMLINE{iele}.HGAP);
         BEAMLINE{iele}.FINT=flip(BEAMLINE{iele}.FINT);
         BEAMLINE{iele}.EdgeCurvature=flip(BEAMLINE{iele}.EdgeCurvature);
+      end
+      % Setup correct parameters for RF elements
+      for iele=findcells(BEAMLINE,'Egain')
+        BEAMLINE{iele}.Egain=-BEAMLINE{iele}.Egain;
+        BEAMLINE{iele}.Phase=BEAMLINE{iele}.Phase+180;
+      end
+      % Flip required Offset parameters
+      for iele=findcells(BEAMLINE,'Offset')
+        BEAMLINE{iele}.Offset([1 2 5 6]) = -BEAMLINE{iele}.Offset([1 2 5 6]) ;
+      end
+      if ~isempty(GIRDER)
+        for igir=1:length(GIRDER)
+          GIRDER{igir}.Offset([1 2 5 6]) = -GIRDER{igir}.Offset([1 2 5 6]) ;
+        end
       end
     end
     function SliceMags(sdist)
