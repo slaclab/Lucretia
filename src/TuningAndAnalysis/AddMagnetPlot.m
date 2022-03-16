@@ -160,7 +160,11 @@ bottom=[];
 top=[];
 frac=1;
 if exist('opt','var') && isequal(lower(opt),'replace')
-  h0=get(han,'Children');
+  if strcmp(han.Type,'axes')
+    h0=han;
+  else
+    h0=get(han,'Children');
+  end
   if isprop(han,'XLim'); h0=han; end
   v=get(h0(1),'Position');
   bottom=min([bottom,v(2)]);
@@ -168,7 +172,11 @@ if exist('opt','var') && isequal(lower(opt),'replace')
   height=top-bottom;
 else
   frac = 0.15 ;
-  hc=get(han,'Children');
+  if strcmp(han.Type,'axes')
+    hc=han;
+  else
+    hc=get(han,'Children');
+  end
   h0=[];
   for n=1:length(hc)
     if (strcmp(get(hc(n),'Type'),'axes'))
@@ -230,8 +238,8 @@ for count = 1:nElem
       y = -barHeight(count) ; h = barHeight(count) ;
   end
   color = barColor(count) ;
-  rhan=rectangle('Position',[x,y,w,h],'FaceColor',color,'Parent',h1,'LineStyle','none') ;
-%   rhan=rectangle('Position',[x,y,w,h],'FaceColor',color,'Parent',h1) ;
+%   rhan=rectangle('Position',[x,y,w,h],'FaceColor',color,'Parent',h1,'LineStyle','none') ;
+  rhan=rectangle('Position',[x,y,w,h],'FaceColor',color,'Parent',h1) ;
   % Set internal data identifying this object if clicked on
   set(rhan,'ButtonDownFcn',@AddMagnetPlot)
   set(rhan,'Tag',num2str(eletag(count)));
