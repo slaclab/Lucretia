@@ -147,13 +147,22 @@ if exist('opt','var') && isequal(lower(opt),'replace')
   else
     h0=han;
   end
+  if strcmp(han.Type,'axes')
+    h0=han;
+  else
+    h0=get(han,'Children');
+  end
   v=get(h0(1),'Position');
   bottom=min([bottom,v(2)]);
   top=max([top,v(2)+v(4)]);
   height=top-bottom;
 else
   frac = 0.15 ;
-  hc=get(han,'Children');
+  if strcmp(han.Type,'axes')
+    hc=han;
+  else
+    hc=get(han,'Children');
+  end
   h0=[];
   for n=1:length(hc)
     if (strcmp(get(hc(n),'Type'),'axes'))
@@ -229,8 +238,9 @@ end
 hold(h1,'off');
 
 % Link x-axis for original and magnet bar plots
-try
-  hl=linkaxes([h0(1) h1],'x');
+%hl=linkaxes([h0(1) h1],'x');
+try % Doesn't work for UIAxes
+  hl=linkprop([h0(1) h1],'XLim');
   if ~isempty(HLINK)
     dhl=[];
     for iH=1:length(HLINK)
