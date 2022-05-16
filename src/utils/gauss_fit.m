@@ -82,11 +82,11 @@ p = fminsearch(@gauss_min,p,optimset('MaxIter',5000,'MaxFunEvals',5000),arg1);
 z = sqrt(2*pi)*p(2)*gauss(x,p(1),p(2));
 if y_off
   Q = [ones(size(z)) z];
-  [yfit,dyfit,c] = fit(Q,y,dy);
+  [yfit,dyfit,c] = ffit(Q,y,dy);
   q = [c(1) c(2) p(1) p(2)];
 else
   Q = z;
-  [yfit,dyfit,c] = fit(Q,y,dy);
+  [yfit,dyfit,c] = ffit(Q,y,dy);
   q = [0 c(1) p(1) p(2)];
 end
 chisq_ndf = norm( (y-yfit)./dy )/sqrt(length(y) - length(q));        

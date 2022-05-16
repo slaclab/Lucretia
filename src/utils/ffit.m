@@ -1,7 +1,7 @@
-function [y,dy,R,dR,chisq,V] = fit(Q,s,sig)
+function [y,dy,R,dR,chisq,V] = ffit(Q,s,sig)
 
 %FIT
-%       [y,dy,R,dR,chisq,V] = fit(Q,s[,sig])
+%       [y,dy,R,dR,chisq,V] = ffit(Q,s[,sig])
 %
 %       Function to fit the data in column vector "s" to the curve given by
 %       the linear combination of the functions in "Q".  The matrix "Q" is

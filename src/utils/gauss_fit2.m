@@ -82,11 +82,11 @@ p = fminsearch(@gauss_min2,p,optimset('MaxIter',5000,'MaxFunEvals',5000),arg1);
 z = gauss2(x,p(1),p(2),p(3),p(4),p(5),p(6));
 if y_off
   Q = [ones(size(z)) z];
-  [yfit,dyfit,c] = fit(Q,y,dy);
+  [yfit,dyfit,c] = ffit(Q,y,dy);
 %   q = [c(1) c(2) p(1) p(2)];
 else
   Q = z;
-  [yfit,dyfit,c] = fit(Q,y,dy);
+  [yfit,dyfit,c] = ffit(Q,y,dy);
 %   q = [0 c(1) p(1) p(2)];
 end
 q=p;

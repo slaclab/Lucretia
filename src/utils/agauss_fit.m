@@ -63,11 +63,11 @@ p=fminsearch('agauss_min',p,[],arg1);
 z=sqrt(2*pi)*p(2)*agauss(x,p(1),p(2),p(3));
 if y_off
   Q=[ones(size(z)) z];
-  [yfit,dyfit,c]=fit(Q,y,dy);
+  [yfit,dyfit,c]=ffit(Q,y,dy);
   q=[c(1) c(2) p(1) p(2) p(3)];
 else
   Q=z;
-  [yfit,dyfit,c]=fit(Q,y,dy);
+  [yfit,dyfit,c]=ffit(Q,y,dy);
   q=[0 c(1) p(1) p(2) p(3)];
 end
 chisq=norm((y-yfit)./dy)/sqrt(length(y)-length(q));

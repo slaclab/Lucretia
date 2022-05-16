@@ -60,9 +60,9 @@ for j=0:2
 end
 
 if (bars)
-   [yfit,dyfit,p,dp,chisq,Cv]=fit(Q,y,dy);
+   [yfit,dyfit,p,dp,chisq,Cv]=ffit(Q,y,dy);
 else
-   [yfit,dyfit,p,dp,chisq,Cv]=fit(Q,y);
+   [yfit,dyfit,p,dp,chisq,Cv]=ffit(Q,y);
 end
 
 if (p(3)~=0)

@@ -135,9 +135,9 @@ end
 % do the fit
 
 if (bars)
-   [yfit,dyfit,p1,dp1,chisq]=fit(Q,y,dy);
+   [yfit,dyfit,p1,dp1,chisq]=ffit(Q,y,dy);
 else
-   [yfit,dyfit,p1,dp1]=fit(Q,y);
+   [yfit,dyfit,p1,dp1]=ffit(Q,y);
 end
 for j=1:mm
    p(j)=p1(j)/(f^m(j));
