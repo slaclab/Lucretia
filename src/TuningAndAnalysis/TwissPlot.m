@@ -145,7 +145,7 @@ if abs(functions(2))
   end
   plot(S,Twiss.etax)
   ltxt{end+1}='\eta_x';
-  ylabel('Dispersion [m]');
+  ylabel('\eta [m]');
   hold on
 end
 if abs(functions(3))
@@ -154,7 +154,7 @@ if abs(functions(3))
   end
   plot(S,Twiss.etay)
   ltxt{end+1}='\eta_y';
-  ylabel('Dispersion [m]');
+  ylabel('\eta [m]');
 end
 legend(ltxt)
 hold off
@@ -165,6 +165,8 @@ if ~isempty(dL)
   BEAMLINE=BL1;
   PS=PS1;
 end
-yyaxis left
+if any(functions(2:3))
+  yyaxis left
+end
 % Add Magnet plot
 [h0,h1]=AddMagnetPlot(istart1,iend1);

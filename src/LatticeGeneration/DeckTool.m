@@ -278,9 +278,9 @@ classdef DeckTool < handle
         X(ind)=BEAMLINE{iele}.Coordi(1);
         Y(ind)=BEAMLINE{iele}.Coordi(2);
         Z(ind)=BEAMLINE{iele}.Coordi(3);
-        XANG(ind)=BEAMLINE{iele}.Anglei(2); % Pitch
-        YANG(ind)=BEAMLINE{iele}.Anglei(1); % Yaw
-        ZANG(ind)=BEAMLINE{iele}.Anglei(3); % Roll
+        PHI(ind)=BEAMLINE{iele}.Anglei(2); % Pitch
+        THETA(ind)=BEAMLINE{iele}.Anglei(1); % Yaw
+        PSI(ind)=BEAMLINE{iele}.Anglei(3); % Roll
         if isfield(BEAMLINE{iele},'B')
           BL(ind)=BEAMLINE{iele}.B(1);
         else
@@ -300,11 +300,11 @@ classdef DeckTool < handle
         props.L(ind)=L; props.K0L(ind)=K0L; props.K1L(ind)=K1L; props.K2L(ind)=K2L;
         props.K3L(ind)=K3L;
       end
-      X(abs(X)<1e-6)=0; Y(abs(Y)<1e-6)=0; Z(abs(Z)<1e-6)=0; XANG(abs(XANG)<1e-6)=0; YANG(abs(YANG)<1e-6)=0; ZANG(abs(ZANG)<1e-6)=0;
-      T=table(ModelName',Type',X',Y',Z',XANG',YANG',ZANG',SC_X',SC_Y',props.L',BL',props.K0L',props.K1L',props.K2L',props.K3L','VariableNames',...
-        {'ModelName';'Type';'X';'Y';'Z';'XANG';'YANG';'ZANG';'SC_X';'SC_Y';'L';'BL';'K0L';'K1L';'K2L';'K3L'}); % ,'RowNames',Label'
+      X(abs(X)<1e-6)=0; Y(abs(Y)<1e-6)=0; Z(abs(Z)<1e-6)=0; PHI(abs(PHI)<1e-6)=0; THETA(abs(THETA)<1e-6)=0; PSI(abs(PSI)<1e-6)=0;
+      T=table(ModelName',Type',X',Y',Z',THETA',PHI',PSI',SC_X',SC_Y',props.L',BL',props.K0L',props.K1L',props.K2L',props.K3L','VariableNames',...
+        {'ModelName';'Type';'X';'Y';'Z';'THETA';'PHI';'PSI';'SC_X';'SC_Y';'L';'BL';'K0L';'K1L';'K2L';'K3L'}); % ,'RowNames',Label'
       writetable(T,filename);
-    end  
+    end
     function Diff(obj,filename,linename,betaname,beamname)
       % Diff(filename [,linename,betaname,beamname])
       % Difference of in-memory lattice to given file
@@ -1950,6 +1950,37 @@ classdef DeckTool < handle
     end
   end
   methods(Static)
+    function WriteSpreadsheet()
+      global BEAMLINE
+      qele=findcells(BEAMLINE,'Class','QUAD');
+      Name={}; g=[]; L=[]; PMOD=[]; k=[]; aper_x=[]; aper_y=[]; type={};
+      clight=2.99792458e8; % speed of light (m/sec)
+      Cb=1e9/clight;       % rigidity conversion (T-m/GeV)
+      for iele=qele
+        if isfield(BEAMLINE{iele},'Slices') && length(BEAMLINE{iele}.Slices)>1 && iele~=BEAMLINE{iele}.Slices(1)
+          continue
+        end
+        PMOD(end+1)=BEAMLINE{iele}.P;
+        g(end+1)=GetTrueStrength(iele,1);
+        if isfield(BEAMLINE{iele},'Slices') && length(BEAMLINE{iele}.Slices)>1
+          L(end+1)=sum(arrayfun(@(x) BEAMLINE{x}.L,BEAMLINE{iele}.Slices));
+        else
+          L(end+1)=BEAMLINE{iele}.L;
+        end
+        k(end+1)=g(end)/(Cb*BEAMLINE{iele}.P)/L(end);
+        aper_x(end+1)=BEAMLINE{iele}.aper(1);
+        if length(BEAMLINE{iele}.aper)>1
+          aper_y(end+1)=BEAMLINE{iele}.aper(2);
+        else
+          aper_y(end+1)=aper_x(end);
+        end
+        type{end+1}=BEAMLINE{iele}.Type;
+        Name{end+1}=BEAMLINE{iele}.Name;
+      end
+      T=table(Name(:),type(:),L(:),g(:),k(:),PMOD(:),aper_x(:),aper_y(:),'VariableNames',...
+        {'ModelName';'Type';'Length';'FieldGradient';'K';'P';'APER_X';'APER_Y'});
+      writetable(T,'QuadData.xls');
+    end
     function FlipLattice
       %FLIPDECK Flip the order of the BEAMLINE lattice
       global BEAMLINE GIRDER
@@ -2080,6 +2111,7 @@ classdef DeckTool < handle
     end
   end
   methods(Static,Access=private)
+    
     function varargout=collectPar(ele,varargin)
       npar=nargin-1;
       if npar<1; varargout{1}=[]; return; end
