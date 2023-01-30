@@ -115,6 +115,7 @@ classdef Match < handle & physConsts
     lookupVarVals
     lookupCnstVals
     optimExitFlag
+    match_fval
   end
   properties(Dependent)
     dotrack
@@ -231,7 +232,7 @@ classdef Match < handle & physConsts
       % Creates obj.BUMP(end+1) with fields: 'corPS' 'bumpIND' 'type'
       %                                      'dim' 'coefs' 'val'
       global PS BEAMLINE
-      if ~exist('type','var') || ~exist('type','var') || ~exist('corPsInds','var') || ~exist('bumpInd','var')
+      if ~exist('type','var') || ~exist('corPsInds','var') || ~exist('bumpInd','var')
         error('some required defineBump method inputs not specified')
       end
       if ~strcmp(type,'COR3')
@@ -349,7 +350,7 @@ classdef Match < handle & physConsts
         for itype=1:length(obj.varType)
           indstr=' ';
           for ind=obj.varIndex{itype}
-            indstr=[indstr num2str(ind) ' '];
+            indstr=[indstr num2str(ind) ' ']; %#ok<AGROW> 
           end
           fprintf('%s(%s).%s(%d) / %g / %g / %g\n',obj.varType{itype},indstr,obj.varField{itype},...
             obj.varFieldIndex(itype),curVals(itype),obj.varLimits(1,itype),obj.varLimits(2,itype))
@@ -395,7 +396,8 @@ classdef Match < handle & physConsts
       
       % Perform fit
       % - normalise variables
-      varW=(obj.varLimits(2,:)-obj.varLimits(1,:)); varVals=obj.varVals;
+      varW=(obj.varLimits(2,:)-obj.varLimits(1,:)); varVals=obj.varVals; %#ok<*PROP> 
+      fval=[];
       switch obj.optim
         case 'global'
           gs = GlobalSearch;
@@ -406,14 +408,14 @@ classdef Match < handle & physConsts
           x = gamultiobj(@(x) minFunc(obj,x,obj.dotrack,obj.dotwiss,varW,varVals),length(varVals),[],[],[],[],...
             obj.varLimits(1,:)./varW,obj.varLimits(2,:)./varW,opts);
         case 'lsqnonlin'
-          [x , ~, ~, eflag]=lsqnonlin(@(x) minFunc(obj,x,obj.dotrack,obj.dotwiss,varW,varVals),...
+          [x , fval, ~, eflag]=lsqnonlin(@(x) minFunc(obj,x,obj.dotrack,obj.dotwiss,varW,varVals),...
             varVals./varW,obj.varLimits(1,:)./varW,obj.varLimits(2,:)./varW,opts);
           obj.optimExitFlag=eflag;
         case 'fminsearch'
-          [x , ~, eflag]=fminsearch(@(x) minFunc(obj,x,obj.dotrack,obj.dotwiss),varVals./varW,opts);
+          [x , fval, eflag]=fminsearch(@(x) minFunc(obj,x,obj.dotrack,obj.dotwiss),varVals./varW,opts);
           obj.optimExitFlag=eflag;
         case 'fmincon'
-          x=fmincon(@(x) minFunc(obj,x,obj.dotrack,obj.dotwiss),varVals./varW,[],[],[],[],...
+          [x,fval] = fmincon(@(x) minFunc(obj,x,obj.dotrack,obj.dotwiss),varVals./varW,[],[],[],[],...
             obj.varLimits(1,:)./varW,obj.varLimits(2,:)./varW,[],opts);
 %           x = simulannealbnd(@(x) minFunc(obj,x,obj.dotrack,obj.dotwiss),varVals./varW,obj.varLimits(1,:)./varW,obj.varLimits(2,:)./varW,opts);
         case 'fgoalattain'
@@ -438,6 +440,7 @@ classdef Match < handle & physConsts
         otherwise
           error('Unknown or unsupported optimizer');
       end
+      obj.match_fval=fval;
       if strcmp(obj.optim,'fgoalattain') || strcmp(obj.optim,'lscov')
         obj.varVals=x;
       else
@@ -496,6 +499,7 @@ classdef Match < handle & physConsts
     end
     function vals=get.varVals(obj)
       global BEAMLINE PS GIRDER KLYSTRON
+      vals=zeros(1,length(obj.varType));
       for itype=1:length(obj.varType)
         ind=obj.varIndex{itype}(1);
         switch obj.varType{itype}
@@ -538,10 +542,10 @@ classdef Match < handle & physConsts
               end
             case 'PS'
               PS(ind).(obj.varField{itype})(obj.varFieldIndex(itype))=x(itype);
-              if strcmp(obj.varField{itype},'SetPt'); PSTrim(ind); end;
+              if strcmp(obj.varField{itype},'SetPt'); PSTrim(ind); end
             case 'GIRDER'
               GIRDER{ind}.(obj.varField{itype})(obj.varFieldIndex(itype))=x(itype);
-              if strcmp(obj.varField{itype},'MoverSetPt'); MoverTrim(ind); end;
+              if strcmp(obj.varField{itype},'MoverSetPt'); MoverTrim(ind); end
             case 'KLYSTRON'
               KLYSTRON(ind).(obj.varField{itype})(obj.varFieldIndex(itype))=x(itype);
               if strcmp(obj.varField{itype},'AmplSetPt') || strcmp(obj.varField{itype},'PhaseSetPt')
@@ -607,7 +611,7 @@ classdef Match < handle & physConsts
         else
           obj.lookupMat=lookupMat;
         end
-        vvals=[]; %#ok<NASGU>
+        vvals=[];
       else
         nscan=obj.nLookupSteps;
         ivals=obj.varVals;
@@ -619,16 +623,16 @@ classdef Match < handle & physConsts
         vvals=cell(1,length(ivals));
         while varCount<length(ivals)
           spmd % ivar=1:length(ivals)
-            ivar=labindex+varCount;
+            ivar=spmdIndex+varCount;
             if ivar <= length(ivals)
               vvals_p=linspace(varlims(1,ivar),varlims(2,ivar),nscan);
               for ival=1:length(vvals_p)
                 vals=ivals; vals(ivar)=vvals_p(ival);
                 M.varVals=vals;
-                lookupMat_p(ival,:)=M.optimVals-iConst;
+                lookupMat_p(ival,:)=M.optimVals-iConst; %#ok<AGROW> 
               end
               M.varVals=ivals;
-              filledVals=labindex+varCount;
+              filledVals=spmdIndex+varCount;
             else
               filledVals=0;
             end
@@ -774,7 +778,7 @@ classdef Match < handle & physConsts
         
         % Get twiss in correct format
         if dotwiss && ~(dotrack<0)
-          Ix.beta=obj.initStruc.x.Twiss.beta;
+          Ix.beta=obj.initStruc.x.Twiss.beta; %#ok<*PROPLC> 
           Ix.alpha=obj.initStruc.x.Twiss.alpha;
           Ix.eta=obj.initStruc.x.Twiss.eta;
           Ix.etap=obj.initStruc.x.Twiss.etap;
@@ -805,7 +809,7 @@ classdef Match < handle & physConsts
                 else
                   [stat, T]=GetTwiss(obj.iInitial,obj.iMatch(1),Ix,Iy);
                 end
-                if stat{1}~=1; error('Error in tracking in minimiser function: %s',stat{2}); end;
+                if stat{1}~=1; error('Error in tracking in minimiser function: %s',stat{2}); end
               end
             else
               if dotrack
@@ -821,7 +825,7 @@ classdef Match < handle & physConsts
                 else
                   [stat, T]=GetTwiss(obj.iInitial,obj.iMatch(itrack),Ix,Iy);
                 end
-                if stat{1}~=1; error('Error in tracking in minimiser function: %s',stat{2}); end;
+                if stat{1}~=1; error('Error in tracking in minimiser function: %s',stat{2}); end
               end
             end
           catch
@@ -830,7 +834,7 @@ classdef Match < handle & physConsts
           end
           % Extract the data
           for itype=1:length(obj.matchType)
-            if obj.matchInd(itype)~=obj.iMatch(itrack); continue; end;
+            if obj.matchInd(itype)~=obj.iMatch(itrack); continue; end
             switch obj.matchType{itype}
               case 'SumBeta'
                 F(itype)=T.betax(end)+T.betay(end);
