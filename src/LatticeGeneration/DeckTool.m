@@ -1987,6 +1987,12 @@ classdef DeckTool < handle
       % Flip the order of all elements
       BEAMLINE=flip(BEAMLINE);
       SetSPositions(1,length(BEAMLINE),0);
+      if any(cellfun(@(x) isfield(x,'Slices'),BEAMLINE))
+        SetElementSlices(1,length(BEAMLINE));
+      end
+      if any(cellfun(@(x) isfield(x,'Block'),BEAMLINE))
+        SetElementBlocks(1,length(BEAMLINE));
+      end
       for iele=1:length(BEAMLINE)
         if isfield(BEAMLINE{iele},'Coordi')
           ci=BEAMLINE{iele}.Coordi;
