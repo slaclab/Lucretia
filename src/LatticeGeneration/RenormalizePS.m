@@ -89,7 +89,7 @@ for elemno = PS(psno).Element
       end
     end
   else
-    if (length(BEAMLINE{elemno}.PS) == 1)
+    if length(BEAMLINE{elemno}.PS) == 1
       BEAMLINE{elemno}.B = BEAMLINE{elemno}.B ./ scale ;
     else
       BEAMLINE{elemno}.B(BEAMLINE{elemno}.PS == psno) = BEAMLINE{elemno}.B(BEAMLINE{elemno}.PS == psno) ./ scale ;
