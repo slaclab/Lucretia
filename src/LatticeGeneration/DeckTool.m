@@ -808,14 +808,7 @@ classdef DeckTool < handle
                   case 'BMAD'
                     pinfo.name{end+1}=sprintf('tt%d%d',iarg1,iarg2);
                   case 'Elegant'
-                    for i1=1:6
-                      for i2=1:6
-                        if abs(BEAMLINE{iele}.R(i1,i2))>0
-                          pinfo.name{end+1}=sprintf('R%d%d',i1,i2);
-                          pinfo.val(end+1)=BEAMLINE{iele}.R(i1,i2);
-                        end
-                      end
-                    end
+                    pinfo.name{end+1}=sprintf('R%d%d',iarg1,iarg2);
                 end
                 pinfo.val(end+1)=rv;
               end
