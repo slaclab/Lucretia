@@ -79,7 +79,7 @@ classdef DeckTool < handle
           SetSPositions(1,length(BEAMLINE),0);
         end
       end
-      obj.verinfo=ver('Matlab'); % store info about current Matlab instance
+      obj.verinfo=matlabRelease; % store info about current Matlab instance
     end
     function SetWakeFile(obj,WFno,type,filename)
       % Assign a wakefield file to a WF entry
@@ -975,7 +975,7 @@ classdef DeckTool < handle
             elseif strcmp(obj.deckType,'Elegant') && strcmp(pinfo.classname,'RFCW')
               newstr{1}=sprintf('ZWAKE=%d',BEAMLINE{eleind}.TrackFlag.SRWF_Z);
               newstr{2}=sprintf('TRWAKE=%d',BEAMLINE{eleind}.TrackFlag.SRWF_T);
-              d=dir(filename);
+              % d=dir(filename);
               zwname=sprintf('zwake_%d.sdds',BEAMLINE{eleind}.Wakes(1));
               twname=sprintf('trwake_%d.sdds',BEAMLINE{eleind}.Wakes(2));
               dowake=false;

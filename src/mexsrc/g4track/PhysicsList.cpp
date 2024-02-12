@@ -106,6 +106,7 @@ void PhysicsList::ConstructParticle()
 
 void PhysicsList::ConstructProcess()
 {
+  auto theParticleIterator = GetParticleIterator();
   AddTransportation();
   theParticleIterator->reset();
   G4EmProcessOptions opt;
@@ -187,6 +188,7 @@ void PhysicsList::ConstructProcess()
 
 void PhysicsList::ConstructGeneral()
 {
+  auto theParticleIterator = GetParticleIterator();
   // Add Decay Process
   G4Decay* theDecayProcess = new G4Decay();
   theParticleIterator->reset();

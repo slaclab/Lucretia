@@ -110,8 +110,8 @@ if strcmp(target,'cpu-g4')
   G4FLAGS=strrep(G4FLAGS,sprintf('\r'),'');
   G4LIBS=strrep(G4LIBS,sprintf('\r'),'');
   FLAGS=[FLAGS ' -DLUCRETIA_G4TRACK' sprintf(' CXXFLAGS=''$CXXFLAGS %s'' CFLAGS=''$CFLAGS %s''',G4FLAGS,G4FLAGS)];
-  LIBS=[LIBS ' -Lg4track/ -lg4track -L/home/glen/xerces-c-3.0.1/lib -lxerces-c ' G4LIBS];
-%   LIBS=[LIBS ' -Lg4track/ -lg4track ' G4LIBS];
+  % LIBS=[LIBS ' -Lg4track/ -lg4track -L/home/glen/xerces-c-3.0.1/lib -lxerces-c ' G4LIBS];
+  LIBS=[LIBS ' -Lg4track/ -lg4track ' G4LIBS];
 end
 
 % Dependencies

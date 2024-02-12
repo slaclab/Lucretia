@@ -152,11 +152,11 @@ classdef Track < handle
     end
     function set.beamIn(obj,beamStruc)
       % Update single ray structure
-      if length(beamStruc.Bunch.Q)>1
+      if length(beamStruc.Bunch(1).Q)>1
         obj.beamInSingle=beamStruc;
-        obj.beamInSingle.Bunch.Q=sum(beamStruc.Bunch.Q);
-        obj.beamInSingle.Bunch.stop=0;
-        obj.beamInSingle.Bunch.x=mean(beamStruc.Bunch.x,2);
+        obj.beamInSingle.Bunch(1).Q=sum(beamStruc.Bunch(1).Q);
+        obj.beamInSingle.Bunch(1).stop=0;
+        obj.beamInSingle.Bunch(1).x=mean(beamStruc.Bunch(1).x,2);
       end
       % Store given beam as local beam
       obj.lBeamIn=beamStruc;
@@ -164,7 +164,7 @@ classdef Track < handle
       if obj.isPTrack
         % Divide up beam particles amongst worker nodes
         np=length(obj.DL.workers);
-        nmp_1=length(beamStruc.Bunch.Q);
+        nmp_1=length(beamStruc.Bunch(1).Q);
         nmp=floor(nmp_1/np);
         n=0;
         for iw=obj.DL.workers
@@ -264,7 +264,7 @@ classdef Track < handle
       obj.startInd=1;
       obj.finishInd=length(BEAMLINE);
       obj.beamIn=beamIn;
-      obj.nray=numel(beamIn.Bunch.Q);
+      obj.nray=numel(beamIn.Bunch(1).Q);
       if exist('setPT','var') && setPT
         try
           obj.setupPTrackThru(beamIn);
