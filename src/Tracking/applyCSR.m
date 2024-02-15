@@ -113,6 +113,9 @@ if isfield(BEAMLINE{itrack},'TrackFlag') && isfield(BEAMLINE{itrack}.TrackFlag,'
   else
     iter=iter+1;
   end
+  if iter>BEAMLINE{itrack}.TrackFlag.Split % This case generated when multi-bunch tracking in bunch-order mode
+    iter=1;
+  end
   splitfrac=iter/BEAMLINE{itrack}.TrackFlag.Split;
   nsplit=BEAMLINE{itrack}.TrackFlag.Split;
 else
