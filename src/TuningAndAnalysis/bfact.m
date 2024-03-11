@@ -28,9 +28,11 @@ zv=zv(n1:n2); qv=qv(n1:n2);
 
 % Apply smoothing function
 if sf<0
-  qvs=smoothn(qv,'robust');
+  % qvs=smoothn(qv,'robust');
+  qvs=smoothdata(qv,'sgolay');
 elseif sf>0
-  qvs=smoothn(qv,sf);
+  % qvs=smoothn(qv,sf);
+  qvs=smoothdata(qv,'rlowess',sf);
 else
   qvs=qv;
 end

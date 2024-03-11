@@ -227,16 +227,21 @@ q = accumarray(bininds',beamQ')';
 bw=abs(z(2)-z(1));
 Q=sum(q);
 q=q./bw;
-if smoothVal==0
+if smoothVal==1
   q=smoothn(q,'robust','MaxIter',10000);
-else
+  % q=smoothdata(q,'sgolay');
+elseif smoothVal>1
   q=smoothn(q,smoothVal,'MaxIter',10000);
+  % q=smoothdata(q,'rlowess',smoothVal);
 end
+q(q<0)=0;
 dq=gradient(q,bw);
-if smoothVal==0
+if smoothVal==1
   dq=smoothn(dq,'robust','MaxIter',10000);
-else
+  % dq=smoothdata(dq,'sgolay');
+elseif smoothVal>1
   dq=smoothn(dq,smoothVal,'MaxIter',10000);
+  % dq=smoothdata(dq,'rlowess',smoothVal);
 end
 
 %Wake conversion constants
