@@ -1,7 +1,7 @@
 function [dat,fh]=plotSliceEmit(beam,ibunch,dl,doplot)
 % plotSliceEmit(beam,ibunch,dl [,doplot])
 
-fh=NaN(1,3);
+fh=NaN(1,4);
 if ~exist('doplot','var')
   doplot=false;
 elseif ~islogical(doplot)
@@ -13,7 +13,7 @@ ns=~beam.Bunch(ibunch).stop;
 z1=min(beam.Bunch(ibunch).x(5,ns)); z2=max(beam.Bunch(ibunch).x(5,ns));
 zslice=linspace(z1,z2,ceil((z2-z1)/dl));
 
-nx=zeros(1,length(zslice)-1); ny=nx; Q=nx; de=nx; xpos=nx; ypos=nx; betax=nx; alphax=nx; betay=nx; alphay=nx;
+nx=zeros(1,length(zslice)-1); ny=nx; Q=nx; de=nx; xpos=nx; ypos=nx; betax=nx; alphax=nx; betay=nx; alphay=nx; E=nx;
 for islice=1:length(zslice)-1
   B=beam;
   sel=ns&beam.Bunch(ibunch).x(5,:)>=zslice(islice)&beam.Bunch(ibunch).x(5,:)<zslice(islice+1);
@@ -22,10 +22,11 @@ for islice=1:length(zslice)-1
   nx(islice)=ex; ny(islice)=ey;
   Q(islice)=sum(beam.Bunch(ibunch).Q(sel));
   de(islice)=std(beam.Bunch(ibunch).x(6,sel))./mean(beam.Bunch(ibunch).x(6,sel));
+  E(islice)=mean(beam.Bunch(ibunch).x(6,sel));
   xpos(islice)=mean(beam.Bunch(ibunch).x(1,sel)); ypos(islice)=mean(beam.Bunch(ibunch).x(3,sel));
   [Tx,Ty]=GetUncoupledTwissFromBeamPars(B,1);
-  betax(islice)=Tx.beta; alphax(islice)=Tx.alpha;
-  betay(islice)=Ty.beta; alphay(islice)=Ty.alpha;
+  betax(islice)=real(Tx.beta); alphax(islice)=real(Tx.alpha);
+  betay(islice)=real(Ty.beta); alphay(islice)=real(Ty.alpha);
 end
 maxQ=max(Q);
 maxE=max([nx ny]); minE=min([nx ny]);
@@ -34,7 +35,7 @@ dz=diff(zslice(1:2));
 zp=zslice(1:end-1)+dz/2;
 clight=2.99792458e8; % speed of light (m/sec)
 I=Q./(dz/clight);
-dat.nx=nx; dat.ny=ny; dat.Q=Q; dat.de=de; dat.zp=zp; dat.betax=betax; dat.betay=betay; dat.alphax=alphax; dat.alphay=alphay; dat.I=I;
+dat.nx=nx; dat.ny=ny; dat.Q=Q; dat.de=de; dat.zp=zp; dat.betax=betax; dat.betay=betay; dat.alphax=alphax; dat.alphay=alphay; dat.I=I; dat.E=E;
 if doplot
   if isnan(fh(1))
     fh(1)=figure;
@@ -77,6 +78,21 @@ if doplot
   yyaxis left, hold on
   plot(zp(qsel).*1e6,xpos(qsel).*1e6,'*',zp(qsel).*1e6,ypos(qsel).*1e6,'o'); hold off;
   xlabel('z [\mum]'); ylabel('Mean Slice Position [\mum]'); grid on;
+  yyaxis right, hold on
+  clight=2.99792458e8; % speed of light (m/sec)
+  I=Q./(dz/clight);
+  plot(zp(qsel).*1e6,I(qsel).*1e-3,'+'); hold off;
+  ylabel('I [kA]');
+  legend({'<X>' '<Y>' 'I_{pk}'});
+   %
+  if isnan(fh(4))
+    fh(4)=figure;
+  else
+    figure(fh(4));
+  end
+  yyaxis left, hold on
+  plot(zp(qsel).*1e6,betax(qsel),'*',zp(qsel).*1e6,betay(qsel),'o'); hold off;
+  xlabel('z [\mum]'); ylabel('\beta_{x,y} [m]'); grid on;
   yyaxis right, hold on
   clight=2.99792458e8; % speed of light (m/sec)
   I=Q./(dz/clight);
