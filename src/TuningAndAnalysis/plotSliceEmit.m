@@ -13,7 +13,7 @@ ns=~beam.Bunch(ibunch).stop;
 z1=min(beam.Bunch(ibunch).x(5,ns)); z2=max(beam.Bunch(ibunch).x(5,ns));
 zslice=linspace(z1,z2,ceil((z2-z1)/dl));
 
-nx=zeros(1,length(zslice)-1); ny=nx; Q=nx; de=nx; xpos=nx; ypos=nx; betax=nx; alphax=nx; betay=nx; alphay=nx; E=nx;
+nx=zeros(1,length(zslice)-1); ny=nx; Q=nx; de=nx; xpos=nx; ypos=nx; betax=nx; alphax=nx; betay=nx; alphay=nx; E=nx; bmx=nx; bmy=nx;
 for islice=1:length(zslice)-1
   B=beam;
   sel=ns&beam.Bunch(ibunch).x(5,:)>=zslice(islice)&beam.Bunch(ibunch).x(5,:)<zslice(islice+1);
@@ -35,7 +35,13 @@ dz=diff(zslice(1:2));
 zp=zslice(1:end-1)+dz/2;
 clight=2.99792458e8; % speed of light (m/sec)
 I=Q./(dz/clight);
+[~,ind]=max(I);
+for islice=1:length(zslice)-1
+  bmx(islice)=bmag(betax(ind),alphax(ind),betax(islice),alphax(islice));
+  bmy(islice)=bmag(betay(ind),alphay(ind),betay(islice),alphay(islice));
+end
 dat.nx=nx; dat.ny=ny; dat.Q=Q; dat.de=de; dat.zp=zp; dat.betax=betax; dat.betay=betay; dat.alphax=alphax; dat.alphay=alphay; dat.I=I; dat.E=E;
+dat.bmag_x=bmx; dat.bmag_y=bmy;
 if doplot
   if isnan(fh(1))
     fh(1)=figure;
@@ -91,8 +97,8 @@ if doplot
     figure(fh(4));
   end
   yyaxis left, hold on
-  plot(zp(qsel).*1e6,betax(qsel),'*',zp(qsel).*1e6,betay(qsel),'o'); hold off;
-  xlabel('z [\mum]'); ylabel('\beta_{x,y} [m]'); grid on;
+  plot(zp(qsel).*1e6,bmx(qsel),'*',zp(qsel).*1e6,bmy(qsel),'o'); hold off;
+  xlabel('z [\mum]'); ylabel('BMAG_{x,y} [m]'); grid on;
   yyaxis right, hold on
   clight=2.99792458e8; % speed of light (m/sec)
   I=Q./(dz/clight);
