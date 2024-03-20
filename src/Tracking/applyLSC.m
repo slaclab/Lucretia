@@ -126,9 +126,12 @@ dl= (0.1*c) / ( ((2*c)/rb)*sqrt(max(I)/(17e3*gamma^3)) );
 I_ns=I;
 if smoothFactor>1
   I=smoothn(I,smoothFactor);
+  % I=smoothdata(I,'rlowess',smoothFactor);
 elseif smoothFactor==1
   I=smoothn(I,'robust');
+  % I=smoothdata(I,'sgolay');
 end
+I(I<0)=0;
 
 % Calculate fourier transform of current histogram
 nfft=2^nextpow2(nbins);

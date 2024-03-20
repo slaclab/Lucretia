@@ -6,6 +6,7 @@ classdef FloorPlot < handle
     SEXT
     SBEN
     LCAV
+    TCAV
     MARK
   end
   properties % world properties
@@ -29,6 +30,9 @@ classdef FloorPlot < handle
       obj.LCAV.dx=0.1;
       obj.LCAV.dy=0.1;
       obj.LCAV.col='y';
+      obj.TCAV.dx=0.1;
+      obj.TCAV.dy=0.1;
+      obj.TCAV.col='y';
       obj.MARK.dx=0.1;
       obj.MARK.dy=0.1;
       obj.MARK.col='m';

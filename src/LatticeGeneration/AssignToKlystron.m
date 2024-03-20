@@ -133,7 +133,7 @@ end
 % ...now at the klystron
 
 if (klysnum > 0)
-  elist = [KLYSTRON(klysnum).Element elemlist] ;
+  elist = [KLYSTRON(klysnum).Element elemlist(:)'] ;
   elist = sort(elist) ;
   
   % eliminate duplicates
