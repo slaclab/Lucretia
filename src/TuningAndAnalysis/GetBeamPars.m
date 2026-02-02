@@ -51,7 +51,7 @@ function [x,sigma] = GetBeamPars( beam, bunch )
       Qvec = beam.Bunch(bcount).Q ;
       nstop = beam.Bunch(bcount).stop == 0 ;
       
-      Q = Q + sum(Qvec) ;
+      Q = Q + sum(Qvec(nstop)) ;
       for ccount = 1:6
           
           xq = beam.Bunch(bcount).x(ccount,nstop).* Qvec(nstop) ;

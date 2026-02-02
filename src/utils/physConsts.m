@@ -9,5 +9,6 @@ classdef(Abstract) physConsts < handle
     Cb=1e9/2.99792458e8; % rigidity conversion (T-m/GeV)
     Z0=376.730313667; % free space impedence (Ohms)
     mu0=4e-7*pi; % Vacuum permeability (H/m)
+    re=2.8179403262e-15; % Classical electron radius (m)
   end
 end

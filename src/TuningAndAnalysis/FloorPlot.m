@@ -6,12 +6,14 @@ classdef FloorPlot < handle
     SEXT
     SBEN
     LCAV
+    TCAV
     MARK
   end
   properties % world properties
     WORLD
     INITC=[0 0 0]; % initial coordinate offset to apply
     INITANG=[0 0 0]; % initial angular offset to apply
+    axhan % Axes handle (blank to generate new figure window)
   end
   
   methods
@@ -29,6 +31,9 @@ classdef FloorPlot < handle
       obj.LCAV.dx=0.1;
       obj.LCAV.dy=0.1;
       obj.LCAV.col='y';
+      obj.TCAV.dx=0.1;
+      obj.TCAV.dy=0.1;
+      obj.TCAV.col='y';
       obj.MARK.dx=0.1;
       obj.MARK.dy=0.1;
       obj.MARK.col='m';
@@ -65,8 +70,8 @@ classdef FloorPlot < handle
       end
       lab={'dx' 'dy' 'dz'};
       if exist('cmd','var') && strcmpi(cmd,'add')
-        hold on
-        ax=axis;
+        hold(obj.axhan,'on');
+        ax=axis(obj.axhan);
         max1=max(cellfun(@(x) x.Coordf(3),BEAMLINE(ind1:ind2)))-obj.INITC(3);
         min1=min(cellfun(@(x) x.Coordi(3),BEAMLINE(ind1:ind2)))-obj.INITC(3);
         max2=max(cellfun(@(x) x.Coordf(pdim),BEAMLINE(ind1:ind2)))-obj.INITC(pdim);
@@ -75,17 +80,20 @@ classdef FloorPlot < handle
         ax(2)=max([ax(2) max1+obj.WORLD.(lab{3})]);
         ax(3)=min([ax(3) min2-obj.WORLD.(lab{pdim})]);
         ax(4)=max([ax(4) max2+obj.WORLD.(lab{pdim})]);
-        axis(ax);
+        axis(obj.axhan,ax);
       else
-        figure
+        if isempty(obj.axhan)
+          figure;
+          obj.axhan=axes;
+        end
         max1=max(cellfun(@(x) x.Coordf(3),BEAMLINE(ind1:ind2)))-obj.INITC(3);
         min1=min(cellfun(@(x) x.Coordi(3),BEAMLINE(ind1:ind2)))-obj.INITC(3);
         max2=max(cellfun(@(x) x.Coordf(pdim),BEAMLINE(ind1:ind2)))-obj.INITC(pdim);
         min2=min(cellfun(@(x) x.Coordf(pdim),BEAMLINE(ind1:ind2)))-obj.INITC(pdim);     
-        axis([min1-obj.WORLD.(lab{3}) max1+obj.WORLD.(lab{3}) min2-obj.WORLD.(lab{pdim}) max2+obj.WORLD.(lab{pdim})]);
-        axis tight
-        axis
-        hold on
+        axis(obj.axhan,[min1-obj.WORLD.(lab{3}) max1+obj.WORLD.(lab{3}) min2-obj.WORLD.(lab{pdim}) max2+obj.WORLD.(lab{pdim})]);
+        axis(obj.axhan,'tight');
+        axis(obj.axhan);
+        hold(obj.axhan,'on');
       end
       lastCoord=[];
       pp=properties(obj);
@@ -106,7 +114,7 @@ classdef FloorPlot < handle
           elseif isempty(aper)
             aper=0.000000001;
           end
-          if length(aper)==1; aper=ones(1,2).*aper; end
+          if isscalar(aper); aper=ones(1,2).*aper; end
           if any(aper==1)
             aper=[0.015 0.015];
           end
@@ -122,14 +130,14 @@ classdef FloorPlot < handle
             xp1=lastCoord(3)+lastCoord(6+pdim)*sin(lastCoord(3+pdim));
             ym1=lastCoord(pdim)-lastCoord(6+pdim)*cos(lastCoord(3+pdim));
             yp1=lastCoord(pdim)+lastCoord(6+pdim)*cos(lastCoord(3+pdim));
-            fill([xp1 xm1 xm2 xp2],[ym1 yp1 yp2 ym2],'k');
+            fill(obj.axhan,[xp1 xm1 xm2 xp2],[ym1 yp1 yp2 ym2],'k');
           end
           % Draw object + beam pipe in object
           xm3=Cf(3)-aper(pdim)*sin(th2);
           xp3=Cf(3)+aper(pdim)*sin(th2);
           ym3=Cf(pdim)-aper(pdim)*cos(th2);
           yp3=Cf(pdim)+aper(pdim)*cos(th2);
-          fill([xp2 xm2 xm3 xp3],[ym2 yp2 yp3 ym3],'k');
+          fill(obj.axhan,[xp2 xm2 xm3 xp3],[ym2 yp2 yp3 ym3],'k');
           xm1=Ci(3)-obj.(type).(lab{pdim})*sin(th1);
           xp1=Ci(3)+obj.(type).(lab{pdim})*sin(th1);
           ym1=Ci(pdim)-obj.(type).(lab{pdim})*cos(th1);
@@ -138,15 +146,15 @@ classdef FloorPlot < handle
           xp2=Cf(3)+obj.(type).(lab{pdim})*sin(th2);
           ym2=Cf(pdim)-obj.(type).(lab{pdim})*cos(th2);
           yp2=Cf(pdim)+obj.(type).(lab{pdim})*cos(th2);
-          fill([xp1 xm1 xm2 xp2],[ym1 yp1 yp2 ym2],obj.(type).col,'EdgeColor','none');
+          fill(obj.axhan,[xp1 xm1 xm2 xp2],[ym1 yp1 yp2 ym2],obj.(type).col,'EdgeColor','none');
           % Store last coordinate and aperture
           lastCoord=[Cf BEAMLINE{ibl}.Anglef-obj.INITANG aper(1) aper(2)];
         end
       end
-      hold off
-      grid on
+      hold(obj.axhan,'off');
+      grid(obj.axhan,'on');
       ylab={'X / m' 'Y / m'};
-      xlabel('Z / m'); ylabel(ylab(pdim));
+      xlabel(obj.axhan,'Z / m'); ylabel(obj.axhan,ylab(pdim));
     end
   end
   

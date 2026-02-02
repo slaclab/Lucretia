@@ -72,13 +72,14 @@ classdef Track < handle
     centerTInd=[]; % Indices to re-center transverse distribution
     zOffset=0; % Phase offset in bunch (m), used if centerZInd present
     isgpu=false; % Wishing to track with GPU-optimized mex function?
+    storeFullBeam logical = false % Store full beam @beamStoreInd? (else just beam centroid)
   end
   properties(SetAccess=protected)
     isDistrib=false; % Is this Track object opererating in distributed mode?
     isPTrack=false; % Track object setup to parallel track through common lattice?
     DL % distributedLucretia object reference
     plasmaData % Tracked data through plasma channel if requested
-    beamStore % Beam saved at intermediate tracking locations if requested in 'beamStoreInd'
+    beamStore cell % Beam saved at intermediate tracking locations if requested in 'beamStoreInd'
   end
   properties(Access=protected)
     dBeamIn % distributed input beam
@@ -152,11 +153,11 @@ classdef Track < handle
     end
     function set.beamIn(obj,beamStruc)
       % Update single ray structure
-      if length(beamStruc.Bunch.Q)>1
+      if length(beamStruc.Bunch(1).Q)>1
         obj.beamInSingle=beamStruc;
-        obj.beamInSingle.Bunch.Q=sum(beamStruc.Bunch.Q);
-        obj.beamInSingle.Bunch.stop=0;
-        obj.beamInSingle.Bunch.x=mean(beamStruc.Bunch.x,2);
+        obj.beamInSingle.Bunch(1).Q=sum(beamStruc.Bunch(1).Q);
+        obj.beamInSingle.Bunch(1).stop=0;
+        obj.beamInSingle.Bunch(1).x=mean(beamStruc.Bunch(1).x,2);
       end
       % Store given beam as local beam
       obj.lBeamIn=beamStruc;
@@ -164,7 +165,7 @@ classdef Track < handle
       if obj.isPTrack
         % Divide up beam particles amongst worker nodes
         np=length(obj.DL.workers);
-        nmp_1=length(beamStruc.Bunch.Q);
+        nmp_1=length(beamStruc.Bunch(1).Q);
         nmp=floor(nmp_1/np);
         n=0;
         for iw=obj.DL.workers
@@ -179,12 +180,12 @@ classdef Track < handle
         useWorkers=obj.DL.workers;
         nbunch=length(beamStruc.Bunch);
         spmd
-          if ismember(labindex,useWorkers)
+          if ismember(spmdIndex,useWorkers)
             BeamIn.BunchInterval=beamStruc.BunchInterval;
             for bn=1:nbunch
-              BeamIn.Bunch(bn).Q=beamStruc.Bunch(bn).Q(r0(labindex):r1(labindex));
-              BeamIn.Bunch(bn).stop=beamStruc.Bunch(bn).stop(r0(labindex):r1(labindex));
-              BeamIn.Bunch(bn).x=beamStruc.Bunch(bn).x(:,r0(labindex):r1(labindex));
+              BeamIn.Bunch(bn).Q=beamStruc.Bunch(bn).Q(r0(spmdIndex):r1(spmdIndex));
+              BeamIn.Bunch(bn).stop=beamStruc.Bunch(bn).stop(r0(spmdIndex):r1(spmdIndex));
+              BeamIn.Bunch(bn).x=beamStruc.Bunch(bn).x(:,r0(spmdIndex):r1(spmdIndex));
             end
           end
         end
@@ -194,7 +195,7 @@ classdef Track < handle
       elseif obj.isDistrib && obj.DL.synchronous
         useWorkers=obj.DL.workers;
         spmd
-          if ismember(labindex,useWorkers)
+          if ismember(spmdIndex,useWorkers)
             BeamIn=beamStruc;
           end
         end
@@ -210,7 +211,7 @@ classdef Track < handle
             trackBeamIn(iw)=beamStruc;
           end
         else
-          trackBeamIn=beamStruc; %#ok<NASGU>
+          trackBeamIn=beamStruc; 
         end
         save(obj.DL.asynDataFile,'trackBeamIn','-append')
       else
@@ -264,7 +265,7 @@ classdef Track < handle
       obj.startInd=1;
       obj.finishInd=length(BEAMLINE);
       obj.beamIn=beamIn;
-      obj.nray=numel(beamIn.Bunch.Q);
+      obj.nray=numel(beamIn.Bunch(1).Q);
       if exist('setPT','var') && setPT
         try
           obj.setupPTrackThru(beamIn);
@@ -288,6 +289,7 @@ classdef Track < handle
       % Any Ext Processes to pre-condition?
       ext=findcells(BEAMLINE,'ExtProcess',[],obj.startInd,obj.finishInd);
       pord=[];
+      obj.beamStore={};
       if ~isempty(ext)
         for iele=ext
           for iproc=1:length(BEAMLINE{iele}.ExtProcess)
@@ -345,7 +347,7 @@ classdef Track < handle
         if ~obj.DL.synchronous
           % Can't store beams or re-center z distributions in this mode
           if ~isempty(interele)
-            error('Intermediate element tracking (setting of beamStoreInd or centerZInd properties) not supported in asynchronos parallel tracking mode')
+            error('Intermediate element tracking (setting of beamStoreInd or centerZInd properties) not supported in asynchronous parallel tracking mode')
           end
           % Remove last job if there is one
           obj.DL.clearAsynJob;
@@ -356,19 +358,19 @@ classdef Track < handle
           end
           obj.DL.launchAsynJob();
         else % if sycnchronous, submit tracking tasks to the pool and wait for them to finish
-          startInd=obj.startInd;
+          startInd=obj.startInd; %#ok<*PROPLC>
           finishInd=obj.finishInd;
           b1=obj.firstBunch;
           b2=obj.lastBunch;
           lf=obj.loopFlag;
           useWorkers=obj.DL.workers;
           spmd
-            if ismember(labindex,useWorkers)
-              bstore=[];
+            if ismember(spmdIndex,useWorkers)
+              bstore={};
               if isempty(interele)
                 [stat, beamout, instdata]=obj.dotrack(startInd,finishInd,BeamIn,b1,b2,lf);
               else
-                if interele(end)~=finishInd; interele=[interele finishInd]; end;
+                if interele(end)~=finishInd; interele=[interele finishInd]; end
                 t1=startInd;
                 t2=interele(1);
                 B=BeamIn;
@@ -377,7 +379,7 @@ classdef Track < handle
                 for iele=1:length(interele)
                   [stat, beamout, idat]=obj.dotrack(t1,t2,B,b1,b2,lf);
                   for id=1:length(idat)
-                    if length(instdata)<id; instdata{id}=[]; end;
+                    if length(instdata)<id; instdata{id}=[]; end
                     instdata{id}=[instdata{id} idat{id}];
                   end
                   if iele<length(interele)
@@ -386,7 +388,11 @@ classdef Track < handle
                     t2=interele(iele+1);
                   end
                   if ismember(interele(iele),bsind)
-                    bstore(bi)=beamout;
+                    if obj.storeFullBeam
+                      bstore{bi}=beamout;
+                    else
+                      bstore{bi}=mean(beamout.Bunch.x(:,~beamout.Bunch.stop),2);
+                    end
                   end
                   if ismember(interele(iele),czind)
                     B.Bunch.x(5,:)=B.Bunch.x(5,~B.Bunch.stop)-median(B.Bunch.x(5,~B.Bunch.stop))+obj.zOffset;
@@ -420,27 +426,23 @@ classdef Track < handle
         end
       else % local tracking
         if isempty(interele)
-          [stat, beamout, instdata]=obj.dotrack(obj.startInd,obj.finishInd,BeamIn,obj.firstBunch,obj.lastBunch,obj.loopFlag);
+          [stat, B, instdata]=obj.dotrack(obj.startInd,obj.finishInd,BeamIn,obj.firstBunch,obj.lastBunch,obj.loopFlag);
         else
-          if interele(end)~=obj.finishInd; interele=[interele obj.finishInd]; end;
+          if interele(end)~=obj.finishInd; interele=[interele obj.finishInd]; end
           t1=obj.startInd;
           t2=interele(1);
           instdata={};
           B=BeamIn;
           bi=1;
           for iele=1:length(interele)
-            [stat, beamout, idat]=obj.dotrack(t1,t2,B,obj.firstBunch,obj.lastBunch,obj.loopFlag);
+            [stat, B, idat]=obj.dotrack(t1,t2,B,obj.firstBunch,obj.lastBunch,obj.loopFlag);
             for id=1:length(idat)
-              if length(instdata)<id; instdata{id}=[]; end;
+              if length(instdata)<id; instdata{id}=[]; end
               instdata{id}=[instdata{id} idat{id}];
             end
             if iele<length(interele)
-              B=beamout;
               t1=t2+1;
               t2=interele(iele+1);
-            end
-            if ismember(interele(iele),bsind)
-              obj.beamStore(bi)=beamout;
             end
             if ismember(interele(iele),czind)
               B.Bunch.x(5,~B.Bunch.stop)=B.Bunch.x(5,~B.Bunch.stop)-median(B.Bunch.x(5,~B.Bunch.stop))+obj.zOffset;
@@ -450,17 +452,25 @@ classdef Track < handle
                 B.Bunch.x(ind,~B.Bunch.stop)=B.Bunch.x(ind,~B.Bunch.stop)-median(B.Bunch.x(ind,~B.Bunch.stop));
               end
             end
+            if ismember(interele(iele),bsind)
+              if obj.storeFullBeam
+                obj.beamStore{bi}=B;
+              else
+                obj.beamStore{bi}=mean(B.Bunch.x(:,~B.Bunch.stop),2);
+              end
+              bi=bi+1;
+            end
           end
         end
         if doplas
           try
-            [bunchProfile, plas_sx, plas_sy]=Track.plasmaTrack(beamout,4);
+            [bunchProfile, plas_sx, plas_sy]=Track.plasmaTrack(B,4);
           catch
             bunchProfile=[]; plas_sx=1e10; plas_sy=1e10;
           end
         end
         obj.trackStatus=stat;
-        obj.beamOut=beamout;
+        obj.beamOut=B;
         obj.instrData=instdata;
         if doplas
           obj.plasmaData.bunchProfile=bunchProfile;
@@ -511,7 +521,7 @@ classdef Track < handle
         obj.finishInd=se(1)-1;
         obj.trackThru;
       end
-      beamout=obj.beamOut;
+      bo=obj.beamOut;
       ise=2;
       while ise<=length(se) && se(ise)<=ifinish && ise<=length(se)
         obj.startInd=obj.finishInd+1;
@@ -527,9 +537,9 @@ classdef Track < handle
         else
           obj.isPTrack=true;
         end
-        obj.beamIn=beamout;
+        obj.beamIn=bo;
         obj.trackThru;
-        beamout=obj.beamOut;
+        bo=obj.beamOut;
       end
       if se(ise)>ifinish || ise<=length(se)
         ise=ise-1;
@@ -546,7 +556,7 @@ classdef Track < handle
       obj.startInd=obj.finishInd+1;
       obj.finishInd=ifinish;
       obj.isPTrack=se(end)<(length(BEAMLINE)-mindist);
-      obj.beamIn=beamout;
+      obj.beamIn=bo;
       obj.trackThru;
       % -- return original properties
       obj.isPTrack=true;
@@ -555,8 +565,8 @@ classdef Track < handle
       obj.beamIn=ibeam;
     end
     function beamData=getBeamData(obj,dims)
-      if isempty(obj.beamOut); error('No tracking has taken place yet!'); end;
-      if ~exist('dims','var'); dims='xyz'; end;
+      if isempty(obj.beamOut); error('No tracking has taken place yet!'); end
+      if ~exist('dims','var'); dims='xyz'; end
       bo=obj.beamOut;
       if obj.isDistrib
         if ~obj.DL.synchronous
@@ -569,12 +579,12 @@ classdef Track < handle
           obj.DL.launchAsynJob();
           obj.DL.asynWait;
           bd=asynGetData(obj.DL,1);
-          for ib=1:length(bd); beamData(ib)=bd{ib}; end;
+          for ib=1:length(bd); beamData(ib)=bd{ib}; end
         else
           spmd
             bd=Track.procBeamData(bo,dims) ;
           end
-          for ib=1:length(bd); beamData(ib)=bd{ib}; end;
+          for ib=1:length(bd); beamData(ib)=bd{ib}; end
         end
       else
         beamData=Track.procBeamData(bo,dims);
@@ -708,13 +718,13 @@ classdef Track < handle
       data.sig14=data.sigma(1,4);
       data.sig15=data.sigma(1,5);
       nbin=max([length(beam.Bunch.Q)/100 100]);
-      [ fx , bc ] = hist(beam.Bunch.x(3,:),nbin);
+      [ fx , bc ] = histcounts(beam.Bunch.x(3,:),nbin);
       [~, q] = gauss_fit(bc,fx) ;
       data.yfit=abs(q(4));
-      [ fx , bc ] = hist(beam.Bunch.x(1,:),nbin);
+      [ fx , bc ] = histcounts(beam.Bunch.x(1,:),nbin);
       [~, q] = gauss_fit(bc,fx) ;
       data.xfit=abs(q(4));
-      [ fx , bc ] = hist(beam.Bunch.x(5,:),nbin);
+      [ fx , bc ] = histcounts(beam.Bunch.x(5,:),nbin);
       [~, q] = gauss_fit(bc,fx) ;
       data.zfit=abs(q(4));
       % Get stats at waist
@@ -763,10 +773,10 @@ classdef Track < handle
           0 0 0 0 0 1];
         B=RL*(R*(RL*B));
         bp(:,:,is-1)=B([1 3],:);
-        [ fx , bc ] = hist(B(3,:),nbin);
+        [ fx , bc ] = histcounts(B(3,:),nbin);
         [~, q] = gauss_fit(bc,fx) ;
         sy(is-1)=abs(q(4));
-        [ fx , bc ] = hist(B(1,:),nbin);
+        [ fx , bc ] = histcounts(B(1,:),nbin);
         [~, q] = gauss_fit(bc,fx) ;
         sx(is-1)=abs(q(4));
       end
@@ -824,7 +834,7 @@ classdef Track < handle
       end
       z=linspace(zmin,zmax,nbin);
       z=z-mean(z);
-      [~,bininds] = histc(-beamZ,z);
+      [~,bininds] = histcounts(-beamZ,z);
       [Z, ZSP]=meshgrid(z,z);
     end
   end

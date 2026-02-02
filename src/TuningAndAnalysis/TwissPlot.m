@@ -31,7 +31,7 @@ if ~isempty(dL)
   BL1=BEAMLINE; % Store Original BEAMLINE to restore later
   PS1=PS;
   for ips=1:length(PS)
-    if PS(ips).Element(1)<iend
+    if ~isempty(PS(ips).Element) && PS(ips).Element(1)<iend
       RenormalizePS(ips);
       for iele=PS(ips).Element
         if PS(ips).Ampl==0

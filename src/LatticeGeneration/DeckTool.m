@@ -5,6 +5,7 @@ classdef DeckTool < handle
   %  * XSIF: Compatible with LIBXSIF version 2.1. Also copes with
   %  most MAD8 formating.
   %  * BMAD (write only)
+  %  * Elegant
   properties % GetPropInfo relies on order of public properties, only add to end
     MARK
     DRIF
@@ -39,7 +40,7 @@ classdef DeckTool < handle
     PS % Store initial full PS structure
     GIRDER % Store initial full GIRDER structure
     KLYSTRON % Store initial full KLYSTRON structure
-    deckType='XSIF';
+    deckType='XSIF'; % XSIF, BMAD or Elegant
     maxcol % max # columns (set by deck type selection)
     blrange % required beamline range to operate on
     wakefiles % filenames to associate with WF structure entries
@@ -51,7 +52,7 @@ classdef DeckTool < handle
   methods
     function obj=DeckTool(deckType,splitMag)
       % DT=DeckTool(rtdir,deckType,splitMag)
-      global BEAMLINE PS GIRDER
+      global BEAMLINE PS GIRDER %#ok<GVMIS>
       % Parse desired deck type (default to XSIF if not provided)
       if ~exist('deckType','var')
         deckType='XSIF';
@@ -78,7 +79,7 @@ classdef DeckTool < handle
           SetSPositions(1,length(BEAMLINE),0);
         end
       end
-      obj.verinfo=ver('Matlab'); % store info about current Matlab instance
+      obj.verinfo=matlabRelease; % store info about current Matlab instance
     end
     function SetWakeFile(obj,WFno,type,filename)
       % Assign a wakefield file to a WF entry
@@ -122,7 +123,7 @@ classdef DeckTool < handle
     function Initial = ReadDeck(obj,filename,linename,betaname,beamname)
       % [Initial,Beam] = ReadDeck(obj,filename [,linename,betaname,beamname])
       % Read deck in chosen file format (obj.deckType)
-      % filename: filename to read
+      % filename: filename to read (char array for xsif, bmad, 2 element cell array for Elegant- with {lat file, ele file})
       % linename (optional): Name of line to use in deck
       % betaname (optional): Initial BETA0 parameters to use
       % beamname (optional): Use data from beamname
@@ -136,20 +137,34 @@ classdef DeckTool < handle
       if ~exist('beamname','var')
         beamname='';
       end
-      if ~exist(filename,'file')
-        error('Cannot find file: %s',filename)
+      if ~exist('filename','var')
+        error('Must provide file name argument');
       end
       % Initialize some internal variables
       obj.parsedWFfiles={};
-      D=dir(filename);
+      if iscell(filename)
+        D=dir(filename{1});
+      else
+        D=dir(filename);
+      end
       obj.basedir=D.folder;% Assume all called files are relative to main deck file
-      filename=D.name;
+      if iscell(filename)
+        D2=dir(filename{2});
+        filename={D.name D2.name};
+      else
+        filename=D.name;
+      end
       switch obj.deckType
         case 'XSIF'
           % read in raw deck file
           txt=obj.XSIFRead(filename);
           % parse deck to Lucretia format
           Initial = obj.XSIFParse(txt,linename,betaname,beamname) ;
+        case 'Elegant'
+          % read in raw deck file
+          txt=obj.ElegantRead(filename);
+          % parse deck to Lucretia format
+          Initial = obj.ElegantParse(txt,linename,betaname,beamname) ;
       end
       % Convert any bends with K2 elements temp stored in B(3)- use Multipole components
       isb=findcells(BEAMLINE,'Class','SBEN');
@@ -198,7 +213,7 @@ classdef DeckTool < handle
       if ~isempty(obj.blrange)
         obj.SetSubBeamline();
       end
-      try
+      % try
         if ~isempty(obj.splitMag) && obj.splitMag
           obj.splitMags();
         elseif ~isempty(obj.splitMag)
@@ -208,18 +223,12 @@ classdef DeckTool < handle
           useline=false;
         end
         obj.deckWrite(Initial,filename,linename,useline);
-%         switch obj.deckType
-%           case 'XSIF'
-%             obj.deckWrite(Initial,filename,linename);
-%           case 'BMAD'
-%             obj.BMADWrite(Initial,filename,linename);
-%         end
-      catch ME
-        if ~isempty(obj.splitMag) || ~isempty(obj.blrange)
-          obj.restoreLucretiaData();
-        end
-        rethrow(ME)
-      end
+      % catch ME
+      %   if ~isempty(obj.splitMag) || ~isempty(obj.blrange)
+      %     obj.restoreLucretiaData();
+      %   end
+      %   rethrow(ME)
+      % end
       if ~isempty(obj.splitMag) || ~isempty(obj.blrange)
         obj.restoreLucretiaData();
       end
@@ -231,6 +240,9 @@ classdef DeckTool < handle
           obj.maxcol=79;
         case 'BMAD'
           obj.deckType='BMAD';
+          obj.maxcol=79;
+        case 'Elegant'
+          obj.deckType='Elegant';
           obj.maxcol=79;
         otherwise
           error('Unsupported Deck Type')
@@ -259,7 +271,7 @@ classdef DeckTool < handle
       end
       if ~exist('espr','var')
         espr=ones(1,i2).*(Initial.SigPUncorrel/Initial.Momentum);
-      elseif length(espr)==1
+      elseif isscalar(espr)
         espr=ones(1,1+i2-i1).*espr;
       end
       nespr=0;
@@ -387,6 +399,10 @@ classdef DeckTool < handle
     end
     function pinfo=GetPropInfo(obj,iele,prop,val)
       global BEAMLINE
+      persistent dz
+      if isempty(dz)
+        dz=1;
+      end
       pinfo.name={};
       pinfo.val=[];
       Cb=1e9/2.99792458e8;
@@ -399,9 +415,14 @@ classdef DeckTool < handle
         case 'BMAD'
           % Mapping of classnames (properties of this object) to BMAD elements types
           classnames={'marker' 'drift' 'quadrupole' 'sextupole' 'octupole' 'multipole' 'sbend' 'solenoid' ...
-            'lcavity, cavity_type=traveling_wave' 'crab_cavity' 'hkicker' ...
-            'vkicker' 'kicker' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' ...
+            'lcavity, cavity_type=traveling_wave' 'crab_cavity' 'kicker' ...
+            'kicker' 'kicker' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' 'instrument' ...
             'COLL' 'patch' 'taylor'};
+        case 'Elegant'
+          % Mapping of classnames (properties of this object) to Elegant elements types
+          classnames={'MARK' 'DRIF' 'QUAD' 'SEXT' 'OCTU' 'MULT' 'CSBEND' 'SOLE' 'RFCW' 'RFDF' 'HKICK' ...
+            'VKICK' 'KICKER' 'MONI' 'MONI' 'MONI' 'MONI' 'MONI' 'MONI' 'MONI' 'MONI' 'MONI' ...
+            'COLL' 'MARK' 'EMATRIX'};
         otherwise
           error('Unknown conversion type')
       end
@@ -409,14 +430,96 @@ classdef DeckTool < handle
       if nargin==2
         return
       end
+      % Alternate collimator classes depending on deck type
       if strcmp(pinfo.classname,'COLL')
         if strcmp(BEAMLINE{iele}.Geometry,'Ellipse')
-          pinfo.classname='ECOLLIMATOR';
+          switch obj.deckType
+            case 'Elegant'
+              pinfo.classname='ECOL';
+            otherwise
+              pinfo.classname='ECOLLIMATOR';
+          end          
         elseif strcmp(BEAMLINE{iele}.Geometry,'Rectangle')
-          pinfo.classname='RCOLLIMATOR';
+          switch obj.deckType
+            case 'Elegant'
+              pinfo.classname='RCOL';
+            otherwise
+              pinfo.classname='RCOLLIMATOR';
+          end  
+        end
+      end
+      % If CSR or LSC enabled, use alternate element types for Elegant
+      if strcmp(obj.deckType,'Elegant')
+        if strcmp(BEAMLINE{iele}.Class,'SBEN') && isfield(BEAMLINE{iele}.TrackFlag,'CSR') && BEAMLINE{iele}.TrackFlag.CSR~=0
+          pinfo.classname='CSRCSBEND';
+        end
+        % Use CSRDRIFT element for handling CSR and/or LSC simulations
+        if strcmp(BEAMLINE{iele}.Class,'DRIF') && isfield(BEAMLINE{iele}.TrackFlag,'CSR') && BEAMLINE{iele}.TrackFlag.CSR~=0
+          pinfo.classname='CSRDRIFT';
+        end
+        if strcmp(BEAMLINE{iele}.Class,'DRIF') && isfield(BEAMLINE{iele}.TrackFlag,'LSC') && BEAMLINE{iele}.TrackFlag.LSC~=0
+          pinfo.classname='CSRDRIFT';
         end
       end
       switch prop
+        case 'ISR'
+          if strcmp(obj.deckType,'Elegant')
+            if BEAMLINE{iele}.TrackFlag.SynRad>0
+              pinfo.name{end+1}='ISR';
+              pinfo.val(end+1)=1;
+            end
+          end
+        case 'LSC'
+          if isfield(BEAMLINE{iele},'TrackFlag') && isfield(BEAMLINE{iele}.TrackFlag,'LSC') && BEAMLINE{iele}.TrackFlag.LSC>0
+            pinfo.name{end+1}='LSC_BINS';
+            if isfield(BEAMLINE{iele}.TrackFlag,'LSC_npow2Bins') && BEAMLINE{iele}.TrackFlag.LSC_npow2Bins>0
+              pinfo.val(end+1)=2^BEAMLINE{iele}.TrackFlag.LSC_npow2Bins;
+            else
+              pinfo.val(end+1)=4096;
+            end
+            if ~strcmp(BEAMLINE{iele}.Class,'DRIF')
+              pinfo.name{end+1}='LSC';
+              pinfo.val(end+1)=1;
+              if isfield(BEAMLINE{iele}.TrackFlag,'LSC_smoothFactor') && BEAMLINE{iele}.TrackFlag.LSC_smoothFactor>0
+                pinfo.name{end+1}='SMOOTHING';
+                pinfo.val(end+1)=1;
+              end
+            end
+            if isfield(BEAMLINE{iele}.TrackFlag,'LSC_cutoffFreq')
+              pinfo.name{end+1}='LSC_HIGH_FREQUENCY_CUTOFF1';
+              pinfo.val(end+1)=BEAMLINE{iele}.TrackFlag.LSC_cutoffFreq;
+            end
+            pinfo.name{end+1}='N_KICKS';
+            pinfo.val(end+1)=ceil(BEAMLINE{iele}.L/0.01);
+            if ismember(BEAMLINE{iele}.Class,{'SBEN','DRIF'})
+              if ~isfield(BEAMLINE{iele}.TrackFlag,'CSR') || BEAMLINE{iele}.TrackFlag.CSR==0
+                pinfo.name{end+1}='CSR';
+                pinfo.val(end+1)=0;
+                pinfo.name{end+1}='USE_STUPAKOV';
+                pinfo.val(end+1)=1;
+              end
+            end
+          end
+        case 'CSR'
+          if isfield(BEAMLINE{iele}.TrackFlag,'CSR') && ismember(BEAMLINE{iele}.Class,{'SBEN','DRIF'})
+            if BEAMLINE{iele}.TrackFlag.CSR~=0
+              pinfo.name{end+1}='CSR';
+              pinfo.val(end+1)=1;
+              if strcmp(BEAMLINE{iele}.Class,'SBEN')
+                pinfo.name{end+1}='BINS';
+                pinfo.val(end+1)=BEAMLINE{iele}.TrackFlag.CSR;
+                pinfo.name{end+1}='SG_HALFWIDTH';
+                pinfo.val(end+1)=1;
+                pinfo.name{end+1}='N_SLICES';
+                pinfo.val(end+1)=BEAMLINE{iele}.TrackFlag.Split;
+              elseif strcmp(BEAMLINE{iele}.Class,'DRIF')
+                pinfo.name{end+1}='USE_STUPAKOV';
+                pinfo.val(end+1)=1;
+                pinfo.name{end+1}='DZ';
+                pinfo.val(end+1)=BEAMLINE{iele}.TrackFlag.CSR;
+              end
+            end
+          end
         case {'L' 'Angle'}
           if val==0; return; end
           pinfo.name{end+1}=upper(prop);
@@ -429,34 +532,47 @@ classdef DeckTool < handle
             case 'BMAD'
               pinfo.name{end+1}='rf_frequency';
               pinfo.val(end+1)=val*1e6;
+            case 'Elegant'
+              if strcmp(BEAMLINE{iele}.Class,'TCAV')
+                pinfo.name{end+1}='FREQUENCY';
+              else
+                pinfo.name{end+1}='FREQ';
+              end
+              pinfo.val(end+1)=val*1e6;
           end
         case 'Lrad'
           if val==0; return; end
           switch obj.deckType
-            case 'XSIF'
+            case {'XSIF','Elegant'}
               pinfo.name{end+1}='LRAD';
               pinfo.val(end+1)=val;
           end
         case 'Tilt'
           if ~any(val); return; end
-          switch BEAMLINE{iele}.Class
-            case 'MULT'
-              for ival=1:length(BEAMLINE{iele}.B)
-                pinfo.name{end+1}=sprintf('T%d',BEAMLINE{iele}.PoleIndex(ival));
-                pinfo.val(end+1)=BEAMLINE{iele}.Tilt(ival);
-              end
-            case 'SBEN'
-              switch obj.deckType
-                case 'XSIF'
+          switch obj.deckType
+            case 'Elegant'
+              pinfo.name{end+1}='TILT';
+              pinfo.val(end+1)=val(1);
+            otherwise
+              switch BEAMLINE{iele}.Class
+                case 'MULT'
+                  for ival=1:length(BEAMLINE{iele}.B)
+                    pinfo.name{end+1}=sprintf('T%d',BEAMLINE{iele}.PoleIndex(ival));
+                    pinfo.val(end+1)=BEAMLINE{iele}.Tilt(ival);
+                  end
+                case 'SBEN'
+                  switch obj.deckType
+                    case 'XSIF'
+                      pinfo.name{end+1}='TILT';
+                      pinfo.val(end+1)=val;
+                    case 'BMAD'
+                      pinfo.name{end+1}='ref_tilt';
+                      pinfo.val(end+1)=val;
+                  end
+                otherwise
                   pinfo.name{end+1}='TILT';
                   pinfo.val(end+1)=val;
-                case 'BMAD'
-                  pinfo.name{end+1}='ref_tilt';
-                  pinfo.val(end+1)=val;
               end
-            otherwise
-              pinfo.name{end+1}='TILT';
-              pinfo.val(end+1)=val;
           end
         case 'aper'
           switch BEAMLINE{iele}.Class
@@ -468,6 +584,9 @@ classdef DeckTool < handle
                 case 'BMAD'
                   pinfo.name{end+1}='x_limit';
                   pinfo.name{end+1}='y_limit';
+                case 'Elegant'
+                  pinfo.name{end+1}='X_MAX';
+                  pinfo.name{end+1}='Y_MAX';
               end
               pinfo.val(end+1)=val(1);
               if length(val)==2
@@ -476,8 +595,16 @@ classdef DeckTool < handle
                 pinfo.val(end+1)=val(1);
               end
             otherwise
-              pinfo.name{end+1}='APERTURE';
-              pinfo.val(end+1)=min(val);
+              switch obj.deckType
+                case 'Elegant'
+                  if strcmp(pinfo.classname,'MULT')
+                    pinfo.name{end+1}='BORE';
+                    pinfo.val(end+1)=norm(val);
+                  end
+                otherwise
+                  pinfo.name{end+1}='APERTURE';
+                  pinfo.val(end+1)=norm(val);
+              end
           end
         case 'B'
           switch BEAMLINE{iele}.Class
@@ -492,8 +619,17 @@ classdef DeckTool < handle
               pinfo.val(end+1)=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P*BEAMLINE{iele}.L);
             case 'MULT'
               for ival=1:length(BEAMLINE{iele}.B)
-                pinfo.name{end+1}=sprintf('K%dL',BEAMLINE{iele}.PoleIndex(ival));
-                pinfo.val(end+1)=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P);
+                switch obj.deckType
+                  case 'Elegant'
+                    pinfo.name{end+1}='KNL';
+                    KNL=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P);
+                    pinfo.val(end+1)=KNL(1);
+                    pinfo.name{end+1}='ORDER';
+                    pinfo.val(end+1)=BEAMLINE{iele}.PoleIndex(1);
+                  otherwise
+                    pinfo.name{end+1}=sprintf('K%dL',BEAMLINE{iele}.PoleIndex(ival));
+                    pinfo.val(end+1)=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P);
+                end
               end
             case 'SBEN'
               B=GetTrueStrength(iele);
@@ -504,9 +640,24 @@ classdef DeckTool < handle
             case 'SOLENOID'
               pinfo.name{end+1}='KS';
               pinfo.val(end+1)=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P*BEAMLINE{iele}.L);
-            case {'XCOR','YCOR'}
-              pinfo.name{end+1}='KICK';
-              pinfo.val(end+1)=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P);
+            case 'XCOR'
+              switch obj.deckType
+                case 'Elegant'
+                  pinfo.name{end+1}='KICK';
+                  pinfo.val(end+1)=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P);
+                otherwise
+                  pinfo.name{end+1}='HKICK';
+                  pinfo.val(end+1)=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P);
+              end
+            case 'YCOR'
+              switch obj.deckType
+                case 'Elegant'
+                  pinfo.name{end+1}='KICK';
+                  pinfo.val(end+1)=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P);
+                otherwise
+                  pinfo.name{end+1}='VKICK';
+                  pinfo.val(end+1)=GetTrueStrength(iele)/(Cb*BEAMLINE{iele}.P);
+              end
             case 'XYCOR'
               pinfo.name{end+1}='HKICK';
               pinfo.name{end+1}='VKICK';
@@ -542,6 +693,13 @@ classdef DeckTool < handle
           else
             pinfo.val(end+1)=val(1);
           end
+        case 'Egain'
+          if strcmp(obj.deckType,'Elegant')
+            if val~=0
+              pinfo.name{end+1}='CHANGE_P0';
+              pinfo.val(end+1)=1;
+            end
+          end
         case 'HGAP'
           if ~any(val); return; end
           switch obj.deckType
@@ -564,11 +722,23 @@ classdef DeckTool < handle
           end
         case 'FINT'
           if ~any(val); return; end
-          pinfo.name{end+1}='FINT';
-          pinfo.val(end+1)=val(1);
-          if length(val)==2 && val(2)~=val(1)
-            pinfo.name{end+1}='FINTX';
-            pinfo.val(end+1)=val(2);
+          switch obj.deckType
+            case 'Elegant'
+              pinfo.name{end+1}='FINT';
+              pinfo.val(end+1)=max(val);
+              if length(val)==2 && val(2)~=val(1)
+                pinfo.name{end+1}='EDGE1_EFFECTS';
+                pinfo.val(end+1)=sign(abs(val(1)));
+                pinfo.name{end+1}='EDGE2_EFFECTS';
+                pinfo.val(end+1)=sign(abs(val(2)));
+              end
+            otherwise
+              pinfo.name{end+1}='FINT';
+              pinfo.val(end+1)=val(1);
+              if length(val)==2 && val(2)~=val(1)
+                pinfo.name{end+1}='FINTX';
+                pinfo.val(end+1)=val(2);
+              end
           end
         case 'Volt'
           switch obj.deckType
@@ -576,20 +746,45 @@ classdef DeckTool < handle
               pinfo.name{end+1}='DELTAE';
               pinfo.val(end+1)=GetTrueVoltage(iele);
             case 'BMAD'
-              pinfo.name{end+1}='gradient';
-              pinfo.val(end+1)=1e6*BEAMLINE{iele}.Volt/BEAMLINE{iele}.L;
+              if strcmp(BEAMLINE{iele}.Class,'TCAV')
+                pinfo.name{end+1}='voltage';
+                pinfo.val(end+1)=GetTrueVoltage(iele)*1e6;
+              else
+                pinfo.name{end+1}='gradient';
+                pinfo.val(end+1)=1e6*BEAMLINE{iele}.Volt/BEAMLINE{iele}.L;
+              end
+            case 'Elegant'
+              if strcmp(BEAMLINE{iele}.Class,'TCAV')
+                pinfo.name{end+1}='VOLTAGE';
+              else
+                pinfo.name{end+1}='VOLT';
+              end
+              pinfo.val(end+1)=GetTrueVoltage(iele)*1e6;
+              if GetTrueVoltage(iele)>0
+                pinfo.name{end+1}='CHANGE_P0';
+                pinfo.val(end+1)=1;
+              end
           end
         case 'Phase'
-          pinfo.name{end+1}='PHI0';
-          pinfo.val(end+1)=GetTruePhase(iele)/360;
+          switch obj.deckType
+            case 'Elegant'
+              pinfo.name{end+1}='PHASE';
+              pinfo.val(end+1)=90+GetTruePhase(iele);
+            otherwise
+              pinfo.name{end+1}='PHI0';
+              pinfo.val(end+1)=GetTruePhase(iele)/360;
+          end
         case 'Kloss'
           switch obj.deckType
             case 'XSIF'
               pinfo.name{end+1}='ELOSS';
+              pinfo.val(end+1)=val*BEAMLINE{iele}.L;
             case 'BMAD'
-              pinfo.name{end+1}='e_loss';
+              if ~strcmp(BEAMLINE{iele}.Class,'TCAV')
+                pinfo.name{end+1}='e_loss';
+                pinfo.val(end+1)=val*BEAMLINE{iele}.L;
+              end
           end
-          pinfo.val(end+1)=val*BEAMLINE{iele}.L;
         case 'Change'
           switch obj.deckType
             case 'XSIF'
@@ -620,6 +815,8 @@ classdef DeckTool < handle
                     pinfo.name{end+1}=sprintf('RM(%d,%d)',iarg1,iarg2);
                   case 'BMAD'
                     pinfo.name{end+1}=sprintf('tt%d%d',iarg1,iarg2);
+                  case 'Elegant'
+                    pinfo.name{end+1}=sprintf('R%d%d',iarg1,iarg2);
                 end
                 pinfo.val(end+1)=rv;
               end
@@ -633,6 +830,13 @@ classdef DeckTool < handle
                 pinfo.name{end+1}=sprintf('TM(%d,%d,%d)',arrayfun(@(x) str2double(ns(x)),1:3));
               case 'BMAD'
                 pinfo.name{end+1}=sprintf('tt%d',BEAMLINE{iele}.Tinds(iT));
+              case 'Elegant'
+                if ~isempty(BEAMLINE{iele}.Tinds)
+                  for tind=1:length(BEAMLINE{iele}.Tinds)
+                    pinfo.name{end+1}=sprintf('T%d',num2str(BEAMLINE{iele}.Tinds(tind)));
+                    pinfo.val(end+1)=BEAMLINE{iele}.T(tind);
+                  end
+                end
             end
             pinfo.val(end+1)=val(iT);
           end
@@ -663,18 +867,215 @@ classdef DeckTool < handle
       end
     end
     function deckWrite(obj,Initial,filename,linename,useline)
-      % Write out external deck format file
-      global BEAMLINE WF %#ok<NUSED>
+      %DECKWRITE Write out external deck format file
+      %deckWrite(Initial,filename,linename,useline)
+      % For Elegant files, prepend '+' to filename to omit initialization code (charge &* twiss parameters)
+      global BEAMLINE WF SDDS_SETUP
+      if isempty(SDDS_SETUP)
+        SDDS_SETUP=false;
+      end
+
+      % Generate Initial charge and Twiss parameters (for Elegant lattice file)?
+      InitCode = true ;
+
       % Constants and derived parameters
       qe=1.60217662e-19; % electron charge / C
       me=5.109989465237626e-04; % electron rest mass / GeV
       gamma=Initial.Momentum/me;
       % - Open file for writing
+      if strcmp(obj.deckType,'Elegant')
+        filename=[regexprep(filename,'\.lte','') '.lte'];
+        if ~isempty(regexp(filename,'^(\+)','once'))
+          filename = regexprep(filename,'^(\+)','') ;
+          InitCode = false ;
+        end
+      end
       fid=fopen(filename,'w');
       if ~fid; error('Error opening %s',filename); end
       % - Write header
-      fprintf(fid,'! Beam lines generated from Lucretia: (%s)\n\n',datestr(now));
+      fprintf(fid,'! Beam lines auto-generated from Lucretia: (%s)\n\n',datetime);
       fprintf(fid,'! ===============================================\n');
+      
+      % - Loop through CLASSes and write out beamline elements and properties
+      BL0=BEAMLINE;
+      % try
+        if strcmp(obj.deckType,'Elegant')
+          obj.AssignCSR; % Assign CSR tags to DRIFTs downstream of CSR BENDS
+        end
+        classList=properties(obj);
+        fprintf(fid,'\n');
+        for iclass=1:length(classList)
+          if isempty(obj.(classList{iclass}))
+            continue
+          end
+          fprintf(fid,'\n');
+          fprintf(fid,sprintf('! %s Definitions:\n\n',classList{iclass}));
+          plist=fieldnames(obj.(classList{iclass})); plist=plist(~ismember(plist,'index'));
+          % ignore repeated names
+          classind=obj.(classList{iclass}).index;
+          [~,IA]=unique(arrayfun(@(x) BEAMLINE{x}.Name,classind,'UniformOutput',false));
+          IA=sort(IA);
+          BL1=BEAMLINE;
+          itype=0;
+          while itype<length(IA)
+            itype=itype+1;
+            eleind=classind(IA(itype));
+            if isempty(plist)
+              pinfo=obj.GetPropInfo(eleind);
+              fprintf(fid,sprintf('%s: %s\n',BEAMLINE{eleind}.Name,pinfo.classname));
+              continue
+            end
+            addprop=false;
+            for iprop=1:length(plist)
+              pinfo=obj.GetPropInfo(eleind,plist{iprop},obj.(classList{iclass}).(plist{iprop}){IA(itype)});
+              % Additional properties for LCAV/TCAV?
+              if ~addprop && strcmp(BEAMLINE{eleind}.Class,'LCAV') && strcmp(obj.deckType,'Elegant') % switch on edge-focusing treatment in RF structures
+                pinfo.name{end+1}='END1_FOCUS';
+                pinfo.val(end+1)=1;
+                pinfo.name{end+1}='END2_FOCUS';
+                pinfo.val(end+1)=1;
+                addprop=true;
+              end
+              if iprop==1
+                bname=BEAMLINE{eleind}.Name;
+                newstr=sprintf('%s: %s',bname,pinfo.classname);
+                fprintf(fid,newstr);
+                nline=length(newstr);
+              end
+              if isempty(pinfo.name)
+                continue
+              end
+              for iname=1:length(pinfo.name)
+                switch obj.deckType
+                  case {'XSIF','Elegant'}
+                    newstr=sprintf('%s=%s',upper(pinfo.name{iname}),num2str(pinfo.val(iname),obj.nsigfig));
+                  case 'BMAD'
+                    newstr=sprintf('%s=%s',lower(pinfo.name{iname}),num2str(pinfo.val(iname),obj.nsigfig));
+                end
+                nline=nline+length(newstr);
+                if (nline+2)>obj.maxcol
+                  fprintf(fid,sprintf(',&\n%s',newstr));
+                  nline=length(newstr);
+                else
+                  fprintf(fid,sprintf(',%s',newstr));
+                  nline=nline+1;
+                end
+              end
+            end
+            newstr={};
+            if isfield(BEAMLINE{eleind},'Type') && ~strcmp(BEAMLINE{eleind}.Type,'UNKNOWN')
+              switch obj.deckType
+                case 'XSIF'
+                  newstr=sprintf('TYPE="%s"',regexprep(BEAMLINE{eleind}.Type,'\s+','_'));
+                case 'BMAD'
+                  newstr=sprintf('type="%s"',regexprep(BEAMLINE{eleind}.Type,'\s+','_'));
+              end
+              if ~isempty(newstr)
+                nline=nline+length(newstr);
+                if (nline+2)>obj.maxcol
+                  fprintf(fid,sprintf(',&\n%s',newstr));
+                  nline=length(newstr);
+                else
+                  fprintf(fid,sprintf(',%s',newstr));
+                  nline=nline+1;
+                end
+              end
+            end
+            % Add wakefield file descriptors and write out wake files
+            newstr={}; newstr{1}=[]; newstr{2}=[];
+            if strcmp(obj.deckType,'XSIF')
+              if isfield(BEAMLINE{eleind},'LWFfile') && ~isempty(BEAMLINE{eleind}.LWFfile)
+                newstr{1}=sprintf('LFILE="%s"',BEAMLINE{eleind}.LWFfile);
+              end
+              if isfield(BEAMLINE{eleind},'TWFfile') && ~isempty(BEAMLINE{eleind}.TWFfile)
+                newstr{2}=sprintf('TFILE="%s"',BEAMLINE{eleind}.TWFfile);
+              end
+            elseif strcmp(obj.deckType,'Elegant') && strcmp(pinfo.classname,'RFCW')
+              newstr{1}=sprintf('ZWAKE=%d',BEAMLINE{eleind}.TrackFlag.SRWF_Z);
+              newstr{2}=sprintf('TRWAKE=%d',BEAMLINE{eleind}.TrackFlag.SRWF_T);
+              % d=dir(filename);
+              zwname=sprintf('zwake_%d.sdds',BEAMLINE{eleind}.Wakes(1));
+              twname=sprintf('trwake_%d.sdds',BEAMLINE{eleind}.Wakes(2));
+              dowake=false;
+              if BEAMLINE{eleind}.Wakes(1)>0 && BEAMLINE{eleind}.TrackFlag.SRWF_Z
+                newstr{end+1}=sprintf('ZWAKEFILE="%s"',zwname);
+                dowake=true;
+              end
+              if length(BEAMLINE{eleind}.Wakes)>1 && BEAMLINE{eleind}.Wakes(2)>0 && BEAMLINE{eleind}.TrackFlag.SRWF_T
+                newstr{end+1}=sprintf('TRWAKEFILE="%s"',twname);
+                dowake=true;
+              end
+              newstr{end+1}='CELL_LENGTH=1';
+              if dowake
+                newstr{end+1}='TCOLUMN=T';
+                newstr{end+1}='WXCOLUMN=X';
+                newstr{end+1}='WYCOLUMN=X';
+                newstr{end+1}='WZCOLUMN=Z';
+                if ~SDDS_SETUP
+                  sddspath=regexprep(which('DeckTool'),'LatticeGeneration/DeckTool.m','LatticeGeneration/SDDS');
+                  addpath(sddspath);
+                  javaaddpath(fullfile(sddspath,'SDDS.jar'), '-end');
+                  SDDS_SETUP=true;
+                end
+                import SDDS.java.SDDS.* %#ok<SIMPT>
+                if ~exist(zwname,'file')
+                  iwf=BEAMLINE{eleind}.Wakes(1);
+                  tvals = WF.ZSR(iwf).z./physConsts.clight ;
+                  wvals = WF.ZSR(iwf).K ;
+                  wake.column_names='TZ'; wake.column_names=wake.column_names';
+                  wake.column.T.type='double';
+                  wake.column.T.units='s';
+                  wake.column.T.page1=tvals(:);
+                  wake.column.Z.type='double';
+                  wake.column.Z.units='V/C'; % really V/C/m but always set CELL_LENGTH=1
+                  wake.column.Z.page1=wvals(:);
+                  sddssave(wake,zwname);
+                end
+                if ~exist(twname,'file')
+                  iwf=BEAMLINE{eleind}.Wakes(1);
+                  tvals = WF.TSR(iwf).z./physConsts.clight ;
+                  wvals = WF.TSR(iwf).K ;
+                  wake.column_names='TX'; wake.column_names=wake.column_names';
+                  wake.column.T.type='double';
+                  wake.column.T.units='s';
+                  wake.column.T.page1=tvals(:);
+                  wake.column.X.type='double';
+                  wake.column.X.units='V/C/m'; % really V/C/m^2 but always set CELL_LENGTH=1
+                  wake.column.X.page1=wvals(:);
+                  sddssave(wake,twname);
+                end
+              end
+            end
+            for istr=1:length(newstr)
+              if ~isempty(newstr{istr})
+                nline=nline+length(newstr{istr});
+                if (nline+2)>obj.maxcol
+                  fprintf(fid,sprintf(',&\n%s',newstr{istr}));
+                  nline=length(newstr{istr});
+                else
+                  fprintf(fid,sprintf(',%s',newstr{istr}));
+                  nline=nline+1;
+                end
+              end
+            end
+            fprintf(fid,'\n');
+            % If multipole element and writing Elegant lattice, repeat multipole elements per PoleInex
+            if strcmp(obj.deckType,'Elegant') && strcmp(BEAMLINE{eleind}.Class,'MULT')
+              if length(BEAMLINE{eleind}.PoleIndex)>1
+                BEAMLINE{eleind}.PoleIndex=BEAMLINE{eleind}.PoleIndex(2:end);
+                BEAMLINE{eleind}.B=BEAMLINE{eleind}.B(2:end);
+                BEAMLINE{eleind}.Tilt=BEAMLINE{eleind}.Tilt(2:end);
+                itype=itype-1;
+              end
+            end
+          end
+          BEAMLINE=BL1;
+        end
+      % catch ME
+      %   BEAMLINE=BL0;
+      %   throw(ME);
+      % end
+      BEAMLINE=BL0;
       switch obj.deckType
         case 'XSIF'
           fprintf(fid,'TWSS0: BETA0,');
@@ -707,15 +1108,15 @@ classdef DeckTool < handle
           fprintf(fid,'parameter[lattice] = %s\n',linename);
           fprintf(fid,'parameter[n_part] = %d\n',ceil(Initial.Q/qe));
           fprintf(fid,'parameter[particle] = electron\n');
-          fprintf(fid,'beam_start[x] = %g\n',Initial.x.pos);
-          fprintf(fid,'beam_start[px] = %g\n',Initial.x.ang);
-          fprintf(fid,'beam_start[y] = %g\n',Initial.y.pos);
-          fprintf(fid,'beam_start[py] = %g\n',Initial.y.ang);
-          fprintf(fid,'beam_start[z] = %g\n',Initial.zpos);
-          fprintf(fid,'beam_start[emittance_a] = %g\n',Initial.x.NEmit/gamma);
-          fprintf(fid,'beam_start[emittance_b] = %g\n',Initial.y.NEmit/gamma);
-          fprintf(fid,'beam_start[sig_z] = %g\n',Initial.sigz);
-          fprintf(fid,'beam_start[sig_e] = %g\n',Initial.SigPUncorrel/Initial.Momentum);
+          fprintf(fid,'particle_start[x] = %g\n',Initial.x.pos);
+          fprintf(fid,'particle_start[px] = %g\n',Initial.x.ang);
+          fprintf(fid,'particle_start[y] = %g\n',Initial.y.pos);
+          fprintf(fid,'particle_start[py] = %g\n',Initial.y.ang);
+          fprintf(fid,'particle_start[z] = %g\n',Initial.zpos);
+          fprintf(fid,'particle_start[emittance_a] = %g\n',Initial.x.NEmit/gamma);
+          fprintf(fid,'particle_start[emittance_b] = %g\n',Initial.y.NEmit/gamma);
+          fprintf(fid,'particle_start[sig_z] = %g\n',Initial.sigz);
+          fprintf(fid,'particle_start[sig_e] = %g\n',Initial.SigPUncorrel/Initial.Momentum);
           fprintf(fid,'beginning[beta_a] = %.15g\n',Initial.x.Twiss.beta);
           fprintf(fid,'beginning[beta_b] = %.15g\n',Initial.y.Twiss.beta);
           fprintf(fid,'beginning[alpha_a] = %.15g\n',Initial.x.Twiss.alpha);
@@ -750,6 +1151,50 @@ classdef DeckTool < handle
           end
           fprintf(fid,'\n\n');
           fprintf(fid,sprintf('%s: line=(%s',linename,BEAMLINE{1}.Name));
+        case 'Elegant'
+          cfid = fopen(regexprep(filename,'\.lte','.ele'),'w');
+          fprintf(cfid,'&run_setup\n');
+          fprintf(cfid,'    lattice = %s,\n',filename);
+          fprintf(cfid,'    use_beamline = %s,\n',linename);
+          fprintf(cfid,'    echo_lattice = 1,\n');
+          fprintf(cfid,'    output = %%s.out,\n');
+          fprintf(cfid,'    centroid = %%s.cen,\n');
+          fprintf(cfid,'    sigma = %%s.sig,\n');
+          fprintf(cfid,'    final = %%s.fin,\n');
+          fprintf(cfid,'    magnets = %%s.mag,\n');
+          fprintf(cfid,'    parameters = %%s.par,\n');
+          fprintf(cfid,'    p_central_mev = %g,\n',Initial.Momentum*1e3);
+          fprintf(cfid,'&end\n\n');
+          fprintf(cfid,'&run_control &end\n\n');
+          fprintf(cfid,'&twiss_output\n');
+          fprintf(cfid,'    filename = %%s.twi,\n');
+          fprintf(cfid,'    matched = 0,\n');
+          fprintf(cfid,'    beta_x = %g,\n',Initial.x.Twiss.beta);
+          fprintf(cfid,'    alpha_x = %g,\n',Initial.x.Twiss.alpha);
+          fprintf(cfid,'    eta_x = %g,\n',Initial.x.Twiss.eta);
+          fprintf(cfid,'    etap_x = %g,\n',Initial.x.Twiss.etap);
+          fprintf(cfid,'    beta_y = %g,\n',Initial.y.Twiss.beta);
+          fprintf(cfid,'    alpha_y = %g,\n',Initial.y.Twiss.alpha);
+          fprintf(cfid,'    eta_y = %g,\n',Initial.y.Twiss.eta);
+          fprintf(cfid,'    etap_y = %g,\n',Initial.y.Twiss.etap);
+          fprintf(cfid,'&end\n');
+          fclose(cfid);
+          if InitCode
+            fprintf(fid,'BQ0: CHARGE, TOTAL=%g, ALLOW_TOTAL_CHANGE=1\n',Initial.Q);
+            fprintf(fid,'TWSS0: TWISS, BETAX=%g, ALPHAX=%g, ETAX=%g, ETAXP=%g, BETAY=%g, ALPHAY=%g, ETAY=%g, ETAYP=%g\n',...
+                        Initial.x.Twiss.beta,Initial.x.Twiss.alpha,Initial.x.Twiss.eta,Initial.x.Twiss.etap,...
+                        Initial.y.Twiss.beta,Initial.y.Twiss.alpha,Initial.y.Twiss.eta,Initial.y.Twiss.etap) ;
+            if isfield(BEAMLINE{1},'Coordi')
+              fprintf(fid,'ICOORD: FLOOR, X=%g, Y=%g, Z=%g, THETA=%g, PHI=%g, PSI=%g\n',BEAMLINE{1}.Coordi,BEAMLINE{1}.Anglei);
+            else
+              fprintf(fid,'ICOORD: MARK\n');
+            end
+            fprintf(fid,'\n! ================================\n');
+            fprintf(fid,sprintf('\n%s: LINE=(BQ0,TWSS0,ICOORD,%s',linename,BEAMLINE{1}.Name));
+          else
+            fprintf(fid,'\n! ================================\n');
+            fprintf(fid,sprintf('\n%s: LINE=(%s',linename,BEAMLINE{1}.Name));
+          end
         otherwise
           error('Unknown deck type')
       end
@@ -766,95 +1211,7 @@ classdef DeckTool < handle
           end
         end
       end
-      % - Loop through CLASSes and write out beamline elements and properties
-      classList=properties(obj);
-      fprintf(fid,')\n');
-      for iclass=1:length(classList)
-        if isempty(obj.(classList{iclass}))
-          continue
-        end
-        fprintf(fid,'\n');
-        fprintf(fid,sprintf('! %s Definitions:\n\n',classList{iclass}));
-        plist=fieldnames(obj.(classList{iclass})); plist=plist(~ismember(plist,'index'));
-        % ignore repeated names
-        classind=obj.(classList{iclass}).index;
-        [~,IA]=unique(arrayfun(@(x) BEAMLINE{x}.Name,classind,'UniformOutput',false));
-        for itype=1:length(IA)
-          eleind=classind(IA(itype));
-          if isempty(plist)
-            pinfo=obj.GetPropInfo(eleind);
-            fprintf(fid,sprintf('%s: %s\n',BEAMLINE{eleind}.Name,pinfo.classname));
-            continue
-          end
-          for iprop=1:length(plist)
-            pinfo=obj.GetPropInfo(eleind,plist{iprop},obj.(classList{iclass}).(plist{iprop}){IA(itype)});
-            if iprop==1
-              bname=BEAMLINE{eleind}.Name;
-              newstr=sprintf('%s: %s',bname,pinfo.classname);
-              fprintf(fid,newstr);
-              nline=length(newstr);
-            end
-            if isempty(pinfo.name)
-              continue
-            end
-            for iname=1:length(pinfo.name)
-              switch obj.deckType
-                case 'XSIF'
-                  newstr=sprintf('%s=%s',upper(pinfo.name{iname}),num2str(pinfo.val(iname),obj.nsigfig));
-                case 'BMAD'
-                  newstr=sprintf('%s=%s',lower(pinfo.name{iname}),num2str(pinfo.val(iname),obj.nsigfig));
-              end
-              nline=nline+length(newstr);
-              if (nline+2)>obj.maxcol
-                fprintf(fid,sprintf(',&\n%s',newstr));
-                nline=length(newstr);
-              else
-                fprintf(fid,sprintf(',%s',newstr));
-                nline=nline+1;
-              end
-            end
-          end
-          if isfield(BEAMLINE{eleind},'Type') && ~strcmp(BEAMLINE{eleind}.Type,'UNKNOWN')
-            switch obj.deckType
-              case 'XSIF'
-                newstr=sprintf('TYPE="%s"',regexprep(BEAMLINE{eleind}.Type,'\s+','_'));
-              case 'BMAD'
-                newstr=sprintf('type="%s"',regexprep(BEAMLINE{eleind}.Type,'\s+','_'));
-            end
-            nline=nline+length(newstr);
-            if (nline+2)>obj.maxcol
-              fprintf(fid,sprintf(',&\n%s',newstr));
-              nline=length(newstr);
-            else
-              fprintf(fid,sprintf(',%s',newstr));
-              nline=nline+1;
-            end
-          end
-          % Add wakefield file descriptors
-          newstr={}; newstr{1}=[]; newstr{2}=[];
-          if strcmp(obj.deckType,'XSIF')
-            if isfield(BEAMLINE{eleind},'LWFfile') && ~isempty(BEAMLINE{eleind}.LWFfile)
-              newstr{1}=sprintf('LFILE="%s"',BEAMLINE{eleind}.LWFfile);
-            end
-            if isfield(BEAMLINE{eleind},'TWFfile') && ~isempty(BEAMLINE{eleind}.TWFfile)
-              newstr{2}=sprintf('TFILE="%s"',BEAMLINE{eleind}.TWFfile);
-            end
-          end
-          for istr=1:2
-            if ~isempty(newstr{istr})
-              nline=nline+length(newstr{istr});
-              if (nline+2)>obj.maxcol
-                fprintf(fid,sprintf(',&\n%s',newstr{istr}));
-                nline=length(newstr{istr});
-              else
-                fprintf(fid,sprintf(',%s',newstr{istr}));
-                nline=nline+1;
-              end
-            end
-          end
-          fprintf(fid,'\n');
-        end
-      end
+      fprintf(fid,')\n\n');
       if useline
         fprintf(fid,'\n!===============================\n!Line to use:\n');
         switch obj.deckType
@@ -862,132 +1219,6 @@ classdef DeckTool < handle
             fprintf(fid,'USE, %s\n',linename);
           case 'BMAD'
             fprintf(fid,'use, %s\n',linename);
-        end
-      end
-      fclose(fid);
-    end
-    function XSIFWrite(obj,Initial,filename,linename)
-      % Write out XSIF format file
-      global BEAMLINE WF %#ok<NUSED>
-      % - Open file for writing
-      fid=fopen(filename,'w');
-      if ~fid; error('Error opening %s',filename); end
-      % - Write header
-      fprintf(fid,'! Beam lines generated from Lucretia: (%s)\n\n',datestr(now));
-      % - Write twiss and beam description
-      I=Initial;
-      fprintf(fid,'TWSS0: BETA0,');
-      fprintf(fid,'BETX=%s,',num2str(I.x.Twiss.beta,obj.nsigfig));
-      fprintf(fid,'ALFX=%s,&\n',num2str(I.x.Twiss.alpha,obj.nsigfig));
-      fprintf(fid,'MUX=%s,',num2str(I.x.Twiss.nu,obj.nsigfig));
-      fprintf(fid,'DX=%s,',num2str(I.x.Twiss.eta,obj.nsigfig));
-      fprintf(fid,'DPX=%s,&\n',num2str(I.x.Twiss.eta,obj.nsigfig));
-      fprintf(fid,'BETY=%s,',num2str(I.y.Twiss.beta,obj.nsigfig));
-      fprintf(fid,'ALFY=%s,&\n',num2str(I.y.Twiss.alpha,obj.nsigfig));
-      fprintf(fid,'MUY=%s,',num2str(I.y.Twiss.nu,obj.nsigfig));
-      fprintf(fid,'DY=%s,',num2str(I.y.Twiss.eta,obj.nsigfig));
-      fprintf(fid,'DPY=%s,&\n',num2str(I.y.Twiss.eta,obj.nsigfig));
-      fprintf(fid,'ENERGY=%s',num2str(I.Momentum,obj.nsigfig));
-      fprintf(fid,'\n\n');
-      fprintf(fid,'BEAM0: BEAM, ENERGY=%s,&\n',num2str(I.Momentum,obj.nsigfig));
-      fprintf(fid,'NPART=%s,',num2str(I.Q/1.60217653e-19,obj.nsigfig));
-      fprintf(fid,'EXN=%s,EYN=%s,&\n',num2str(I.x.NEmit,obj.nsigfig),num2str(I.y.NEmit,obj.nsigfig));
-      fprintf(fid,'SIGT=%s,SIGE=%s',num2str(I.sigz,obj.nsigfig),num2str(I.SigPUncorrel/I.Momentum));
-      emitz=sqrt(I.sigz^2*(I.SigPUncorrel/I.Momentum)^2 - I.PZCorrel^2);
-      betaz=I.sigz^2/emitz;
-      alphaz=-betaz*((I.PZCorrel./I.Momentum)/I.sigz^2);
-      fprintf(fid,'\n!EMITZ=%s,BETAZ=%s,ALPHAZ=%s\n\n',num2str(emitz,obj.nsigfig),...
-        num2str(betaz,obj.nsigfig),num2str(alphaz,obj.nsigfig));
-      % - Write beamline
-      fprintf(fid,sprintf('%s: LINE=(%s',linename,BEAMLINE{1}.Name));
-      nline=length(BEAMLINE{1}.Name)+length(linename)+8;
-      if length(BEAMLINE)>1
-        for ibl=2:length(BEAMLINE)
-          if (nline+length(BEAMLINE{ibl}.Name)+2)>obj.maxcol
-            fprintf(fid,sprintf(',&\n%s',BEAMLINE{ibl}.Name)); % end line if over max col width
-            nline=length(BEAMLINE{ibl}.Name);
-          else
-            fprintf(fid,sprintf(',%s',BEAMLINE{ibl}.Name));
-            nline=nline+length(BEAMLINE{ibl}.Name)+1;
-          end
-        end
-      end
-      % - Loop through CLASSes and write out beamline elements and
-      % properties
-      classList=properties(obj);
-      fprintf(fid,')\n');
-      for iclass=1:length(classList)
-        if isempty(obj.(classList{iclass}))
-          continue
-        end
-        fprintf(fid,'\n');
-        fprintf(fid,sprintf('! %s Definitions:\n\n',classList{iclass}));
-        plist=fieldnames(obj.(classList{iclass})); plist=plist(~ismember(plist,'index'));
-        % ignore repeated names
-        classind=obj.(classList{iclass}).index;
-        [~,IA]=unique(arrayfun(@(x) BEAMLINE{x}.Name,classind,'UniformOutput',false));
-        for itype=1:length(IA)
-          eleind=classind(IA(itype));
-          if isempty(plist)
-            pinfo=obj.GetPropInfo(eleind);
-            fprintf(fid,sprintf('%s: %s\n',BEAMLINE{eleind}.Name,pinfo.classname));
-            continue
-          end
-          for iprop=1:length(plist)
-            pinfo=obj.GetPropInfo(eleind,plist{iprop},obj.(classList{iclass}).(plist{iprop}){IA(itype)});
-            if iprop==1
-              bname=BEAMLINE{eleind}.Name;
-              newstr=sprintf('%s: %s',bname,pinfo.classname);
-              fprintf(fid,newstr);
-              nline=length(newstr);
-            end
-            if isempty(pinfo.name)
-              continue
-            end
-            for iname=1:length(pinfo.name)
-              newstr=sprintf('%s=%s',pinfo.name{iname},num2str(pinfo.val(iname),obj.nsigfig));
-              nline=nline+length(newstr);
-              if (nline+2)>obj.maxcol
-                fprintf(fid,sprintf(',&\n%s',newstr));
-                nline=length(newstr);
-              else
-                fprintf(fid,sprintf(',%s',newstr));
-                nline=nline+1;
-              end
-            end
-          end
-          if isfield(BEAMLINE{eleind},'Type') && ~strcmp(BEAMLINE{eleind}.Type,'UNKNOWN')
-            newstr=sprintf('TYPE="%s"',regexprep(BEAMLINE{eleind}.Type,'\s+','_'));
-            nline=nline+length(newstr);
-            if (nline+2)>obj.maxcol
-              fprintf(fid,sprintf(',&\n%s',newstr));
-              nline=length(newstr);
-            else
-              fprintf(fid,sprintf(',%s',newstr));
-              nline=nline+1;
-            end
-          end
-          % Add wakefield file descriptors
-          newstr={}; newstr{1}=[]; newstr{2}=[];
-          if isfield(BEAMLINE{eleind},'LWFfile') && ~isempty(BEAMLINE{eleind}.LWFfile)
-            newstr{1}=sprintf('LFILE="%s"',BEAMLINE{eleind}.LWFfile);
-          end
-          if isfield(BEAMLINE{eleind},'TWFfile') && ~isempty(BEAMLINE{eleind}.TWFfile)
-            newstr{2}=sprintf('TFILE="%s"',BEAMLINE{eleind}.TWFfile);
-          end
-          for istr=1:2
-            if ~isempty(newstr{istr})
-              nline=nline+length(newstr{istr});
-              if (nline+2)>obj.maxcol
-                fprintf(fid,sprintf(',&\n%s',newstr{istr}));
-                nline=length(newstr{istr});
-              else
-                fprintf(fid,sprintf(',%s',newstr{istr}));
-                nline=nline+1;
-              end
-            end
-          end
-          fprintf(fid,'\n');
         end
       end
       fclose(fid);
@@ -1795,6 +2026,831 @@ classdef DeckTool < handle
         end
       end
     end
+    function txt=ElegantRead(obj,filenames)
+      % Read Elegant files, expand lines and call statements
+      % filename = {lte file, ele file} (1x2 char arrays)
+      bdir=obj.basedir; % Assume all called files are relative to main lte file
+      if ~iscell(filenames)
+        filenames={filenames};
+      end
+      if ~exist(fullfile(bdir,filenames{1}),'file')
+        error('%s not found',filenames{1})
+      end
+      ifile=1;
+      fid=fopen(fullfile(bdir,filenames{1}),'r');
+      % commands etc to be ignored
+      ignorecom={};
+      for icom=1:length(ignorecom); ignorecom{icom}=sprintf('%s,',ignorecom{icom}); end
+      txt={}; t_next=[]; sname=''; subtxt=[]; callstack={};
+      while 1
+        % Process next statement from previous line if seperated with ;
+        if ~isempty(t_next)
+          t=t_next;
+        else % Or, Get new line and stop if last line
+          try
+            t=fgetl(fid);
+          catch
+            t=[];
+          end
+        end
+        if ~ischar(t) % hit end of this file, if more on the stack, open that, else break out of this loop
+          if length(filenames)>1 && ifile==1
+            fid=fopen(fullfile(bdir,filenames{2}),'r');
+            continue
+          end
+          if isempty(callstack)
+            break
+          end
+          try
+            fclose(fid);
+          catch
+          end
+           if ~exist(fullfile(bdir,callstack{1}),'file')
+            error('%s not found',callstack{1})
+          end
+          fid=fopen(fullfile(bdir,callstack{1}),'r');
+          callstack(1)=[];
+          t=fgetl(fid);
+        end
+        % Remove comments and whitespace and quotes and string substitutions on element name, replace other " with '
+        t=regexprep(regexprep(t,'!.*',''),'\s+','');
+        if ~isempty(t) && t(1) == '"'
+          t = regexprep(regexprep(t,'"','',1),'"','',1) ;
+        end
+        t=regexprep(t,'"','''');
+        t=regexprep(t,'%s','ss');
+        if isempty(t)
+          continue
+        end
+        % Concatinate line extensions
+        while ~isempty(t) && t(end)=='&'
+          tcont=fgetl(fid);
+          if ~ischar(tcont)
+            error('Deck file cannot end with continution (&) character!')
+          end
+          tcont=regexprep(regexprep(tcont,'!.*',''),'\s+','');
+          if ~isempty(tcont)
+            t=[t(1:end-1) tcont];
+          end
+        end
+        % Parser cannot deal with special characters ; or , in quotes,
+        % replace by string equivalents to be re-substituted later
+        lquo=regexp(t,'"');
+        if length(lquo)>=2
+          for iquo=1:floor(length(lquo)/2)
+            if contains(t(lquo(1+(iquo-1)*2):lquo(2+(iquo-1)*2)),',')
+              newtxt=regexprep(t(lquo(1+(iquo-1)*2)+1:lquo(2+(iquo-1)*2)-1),',','__COMMA__');
+              t=[t(1:lquo(1+(iquo-1)*2)) newtxt t(lquo(2+(iquo-1)*2):end)];
+            end
+            if contains(t(lquo(1+(iquo-1)*2):lquo(2+(iquo-1)*2)),';')
+              newtxt=regexprep(t(lquo(1+(iquo-1)*2)+1:lquo(2+(iquo-1)*2)-1),';','__SEMICOLON__');
+              t=[t(1:lquo(1+(iquo-1)*2)) newtxt t(lquo(2+(iquo-1)*2):end)];
+            end
+          end
+        end
+        % Deal with multiple commands on one line
+        if contains(t,';')
+          tl=regexp(t,';','once');
+          t_next=t(tl+1:end);
+          t=t(1:tl-1);
+        else
+          t_next=[];
+        end
+        % If there are MAD8 style MATRIX element definitions, re-format
+        % them as XSIF style ones
+        if contains(t,':MATR','IgnoreCase',true)
+          t=regexprep(t,'rm\((\d),(\d)\)','R$1$2','ignorecase');
+          t=regexprep(t,'tm\((\d),(\d),(\d)\)','T$1$2$3','ignorecase');
+        end
+        % If reach STOP or RETURN statement, ignore everything following
+        if startsWith(t,{'STOP' 'RETURN'},'IgnoreCase',true)
+          fclose(fid);
+          continue
+        end
+        % Ignore any comment blocks
+        if startsWith(t,'COMMENT','IgnoreCase',true)
+          while 1
+            if ~ischar(t) || startsWith(t,'ENDCOMMENT','IgnoreCase',true)
+              break
+            else
+              t=fgetl(fid);
+              t=regexprep(regexprep(t,'!.*',''),'\s+','');
+            end
+          end
+          continue
+        end
+        % Replace constant declarations with assignments
+        t=regexprep(t,':CONSTANT=',':='); t=regexprep(t,':constant=',':=');
+        % Replace LIST's with LINE's
+        t=regexprep(t,':LIST=',':LINE='); t=regexprep(t,':list=',':LINE=');
+        % Replace set commands with := assignment operators
+        if startsWith(t,'set,','IgnoreCase',true)
+          t=regexprep(t,'^SET,','','ignorecase');
+          t=regexprep(t,'=',':=');
+          t=regexprep(t,',',':=');
+        end
+        % Flag SUBROUTINE blocks
+        if startsWith(t,'ENDSUBROUTINE','IgnoreCase',true)
+          sname='';
+          continue
+        elseif endsWith(t,'SUBROUTINE','IgnoreCase',true)
+          sname=regexprep(t,':SUBROUTINE','');
+          subtxt.(sname)={};
+          continue
+        end
+        % Ignore MATCH blocks
+        if endsWith(t,'MATCH','IgnoreCase',true)
+          while 1
+            if ~ischar(t) || startsWith(t,'ENDMATCH','IgnoreCase',true)
+              break
+            else
+              t=fgetl(fid);
+              t=regexprep(regexprep(t,'!.*',''),'\s+','');
+            end
+          end
+          continue
+        end
+        % Ignore HARMON blocks
+        if endsWith(t,'HARMON','IgnoreCase',true)
+          while 1
+            if ~ischar(t) || startsWith(t,'ENDHARM','IgnoreCase',true)
+              break
+            else
+              t=fgetl(fid);
+              t=regexprep(regexprep(t,'!.*',''),'\s+','');
+            end
+          end
+          continue
+        end
+        % Remove lines featured in ignore list
+        if contains(t,ignorecom,'IgnoreCase',true)
+          while 1
+            if ~ischar(t) || ~endsWith(t,'&')
+              break
+            else
+              t=fgetl(fid);
+            end
+          end
+          continue
+        end
+        % Replace any $ chars with _
+        t=regexprep(t,'\$','_');
+        % Expand called external files or just add line to txt stack
+        if startsWith(t,'call','IgnoreCase',true)
+          % try with filename parameter
+          try
+            cfn=regexprep(cell2mat(regexpi(t,'"(\S+\.?\S*)"','tokens','once')),'"','');
+          catch
+            cfn=[];
+          end
+          fprintf('Calling file: %s\n',cfn);
+          if isempty(cfn) || ~exist(fullfile(bdir,cfn),'file')
+            fclose(fid);
+            error('Unfound filename in CALL statement: %s',fullfile(bdir,cfn))
+          end
+          % Add file to stack to read after done with this one
+          callstack{end+1}=cfn;
+        elseif isempty(sname) && isfield(subtxt,t) % expand out a subroutine call
+          for isub=1:length(subtxt.(t))
+            txt{end+1}=subtxt.(t){isub};
+          end
+        elseif ~isempty(sname) % store subroutine commands
+          subtxt.(sname){end+1}=t;
+        else
+          txt{end+1}=t;
+        end
+      end
+      try
+        fclose(fid);
+      catch
+      end
+    end
+    function Initial=ElegantParse(obj,txt,linename,betaname,beamname)
+      global BEAMLINE WF
+      % math functions and Matlab equivalents
+      madmath={'sqrt(' 'log(' 'exp(' 'sin(' 'cos(' 'tan(' 'asin(' 'abs(' 'max(' 'min(' 'ranf(' 'gauss('} ;
+      matmath={'sqrt(' 'log(' 'exp(' 'sin(' 'cos(' 'tan(' 'asin(' 'abs(' 'max(' 'min(' 'rand(' 'randn('} ;
+      Initial=InitCondStruc();
+      if isempty(txt)
+        return
+      end
+      if exist('linename','var')
+        linename=lower(linename);
+      end
+      if exist('betaname','var')
+        betaname=lower(betaname);
+      end
+      if exist('beamname','var')
+        beamname=lower(beamname);
+      end
+      uselist={}; % container for indicated beamlines, beta0, beam's to use
+      % Default named parameters
+      np.pi=pi;
+      np.twopi=pi*2;
+      np.emass=5.109989e-4;
+      np.clight=299792458;
+      np.e=2.7182818284590;
+      np.degrad=57.295779513082323;
+      np.raddeg=0.017453292519943;
+      np.electron=-1;
+      np.positron=1;
+      % Pull out user-defined named parameters, also pull out line name if
+      % there is one, also form element, parameter lists
+      inp=[]; ndef=[]; firstcall=true; en=[];
+      while ~isempty(ndef) || firstcall
+        if firstcall
+          prog=true;
+        else
+          prog=false;
+        end
+        firstcall=false;
+        for itxt=1:length(txt)
+          txt{itxt}=lower(txt{itxt});
+          tok=regexp(txt{itxt},'^(\w+):?=(.*)','tokens','once');
+          if length(tok)==2 && ~ismember(itxt,inp)
+            expval=[];
+            try
+              % replace variable names
+              if isempty(strfind(tok{2},'np.'))
+                tok{2}=regexprep(tok{2},'([a-z|A-Z]\w*)','np.$1');
+                tok{2}=regexprep(tok{2},'([\dn|\.])np\.(e[-?+?\d])','$1$2'); % ignore exponent case
+                % Deal with math function case
+                imatch=1;
+                while contains(tok{2},madmath) && imatch<=length(madmath)
+                  tok{2}=regexprep(tok{2},sprintf('np.%s',madmath{imatch}),matmath(imatch));
+                  imatch=imatch+1;
+                end
+              end
+              % deal with possible name[par] format
+              if contains(tok{2},'[')
+                tok{2}=regexprep(tok{2},'\[np\.(\w+)','[$1');
+                tokex = regexp(tok{2},'np\.(\w+)\[(\w+)\]','tokens','once');
+                if ~isfield(en.(tokex{1}),tokex{2}) % looking for keyword concatination
+                  fn=fieldnames(en.(tokex{1}));
+                  for ifn=1:length(fn)
+                    if startsWith(string(tokex{2}),fn{ifn}) || startsWith(fn{ifn},tokex{2})
+                      tok{2}=sprintf('en.%s.%s',tokex{1},fn{ifn});
+                      break;
+                    end
+                  end
+                else
+                  tok{2}=regexprep(tok{2},'np\.(\w+)\[(\w+)\]','en.$1.$2');
+                end
+              end
+              expval=eval(tok{2});
+              ndef(ismember(ndef,itxt))=[];
+            catch % if still cannot eval, flag and move on- resolve on next try, or fail
+              if ismember(itxt,ndef) && ~prog
+                error('Failed to resolve expression in line: %s',sprintf('%s := %s',tok{1},tok{2}))
+              elseif ~ismember(itxt,ndef)
+                ndef(end+1)=itxt;
+                if isfield(np,tok{1})
+                  np=rmfield(np,tok{1});
+                end
+              end
+            end
+            if ~isempty(expval)
+              if isfield(np,tok{1})
+                warning('Lucretia:DeckTool','parameter %s defined multiple times',tok{1});
+              end
+              np.(tok{1})=expval;
+              prog=true;
+              inp(end+1)=itxt;
+            end
+          elseif ~ismember(itxt,inp)
+            % Store any use commands
+            ln=cell2mat(regexpi(txt{itxt},'use,(\w+)','tokens','once'));
+            if ~isempty(ln)
+              uselist{end+1}=ln;
+              inp(end+1)=itxt;
+              continue;
+            end
+            % form element structure
+            tok=regexp(txt{itxt},'^(\w+):(\w+),?(.*)','tokens','once');
+            if length(tok)>=2 && ~ismember(itxt,inp) && ~strcmp(tok{2},'line')
+              if isfield(en,tok{1}) && ~ismember(itxt,ndef)
+                warning('Lucretia:DeckTool:MultiEleDeclare','Element %s defined multiple times',tok{1})
+              end
+              en.(tok{1}).Class=tok{2};
+              if length(tok)>=3 && ~isempty(tok{3})
+                par=split(tok{3},',');
+                ndef(ismember(ndef,itxt))=[];
+                for ipar=1:length(par)
+                  pval=regexp(char(par(ipar)),'(\w+)=?(.*)','tokens','once');
+                  % Re-substitute , and ; characters that are inside quotes
+                  pval{2}=regexprep(pval{2},'__COMMA__',',','ignorecase');
+                  pval{2}=regexprep(pval{2},'__SEMICOLON__',';','ignorecase');
+                  if length(pval)==2 && ~isempty(pval{2})
+                    % Replace quotes to '' so matlab eval parses them
+                    % correctly
+                    pval{2}=regexprep(pval{2},'"','''');
+%                     pval{2}=regexprep(regexprep(pval{2},'''',''''''),'"','''''');
+                    % Try evaluating parameter expression
+                    try
+                      % replace variable names
+                      if isempty(strfind(pval{2},'np.')) && pval{2}(1)~=''''
+                        pval{2}=regexprep(regexprep(pval{2},'([a-z|A-Z]\w*)','np.$1'),'np\.([a-z|A-Z]\w*\()','$1');
+                        pval{2}=regexprep(pval{2},'([\dn|\.])np\.(e[-?+?\d])','$1$2'); % ignore exponent case
+                      end
+                      % Deal with math function case
+                      imatch=1;
+                      while contains(pval{2},madmath) && imatch<=length(madmath)
+                        pval{2}=regexprep(pval{2},sprintf('np.%s',madmath{imatch}),matmath(imatch));
+                        imatch=imatch+1;
+                      end
+                      % deal with possible name[par] format
+                      if contains(pval{2},'[')
+                        pval{2}=regexprep(pval{2},'\[np\.(\w+)','[$1');
+                        pval{2}=regexprep(pval{2},'np\.(\w+)\[(\w+)\]','en.$1.$2');
+                      end
+                      % Evaluate parameter
+                      en.(tok{1}).(pval{1})=eval(pval{2});
+                    catch % if cannot eval, flag and move on- resolve on next try, or fail
+                      if ~prog
+                        error('Failed to resolve parameter in element: %s',tok{1})
+                      elseif ~ismember(itxt,ndef)
+                        ndef(end+1)=itxt;
+                        continue
+                      end
+                    end
+                  elseif ~isempty(pval)
+                    en.(tok{1}).(pval{1})=[];
+                  else
+                    en.(tok{1})=[];
+                  end
+                end
+              elseif length(tok)<3
+                en.(tok{1})=[];
+              end
+              if ~ismember(itxt,ndef)
+                inp(end+1)=itxt;
+              end
+            elseif length(tok)>1 && strcmp(tok{2},'line') && ~ismember(itxt,inp) % deal with line definitions seperately
+              en.(tok{1}).Class='line';
+              en.(tok{1}).linearg=regexprep(txt{itxt},'^.+=(.*)','$1');
+            end
+          end
+        end
+      end
+%       txt(inp)=[];
+      % Parse element list
+      fn=fieldnames(en); lines=[]; ifn=1;
+      plist={'MARK' 'DRIF' 'CSRD' 'CSRC' 'CSBE' 'QUAD' 'SEXT' 'OCTU' 'MULT' 'CSBE' 'SOLE' 'LCAV' 'DRIF' 'HKIC' ...
+            'VKIC' 'KICK' 'EKIC' 'MONI' 'HMON' 'VMON' 'INST' 'PROF' 'WIRE' 'BLMO' 'SLMO' 'IMON' 'WIGG' 'CWIG' 'WATC' 'IBSC' 'LSRM' 'CHAR' ...
+            'COLL' 'MATR' 'BETA' 'BEAM' 'LINE' 'SIGM' 'RCOL' 'ECOL' 'SROT' 'ROLL' 'ZROT' 'YROT' 'GKIC' 'TWIS'};
+      while ifn<=length(fn) %for ifn=1:length(fn)
+        % if no class field at this stage, then it is a marker
+        if ~isfield(en.(fn{ifn}),'Class')
+          en.(fn{ifn}).Class='marker';
+        end
+        % Inherting from another element?
+        if length(en.(fn{ifn}).Class)<4 || ~ismember(upper(en.(fn{ifn}).Class(1:4)),plist)
+          try
+            iobj = en.(en.(fn{ifn}).Class) ;
+            en.(fn{ifn}).Class = iobj.Class ;
+            fn2=fieldnames(iobj);
+            for ifn2=1:length(fn2)
+              if ~isfield(en.(fn{ifn}),fn2{ifn2})
+                en.(fn{ifn}).(fn2{ifn2}) = iobj.(fn2{ifn2}) ;
+              end
+            end
+          catch % If this doesn't work, then just unknown class, make it a marker
+            en.(fn{ifn}).Class='marker';
+          end
+        end
+        switch upper(en.(fn{ifn}).Class(1:4))
+          case {'DRIF', 'CSRD', 'WIGG', 'CWIG', 'LSRM'}
+            L=obj.collectPar(en.(fn{ifn}),'l');
+            en.(fn{ifn}).LucretiaElement = DrifStruc( L, fn{ifn} ) ;
+          case {'CSBE', 'CSRC'}
+            [L,ANG,K1,K2,E1,E2,Tilt,H1,H2,Hgap,Fint,Hgap2,Fint2,Type]=obj.collectPar(en.(fn{ifn}),'l','angle','k1','k2','e1','e2','tilt','h1','h2','hgap','fint','hgapx','fintx','group');
+            E=[E1,E2];
+            H=[H1,H2];
+            if L==0
+              L=1e-9;
+            end
+            if isnan(Hgap2)
+              Hgap=[Hgap,Hgap];
+            else
+              Hgap=[Hgap,Hgap2];
+            end
+            if isnan(Fint2)
+              Fint=[Fint,Fint];
+            else
+              Fint=[Fint,Fint2];
+            end
+            if isnan(K1)
+              BField=ANG/L;
+            else
+              BField=[ANG/L,K1];
+            end
+            if isempty(Tilt)
+              Tilt=pi/2;
+            end
+            en.(fn{ifn}).LucretiaElement = SBendStruc( L, BField.*L, ANG, E, H, Hgap, Fint, Tilt, fn{ifn} ) ;
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+            % Deal with design sextupole field content - later gets turned
+            % into MULT elements either side of bend
+            if ~isnan(K2) && abs(K2)>0
+              if length(BField)==2
+                BField=[BField,-K2*sign(ANG)];
+              else
+                BField=[BField,0,-K2*sign(ANG)];
+              end
+              en.(fn{ifn}).LucretiaElement.B = BField.*L ;
+            end
+          case 'QUAD'
+            [L, B, Tilt, aper, Type] = obj.collectPar(en.(fn{ifn}),'l','k1','tilt','aperture','group') ;
+            if L==0
+              L=1e-9;
+            end
+            if isempty(Tilt)
+              Tilt=pi/4;
+            end
+            if isnan(B); B=0; end
+            en.(fn{ifn}).LucretiaElement = QuadStruc( L, B*L, Tilt, aper, fn{ifn} ) ;
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+          case 'SEXT'
+            [L, B, Tilt, aper, Type] = obj.collectPar(en.(fn{ifn}),'l','k2','tilt','aperture','group') ;
+            if L==0
+              L=1e-9;
+            end
+            if isempty(Tilt)
+              Tilt=pi/6;
+            end
+            en.(fn{ifn}).LucretiaElement = SextStruc( L, B*L, Tilt, aper, fn{ifn} ) ;
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+          case 'OCTU'
+            [L, B, Tilt, aper, Type] = obj.collectPar(en.(fn{ifn}),'l','k3','tilt','aperture','group') ;
+            if isempty(Tilt)
+              Tilt=pi/8;
+            end
+            en.(fn{ifn}).LucretiaElement = OctuStruc( L, B*L, Tilt, aper, fn{ifn} ) ;
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+          case 'MULT'
+            [L, LRAD, TiltAll, aper, Type] = obj.collectPar(en.(fn{ifn}),'l','lrad','tilt','aperture','group') ;
+            B=[]; Tilt=[]; PIndx=[];
+            mpn=fieldnames(en.(fn{ifn}));
+            kv=regexp(mpn,'^k(\d+)l?','ignorecase','tokens','once');
+            for ik=1:length(kv)
+              if ~isempty(kv{ik})
+                B(end+1)=en.(fn{ifn}).(mpn{ik});
+                if isfield(en.(fn{ifn}),sprintf('t%c',kv{ik}{1}))
+                  if isempty(en.(fn{ifn}).(sprintf('t%c',kv{ik}{1})))
+                    Tilt(end+1)=pi/((str2double(kv{ik}{1})+1)*2)+TiltAll;
+                  else
+                    Tilt(end+1)=en.(fn{ifn}).(sprintf('t%c',kv{ik}{1}))+TiltAll;
+                  end
+                else
+                  Tilt(end+1)=TiltAll;
+                end
+                PIndx(end+1)=str2double(kv{ik}{1});
+              end
+            end
+            en.(fn{ifn}).LucretiaElement = MultStruc( L, B, Tilt, PIndx, [0 0], aper, fn{ifn} ) ;
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+            if ~isnan(LRAD)
+              en.(fn{ifn}).LucretiaElement.Lrad=LRAD;
+            end
+          case 'SOLE'
+            [L, B, aper,tilt, Type] = obj.collectPar(en.(fn{ifn}),'l','ks','aperture','tilt','group') ;
+            if L==0
+              L=1e-9;
+            end
+            en.(fn{ifn}).LucretiaElement = SolenoidStruc( L, B, aper, fn{ifn} ) ;
+            en.(fn{ifn}).LucretiaElement.Offset(6) = tilt ;
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+          case {'LCAV','TCAV'}
+            [L, V,phi,freq,eloss,lfile,tfile,aper,nbin,tilt,Type] = obj.collectPar(en.(fn{ifn}),'l','deltae','phi0','freq','eloss','lfile','tfile','aperture','nbin','tilt','group');
+            BinWidth=1/nbin; % BinWidth is fraction of sigma - default here to 0.1
+            srwf_z=0; srwf_t=0;
+            if ~any(isnan(lfile)) && ~isempty(lfile) && ~ismember(lfile,obj.parsedWFfiles) && exist(fullfile(obj.basedir,lfile),'file')
+              [stat,W] = ParseSRWF( fullfile(obj.basedir,lfile), BinWidth ) ;
+              if stat{1}~=1; error(stat{2}); end
+              obj.parsedWFfiles{end+1}=lfile;
+              if isempty(WF) || ~isfield(WF,'ZSR')
+                WF.ZSR(1)=W;
+              else
+                WF.ZSR(end+1)=W;
+              end
+              srwf_z=length(WF.ZSR);
+            elseif ~any(isnan(lfile)) && ~isempty(lfile) && ~ismember(lfile,obj.parsedWFfiles) && ~exist(fullfile(obj.basedir,lfile),'file')
+              warning('Lucretia:DeckTool:nolfile','referenced lfile not found, skipping: %s',fullfile(obj.basedir,lfile))
+            end
+            if ~any(isnan(tfile)) && ~isempty(tfile) && ~ismember(lfile,obj.parsedWFfiles) && exist(fullfile(obj.basedir,tfile),'file')
+              [stat,W] = ParseSRWF( fullfile(obj.basedir,tfile), BinWidth ) ;
+              obj.parsedWFfiles{end+1}=tfile;
+              if stat{1}~=1; error(stat{2}); end
+              if isempty(WF) || ~isfield(WF,'TSR')
+                WF.TSR(1)=W;
+              else
+                WF.TSR(end+1)=W;
+              end
+              srwf_t=length(WF.TSR);
+            elseif ~any(isnan(tfile)) && ~isempty(tfile) && ~ismember(lfile,obj.parsedWFfiles) && ~exist(fullfile(obj.basedir,tfile),'file')
+              warning('Lucretia:DeckTool:notfile','referenced tfile not found, skipping: %s',fullfile(obj.basedir,tfile))
+            end
+            if strcmpi(en.(fn{ifn}).Class(1:4),'TCAV')
+              mode=1;
+            else
+              mode=0;
+            end
+            en.(fn{ifn}).LucretiaElement = RFStruc(  L, V, phi, freq, srwf_z, srwf_t, eloss, aper, fn{ifn}, mode ) ;
+            en.(fn{ifn}).LucretiaElement.Offset(6) = tilt ;
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+            if ~any(isnan(lfile)) && ~isempty(lfile)
+              en.(fn{ifn}).LucretiaElement.LWFfile=lfile;
+            end
+            if ~any(isnan(tfile)) && ~isempty(tfile)
+              en.(fn{ifn}).LucretiaElement.TWFfile=tfile;
+            end
+          case {'SROT','ROLL','ZROT','YROT','GKIC'}
+            dpsi=0;
+            [ang,dx,dtheta,dy,dphi,dz]=obj.collectPar(en.(fn{ifn}),'angle','dx','dxp','dy','dyp','dz');
+            if ismember(upper(en.(fn{ifn}).Class(1:4)),{'SROT','ROLL','GKIC'})
+              dpsi=ang;
+            elseif strcmpi(en.(fn{ifn}).Class(1:4),'YROT')
+              dtheta=ang;
+            else
+              dphi=ang;
+            end
+            en.(fn{ifn}).LucretiaElement = CoordStruc( dx, dtheta, dy, dphi, dz, dpsi, fn{ifn} );
+          case {'HKIC','VKIC','KICK','EKIC'}
+            [L,KICK,HKICK,VKICK,TILT, Type]=obj.collectPar(en.(fn{ifn}),'l','kick','hkick','vkick','tilt','group');
+            if strcmpi(en.(fn{ifn}).Class(1:4),'HKIC')
+              en.(fn{ifn}).LucretiaElement = CorrectorStruc(  L, KICK, TILT, 1, fn{ifn} ) ;
+            elseif strcmpi(en.(fn{ifn}).Class(1:4),'VKIC')
+              en.(fn{ifn}).LucretiaElement = CorrectorStruc(  L, KICK, TILT, 2, fn{ifn} ) ;
+            elseif strcmpi(en.(fn{ifn}).Class(1:4),'KICK') || strcmpi(en.(fn{ifn}).Class(1:4),'EKIC')
+              en.(fn{ifn}).LucretiaElement = CorrectorStruc(  L, [HKICK,VKICK], TILT, 3, fn{ifn} ) ;
+            end
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+          case {'ECOL','RCOL'}
+            [L,xgap,ygap,Tilt,Type]=obj.collectPar(en.(fn{ifn}),'l','xsize','ysize','tilt','group') ;
+            if strcmpi(en.(fn{ifn}).Class(1:4),'ECOL')
+              en.(fn{ifn}).LucretiaElement = CollStruc( L, xgap, ygap, 'Ellipse', Tilt, fn{ifn} ) ;
+            else
+              en.(fn{ifn}).LucretiaElement = CollStruc( L, xgap, ygap, 'Rectangle', Tilt, fn{ifn} ) ;
+            end
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+          case 'MATR'
+            mf=fieldnames(en.(fn{ifn}));
+            L=obj.collectPar(en.(fn{ifn}),'l');
+            R=diag(ones(1,6)); T=[]; Tinds=[];
+            for imf=1:length(mf)
+              ind=regexpi(mf{imf},'^R(\d)(\d)','tokens','once');
+              if ~isempty(ind)
+                R(str2double(ind{1}),str2double(ind{2}))=en.(fn{ifn}).(mf{imf});
+              end
+              ind=regexpi(mf{imf},'^T(\d)(\d)(\d)','tokens','once');
+              if ~isempty(ind)
+                Tinds(end+1)=str2double(cell2mat(ind));
+                T(end+1)=en.(fn{ifn}).(mf{imf});
+              end
+            end
+            en.(fn{ifn}).LucretiaElement = TMapStruc( fn{ifn}, L ) ;
+            en.(fn{ifn}).LucretiaElement.R = R ;
+            if ~isempty(T)
+              en.(fn{ifn}).LucretiaElement.T = T;
+              en.(fn{ifn}).LucretiaElement.Tinds = Tinds;
+            end
+          case {'HMON','VMON','MONI'}
+            [L, Type]=obj.collectPar(en.(fn{ifn}),'l','group') ;
+            en.(fn{ifn}).LucretiaElement = BPMStruc( L, fn{ifn} ) ;
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+          case {'BLMO', 'PROF', 'WIRE', 'SLMO', 'IMON', 'INST'}
+            [L, Type]=obj.collectPar(en.(fn{ifn}),'l','group') ;
+            en.(fn{ifn}).LucretiaElement = InstStruc( L, upper(en.(fn{ifn}).Class(1:4)), fn{ifn} ) ;
+            en.(fn{ifn}).LucretiaElement.Type=Type;
+          case {'MARK','WATC','IBSC','CHAR'}
+            en.(fn{ifn}).LucretiaElement = MarkerStruc( fn{ifn} ) ;
+          case 'TWIS'
+            % Initialization parameters set if using this BETA0
+            en.(fn{ifn}).LucretiaElement = MarkerStruc( fn{ifn} ) ;
+            if strcmpi(fn{ifn},betaname) || ismember(fn{ifn},uselist)
+              [bx,ax,mx,by,ay,my,dx,dpx,dy,dpy,xoff,xpoff,yoff,ypoff,E0] = ...
+                obj.collectPar(en.(fn{ifn}),'betax','alphax','mux','betay','alphay','muy','dx','dpx','dy','dpy','x','px','y','py','energy') ;
+              if ~isnan(E0)
+                Initial.Momentum=E0;
+              end
+              Initial.x.Twiss.beta=bx;
+              Initial.x.Twiss.alpha=ax;
+              Initial.x.Twiss.nu=mx;
+              Initial.x.Twiss.eta=dx;
+              Initial.x.Twiss.etap=dpx;
+              Initial.x.pos=xoff;
+              Initial.x.ang=xpoff;
+              Initial.y.Twiss.beta=by;
+              Initial.y.Twiss.alpha=ay;
+              Initial.y.Twiss.nu=my;
+              Initial.y.Twiss.eta=dy;
+              Initial.y.Twiss.etap=dpy;
+              Initial.y.pos=yoff;
+              Initial.y.ang=ypoff;
+            end
+          case 'BEAM'
+            if strcmpi(fn{ifn},beamname) || ismember(fn{ifn},uselist)
+              [q,np,E0,gamma,ex,ey,exn,eyn,sigz,sige,nbunch] = ...
+                obj.collectPar(en.(fn{ifn}),'charge','npart','energy','gamma','ex','ey','exn','eyn','sigt','sige','kbunch');
+                if ~isnan(E0)
+                  Initial.Momentum=E0;
+                end
+                if ~isnan(gamma)
+                  Initial.Momentum=gamma*5.109989e-4;
+                end
+                gamma=Initial.Momentum/5.109989e-4;
+                Initial.Q=q;
+                if np*1.60217653e-19 > q
+                  Initial.Q=np*1.60217653e-19;
+                end
+                if ~isnan(ex)
+                  Initial.x.NEmit=ex*gamma;
+                end
+                if ~isnan(ey)
+                  Initial.y.NEmit=ey*gamma;
+                end
+                if ~isnan(exn)
+                  Initial.x.NEmit=exn;
+                end
+                if ~isnan(eyn)
+                  Initial.y.NEmit=eyn;
+                end
+                if ~isnan(sigz)
+                  Initial.sigz=sigz;
+                end
+                if ~isnan(sige)
+                  Initial.SigPUncorrel=Initial.Momentum*sige;
+                end
+                if ~isnan(nbunch)
+                  Initial.NBunch=nbunch;
+                end
+            end
+          case 'LINE'
+            if ~isempty(regexp(fn{ifn},'(','once'))
+              error('Formal arguments in beamline definitions not currently supported')
+            end
+            % deal with any repeated element groups
+            b1=regexp(en.(fn{ifn}).linearg,'\d+\*\(');
+            while ~isempty(b1)
+              b2=regexp(en.(fn{ifn}).linearg,'\)(,|\))');
+              reptxt=[];
+              nrep=str2double(regexp(en.(fn{ifn}).linearg(b1(1):end),'\d+','once','match'));
+              for irep2=1:nrep
+                reptxt=[reptxt cell2mat(regexp(en.(fn{ifn}).linearg(b1(1):b2(1)),'\((.+)\)','tokens','once'))];
+                if irep2<nrep
+                  reptxt(end+1)=',';
+                end
+              end
+              en.(fn{ifn}).linearg=[en.(fn{ifn}).linearg(1:b1(1)-1) reptxt en.(fn{ifn}).linearg(b2(1)+1:end)];
+              b1=regexp(en.(fn{ifn}).linearg,'\d+\*\(');
+            end
+            bl=split(regexprep(regexprep(en.(fn{ifn}).linearg,'^(',''),')$',''),',');
+            lines.(fn{ifn})=bl;
+          case 'SIGM'
+            % just ignore this for now
+          otherwise % look to see if user made class or treat as drift
+            if strcmpi(en.(fn{ifn}).Class(1:4),'line')
+              ifn=ifn+1;
+              continue
+            end
+            if isfield(en,en.(fn{ifn}).Class)
+              clfd=fieldnames(en.(fn{ifn}));
+              tmp=en.(fn{ifn});
+              en.(fn{ifn})=en.(en.(fn{ifn}).Class);
+              for iclfd=1:length(clfd)
+                if ~strcmp(clfd{iclfd},'Class')
+                  en.(fn{ifn}).(clfd{iclfd}) = tmp.(clfd{iclfd}) ;
+                end
+              end
+              continue
+            end
+            warning('Lucretia:DeckTool:ParseUnknownClass','Found an unknown Class names when parsing elements: %s, treating %s as drift or marker',en.(fn{ifn}).Class,fn{ifn});
+            L=obj.collectPar(en.(fn{ifn}),'l');
+            if L>0
+              en.(fn{ifn}).LucretiaElement = DrifStruc( L, fn{ifn} ) ;
+            else
+              en.(fn{ifn}).LucretiaElement = MarkerStruc( fn{ifn} ) ;
+            end
+        end
+        ifn=ifn+1;
+      end
+      % Parse beamline
+      if isempty(lines)
+        error('No beamlines found!')
+      end
+      lnames=fieldnames(lines);
+      if ~ismember(linename,lnames) && ~any(ismember(lnames,uselist))
+        error('No defined line to use')
+      end
+      % - expand all lines
+      hasexpanded=false; firstcall=true;
+      while hasexpanded || firstcall
+        firstcall=false; hasexpanded=false;
+        for iline=1:length(lnames)
+          newline={}; dorev=[]; newlineind=[];
+          for iele=1:length(lines.(lnames{iline}))
+            elestr=char(lines.(lnames{iline})(iele));
+            if elestr(1)=='-' && ismember(elestr(2:end),lnames)
+              dorev(end+1)=true;
+              newline{end+1}=elestr(2:end);
+              newlineind(end+1)=iele;
+            elseif ismember(elestr,lnames)
+              dorev(end+1)=false;
+              newline{end+1}=elestr;
+              newlineind(end+1)=iele;
+            end
+          end
+          if ~isempty(newline)
+            hasexpanded=true;
+            if ~ismember(newline{1},lnames)
+              error('Line name %s not found',newline{1})
+            end
+            if newlineind(1)==1
+              if dorev(1)
+                exline=lines.(newline{1})(end:-1:1);
+              else
+                exline=lines.(newline{1});
+              end
+            else
+              exline=lines.(lnames{iline})(1:newlineind(1)-1);
+              if dorev(1)
+                exline=[exline; lines.(newline{1})(end:-1:1)];
+              else
+                exline=[exline; lines.(newline{1})];
+              end
+            end
+            if length(newline)>1
+              for inewline=2:length(newline)
+                if ~ismember(newline{inewline},lnames)
+                  error('Line name %s not found',newline{inewline})
+                end
+                if newlineind(inewline)-1 >= newlineind(inewline-1)+1
+                  exline=[exline; lines.(lnames{iline})(newlineind(inewline-1)+1:newlineind(inewline)-1)];
+                end
+                if dorev(inewline)
+                  exline=[exline; lines.(newline{inewline})(end:-1:1)];
+                else
+                  exline=[exline; lines.(newline{inewline})];
+                end
+              end
+            end
+            if newlineind(end)<length(lines.(lnames{iline}))
+              exline=[exline; lines.(lnames{iline})(newlineind(end)+1:end)];
+            end
+            lines.(lnames{iline})=exline;
+          end
+        end
+      end
+      % Form BEAMLINE from chosen line
+      if ismember(linename,lnames)
+        line=lines.(linename);
+      else
+        linesel=find(ismember(lnames,uselist));
+        line=lines.(lnames{linesel(end)});
+      end
+      BEAMLINE={};
+      for iline=1:length(line)
+        % Check for repeated element command
+        if ~isempty(regexp(char(line(iline)),'\d\*', 'once'))
+          nrep=double(string(regexp(line(iline),'(\d+)\*','tokens','once')));
+          line(iline)=regexprep(line(iline),'\d+\*','');
+        else
+          nrep=1;
+        end
+        if ~isfield(en,char(line(iline)))
+          error('Line element not found: %s',line{iline})
+        end
+        if ~isfield(en.(char(line(iline))),'LucretiaElement') && string(en.(char(line(iline))).Class)~="line"
+          error('Error passing Element: %s',line(iline))
+        end
+        for irep=1:nrep
+          if string(en.(char(line(iline))).Class)=="line"
+            for il=1:length(lines.(char(line(iline))))
+              BEAMLINE{end+1,1}=en.(lines.(char(line(iline))){il}).LucretiaElement;
+              BEAMLINE{end}.Name=upper(BEAMLINE{end}.Name);
+            end
+          else
+            BEAMLINE{end+1,1}=en.(char(line(iline))).LucretiaElement;
+            BEAMLINE{end}.Name=upper(BEAMLINE{end}.Name);
+          end
+        end
+      end
+      % Set correct B fields for chosen beam and lattice energy
+      P=Initial.Momentum;
+      Cb=1e9/2.99792458e8;       % rigidity conversion (T-m/GeV)
+      for iele=1:length(BEAMLINE)
+        if isfield(BEAMLINE{iele},'P')
+          BEAMLINE{iele}.P=P;
+        end
+        if isfield(BEAMLINE{iele},'B') % Bfield stored as KL up to now, multiply by Brho to put in Lucretia units
+          BEAMLINE{iele}.B=BEAMLINE{iele}.B.*(Cb*P);
+        end
+        if ismember(BEAMLINE{iele}.Class,{'LCAV','TCAV'})
+          BEAMLINE{iele}.Egain=BEAMLINE{iele}.Volt * cosd(BEAMLINE{iele}.Phase) - BEAMLINE{iele}.L * Initial.Q * BEAMLINE{iele}.Kloss*1e-6 ;
+          P=P+BEAMLINE{iele}.Egain*1e-3;
+        end
+      end
+    end
     function SetProps(obj)
       global BEAMLINE
       classList=properties(obj);
@@ -1809,16 +2865,19 @@ classdef DeckTool < handle
       grp.W={'TMAP'};
       grp.R={'TMAP'};
       grp.Change={'COORD'};
-      grp.Freq={'LCAV'};
-      grp.Kloss={'LCAV'};
-      grp.Phase={'LCAV'};
-      grp.Volt={'LCAV'};
+      grp.Freq={'LCAV' 'TCAV'};
+      grp.Kloss={'LCAV' 'TCAV'};
+      grp.Phase={'LCAV' 'TCAV'};
+      grp.Volt={'LCAV' 'TCAV'};
       grp.FINT={'SBEN'};
       grp.HGAP={'SBEN'};
       grp.EdgeCurvature={'SBEN'};
       grp.EdgeAngle={'SBEN'};
-      grp.P={'LCAV'};
-      grp.aper={'QUAD' 'SEXT' 'OCTU' 'MULT' 'SOLENOID' 'LCAV' 'COLL'};
+      grp.P={'LCAV' 'TCAV'};
+      grp.aper={'QUAD' 'SEXT' 'OCTU' 'MULT' 'SOLENOID' 'LCAV' 'COLL'  'TCAV'};
+      grp.ISR={'SBEN'};
+      grp.LSC={'LCAV' 'DRIF'};
+      grp.CSR={'SBEN' 'DRIF'};
       grpList=fieldnames(grp);
       for iclass=1:length(classList)
         obj.(classList{iclass})=[];
@@ -1829,7 +2888,18 @@ classdef DeckTool < handle
             obj.(classList{iclass}).index(iele)=eleList(iele);
             for igrp=1:length(grpList)
               if ismember(classList{iclass},grp.(grpList{igrp}))
-                obj.(classList{iclass}).(grpList{igrp}){iele}=BEAMLINE{eleList(iele)}.(grpList{igrp});
+                try
+                  if ismember(grpList{igrp},{'CSR','LSC','ISR'})
+                    if isfield(BEAMLINE{eleList(iele)},'TrackFlag') && isfield(BEAMLINE{eleList(iele)}.TrackFlag,grpList{igrp})
+                      obj.(classList{iclass}).(grpList{igrp}){iele}=BEAMLINE{eleList(iele)}.TrackFlag.(grpList{igrp});
+                    else
+                      obj.(classList{iclass}).(grpList{igrp}){iele}=0;
+                    end
+                  else
+                    obj.(classList{iclass}).(grpList{igrp}){iele}=BEAMLINE{eleList(iele)}.(grpList{igrp});
+                  end
+                catch
+                end
               end
             end
           end
@@ -1838,6 +2908,314 @@ classdef DeckTool < handle
     end
   end
   methods
+    function WriteSpreadsheet(obj,filename,boreoffset)
+      %WRITESPREADSHEET generate master spreadsheet for BEAMLINE lattice, including separate sheet for each Class of elements
+      %WriteSpreadsheet(filename [,boreoffset,spotsize,regionID])
+      % boreoffset : added distance to physical bore aperture (e.g. including beam pipe wall thickness), default = 0
+      % regionID : Structure with region names as field names, each region has 'id1' and 'id2' fields with BEAMLINE indices defining region of BEAMLINE array
+      global BEAMLINE PS GIRDER WF SECTION RACK PPS
+      if exist(filename,'file'); delete(filename); end
+      BL0=BEAMLINE; PS0=PS; GIR0=GIRDER; WF0=WF;
+      if ~exist('boreoffset','var') || isempty(boreoffset)
+        boreoffset=0;
+      end
+      % - All Sheet
+      id = 1:length(BEAMLINE) ;
+      nod = ~ismember(id,findcells(BEAMLINE,'Class','DRIF'));
+      id = id(nod) ;
+      names = arrayfun(@(x) BEAMLINE{x}.Name,id,'UniformOutput',false);
+      itid = findcells(BEAMLINE,'Type') ; tid=ismember(id,itid) ;
+      types = repmat("UNKNOWN",length(id),1) ;
+      types(tid) = arrayfun(@(x) string(BEAMLINE{x}.Type),id(tid));
+      L = zeros(length(id),1) ;
+      iLid = findcells(BEAMLINE,'L') ; Lid=ismember(id,iLid) ;
+      L(Lid) = arrayfun(@(x) BEAMLINE{x}.L,id(Lid));
+      P = arrayfun(@(x) BEAMLINE{x}.P,id);
+      S = arrayfun(@(x) BEAMLINE{x}.S,id);
+      Xi = arrayfun(@(x) BEAMLINE{x}.Coordi(1),id);
+      Yi = arrayfun(@(x) BEAMLINE{x}.Coordi(2),id);
+      Zi = arrayfun(@(x) BEAMLINE{x}.Coordi(3),id);
+      Xf = arrayfun(@(x) BEAMLINE{x}.Coordf(1),id);
+      Yf = arrayfun(@(x) BEAMLINE{x}.Coordf(2),id);
+      Zf = arrayfun(@(x) BEAMLINE{x}.Coordf(3),id);
+      XPi = arrayfun(@(x) BEAMLINE{x}.Anglei(1),id);
+      YPi = arrayfun(@(x) BEAMLINE{x}.Anglei(2),id);
+      ZPi = arrayfun(@(x) BEAMLINE{x}.Anglei(3),id);
+      XPf = arrayfun(@(x) BEAMLINE{x}.Anglef(1),id);
+      YPf = arrayfun(@(x) BEAMLINE{x}.Anglef(2),id);
+      ZPf = arrayfun(@(x) BEAMLINE{x}.Anglef(3),id);
+      k0 = zeros(1,length(id));
+      k1 = k0 ;
+      tilt= k0 ;
+      E1 = k0 ;
+      E2 = k0 ;
+      aper_x = k0 ;
+      aper_y = k0 ;
+      girid = k0 ;
+      psid = cell(1,length(k0)) ;
+      klyid = k0 ;
+      isB = arrayfun(@(x) string(BEAMLINE{x}.Class)=="SBEN",id) ;
+      k0(isB) = arrayfun(@(x) BEAMLINE{x}.B(1),id(isB)) ./ arrayfun(@(x) BEAMLINE{x}.L,id(isB)) ./ arrayfun(@(x) BEAMLINE{x}.P,id(isB)) ./ 3.335640952 ;
+      isB = isB(arrayfun(@(x) length(BEAMLINE{x}.B)>1,id(isB))) ;
+      k1(isB) = arrayfun(@(x) BEAMLINE{x}.B(2),id(isB)) ./ arrayfun(@(x) BEAMLINE{x}.L,id(isB)) ./ arrayfun(@(x) BEAMLINE{x}.P,id(isB)) ./ 3.335640952 ;
+      isB = arrayfun(@(x) string(BEAMLINE{x}.Class)=="QUAD",id) ;
+      k1(isB) = arrayfun(@(x) BEAMLINE{x}.B,id(isB)) ./ arrayfun(@(x) BEAMLINE{x}.L,id(isB)) ./ arrayfun(@(x) BEAMLINE{x}.P,id(isB)) ./ 3.335640952 ;
+      sel = arrayfun(@(x) isfield(BEAMLINE{x},'Tilt'),id) ;
+      tilt(sel) = arrayfun(@(x) BEAMLINE{x}.Tilt,id(sel)) ;
+      sel = arrayfun(@(x) isfield(BEAMLINE{x},'EdgeAngle'),id ) ;
+      E1(sel) = arrayfun(@(x) BEAMLINE{x}.EdgeAngle(1),id(sel)) ;
+      E2(sel) = arrayfun(@(x) BEAMLINE{x}.EdgeAngle(end),id(sel)) ;
+      sel = arrayfun(@(x) isfield(BEAMLINE{x},'aper'),id) ;
+      aper_x(sel) = arrayfun(@(x) BEAMLINE{x}.aper(1),id(sel)) ;
+      aper_y(sel) = arrayfun(@(x) BEAMLINE{x}.aper(end),id(sel)) ;
+      sel = arrayfun(@(x) isfield(BEAMLINE{x},'HGAP'),id) ;
+      aper_x(sel) = arrayfun(@(x) BEAMLINE{x}.HGAP(1),id(sel)) ;
+      aper_y(sel) = arrayfun(@(x) BEAMLINE{x}.HGAP(end),id(sel)) ;
+      classes = arrayfun(@(x) BEAMLINE{x}.Class,id,'UniformOutput',false) ;
+      sel = arrayfun(@(x) isfield(BEAMLINE{x},'Girder'),id ) ;
+      girid(sel) = arrayfun(@(x) BEAMLINE{x}.Girder,id(sel)) ;
+      sel = arrayfun(@(x) isfield(BEAMLINE{x},'PS'),id ) ;
+      psid(sel) = arrayfun(@(x) BEAMLINE{x}.PS,id(sel),'UniformOutput',false) ;
+      sel = arrayfun(@(x) isfield(BEAMLINE{x},'Klystron'),id ) & arrayfun(@(x) strcmp(BEAMLINE{x}.Class,'LCAV'),id ) ;
+      klyid(sel) = arrayfun(@(x) BEAMLINE{x}.Klystron,id(sel)) ;
+      sections=string([]);
+      for iele=id
+        if ~isfield(BEAMLINE{iele},'Section') || isempty(BEAMLINE{iele}.Section) || ~BEAMLINE{iele}.Section
+          sections(end+1)="---";
+        else
+          sections(end+1)=SECTION(BEAMLINE{iele}.Section).Name;
+        end
+      end
+      sections=sections';
+      pps=string([]);
+      for iele=id
+        if ~isfield(BEAMLINE{iele},'PPS') || isempty(BEAMLINE{iele}.PPS) || ~BEAMLINE{iele}.PPS
+          pps(end+1)="---";
+        else
+          pps(end+1)=PPS(BEAMLINE{iele}.PPS).Name;
+        end
+      end
+      pps=pps';
+      racks=string([]);
+      for iele=id
+        if ~isfield(BEAMLINE{iele},'RACK') || isempty(BEAMLINE{iele}.RACK) || ~BEAMLINE{iele}.RACK
+          racks(end+1)="---";
+        else
+          racks(end+1)=RACK(BEAMLINE{iele}.RACK).Name;
+        end
+      end
+      racks=racks';
+      girid=girid';
+      psid=psid';
+      klyid=klyid';
+      T=table(id(:),names(:),sections(:),pps(:),racks(:), girid(:), classes(:), types(:),L(:),P(:),S(:),Xi(:),Yi(:),Zi(:),XPi(:),YPi(:),ZPi(:),Xf(:),Yf(:),Zf(:),XPf(:),YPf(:),ZPf(:),k0(:),k1(:),tilt(:),E1(:),E2(:),aper_x(:),aper_y(:),'VariableNames',...
+        {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID'; 'Class'; 'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]';'k0';'k1';'Tilt [rad]';'E1';'E2';'X Aper [m]';'Y Aper [m]'}) ;
+      writetable(T,filename,'Sheet','All');
+      % - COLL Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','COLL')) ;
+      if any(sid)
+        geom = arrayfun(@(x) BEAMLINE{x}.Geometry,id(sid),'UniformOutput',false) ;
+        xgap = arrayfun(@(x) BEAMLINE{x}.aper(1),id(sid));
+        ygap = arrayfun(@(x) BEAMLINE{x}.aper(2),id(sid));
+        xoff = arrayfun(@(x) BEAMLINE{x}.Offset(1),id(sid));
+        yoff = arrayfun(@(x) BEAMLINE{x}.Offset(3),id(sid));
+        T_COLL=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),types(sid),L(sid),P(sid)',S(sid)',geom(:),xgap(:),ygap(:),xoff(:),yoff(:),Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',Xf(sid)',Yf(sid)',Zf(sid)',XPf(sid)',YPf(sid)',ZPf(sid)','VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID'; 'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'Geometry';'X Gap [m]';'Y Gap [m]';'X Offset [m]';'Y Offset [m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+      end
+      % - COR Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','*COR')) ;
+      if any(sid)
+        dim = repmat("X",sum(sid),1) ;
+        dim(ismember(id(sid),findcells(BEAMLINE,'Class','YCOR'))) = 'Y' ;
+        dim(ismember(id(sid),findcells(BEAMLINE,'Class','XYCOR'))) = 'XY' ;
+        tilt = rad2deg(arrayfun(@(x) BEAMLINE{x}.Tilt,id(sid))) ;
+        T_COR=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),psid(sid),types(sid),L(sid),P(sid)',S(sid)',dim(:),tilt(:),Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',Xf(sid)',Yf(sid)',Zf(sid)',XPf(sid)',YPf(sid)',ZPf(sid)','VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID'; 'PS ID'; 'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'Dimension';'Tilt [deg]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+      end
+      % - BPM Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','MONI')) ;
+      if any(sid)
+        T_MONI=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),types(sid),L(sid),P(sid)',S(sid)',Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',Xf(sid)',Yf(sid)',Zf(sid)',XPf(sid)',YPf(sid)',ZPf(sid)','VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID'; 'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+      end
+      % - WIRE Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','WIRE')) ;
+      if any(sid)
+        T_WIRE=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),types(sid),L(sid),P(sid)',S(sid)',Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',Xf(sid)',Yf(sid)',Zf(sid)',XPf(sid)',YPf(sid)',ZPf(sid)','VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID';'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+      end
+      % - PROF Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','PROF')) ;
+      if any(sid)
+        T_PROF=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),types(sid),L(sid),P(sid)',S(sid)',Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',Xf(sid)',Yf(sid)',Zf(sid)',XPf(sid)',YPf(sid)',ZPf(sid)','VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID';'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+      end
+      % - IMON Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','IMON')) ;
+      if any(sid)
+        T_IMON=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),types(sid),L(sid),P(sid)',S(sid)',Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',Xf(sid)',Yf(sid)',Zf(sid)',XPf(sid)',YPf(sid)',ZPf(sid)','VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID';'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+      end
+      % - BLMO Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','BLMO')) ;
+      if any(sid)
+        T_BLMO=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),types(sid),L(sid),P(sid)',S(sid)',Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',Xf(sid)',Yf(sid)',Zf(sid)',XPf(sid)',YPf(sid)',ZPf(sid)','VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID';'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+      end
+      % - INST Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','INST')) ;
+      if any(sid)
+        T_INST=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),types(sid),L(sid),P(sid)',S(sid)',Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',Xf(sid)',Yf(sid)',Zf(sid)',XPf(sid)',YPf(sid)',ZPf(sid)','VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID';'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+      end
+      % - MARK Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','MARK')) ;
+      if any(sid)
+        T_MARK=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),types(sid),L(sid),P(sid)',S(sid)',Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',Xf(sid)',Yf(sid)',Zf(sid)',XPf(sid)',YPf(sid)',ZPf(sid)','VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girer ID';'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+      end
+      % -- Following sheets are for "Unsplit" devices
+      ids1 = ( arrayfun(@(x) isfield(BEAMLINE{x},'Slices') && x==BEAMLINE{x}.Slices(1),id) ) | arrayfun(@(x) ~isfield(BEAMLINE{x},'Slices'),id) ;
+      for iele=id(ids1)
+        if ~isfield(BEAMLINE{iele},'Slices'); BEAMLINE{iele}.Slices=iele; end
+      end
+      % - LCAV Sheet
+      sid = ismember(id,[findcells(BEAMLINE,'Class','LCAV') findcells(BEAMLINE,'Class','TCAV')]) & ids1 ;
+      if any(sid)
+        x2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(1),id(sid)) ; y2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(2),id(sid)) ; z2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(3),id(sid)) ;
+        xp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(1),id(sid)) ; yp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(2),id(sid)) ; zp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(3),id(sid)) ;
+        freq = arrayfun(@(x) BEAMLINE{x}.Freq,id(sid)) ;
+        volt = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.Volt,BEAMLINE{x}.Slices)),id(sid)) ;
+        phase = arrayfun(@(x) BEAMLINE{x}.Phase,id(sid)) ;
+        egain = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.Egain,BEAMLINE{x}.Slices)), id(sid)) ;
+        kloss = arrayfun(@(x) BEAMLINE{x}.Kloss,id(sid)) ;
+        L_this = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.L,BEAMLINE{x}.Slices)),id(sid)) ;
+        T_LCAV=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),klyid(sid),types(sid),L_this(:),P(sid)',S(sid)',freq(:),volt(:),phase(:),egain(:),kloss(:),Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',x2(:),y2(:),z2(:),xp2(:),yp2(:),zp2(:),'VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID';'Klystron ID'; 'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'Freq [MHz]';'Voltage [MV]';'Phase [deg]';'EGAIN [MV]';'Kloss [V/C/m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+        writetable(T_LCAV,filename,'Sheet','LCAV');
+      end
+      % - SBEN Sheet
+      sid=ismember(id,findcells(BEAMLINE,'Class','SBEN')) & ids1 ;
+      if any(sid)
+        Zlen = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(3),id(sid)) - arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(1)}.Coordi(3),id(sid)) ;
+        x2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(1),id(sid)) ; y2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(2),id(sid)) ; z2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(3),id(sid)) ;
+        xp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(1),id(sid)) ; yp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(2),id(sid)) ; zp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(3),id(sid)) ;
+        gap = arrayfun(@(x) max(BEAMLINE{x}.HGAP),id(sid)) ;
+        fint = arrayfun(@(x) max(BEAMLINE{x}.FINT),id(sid)) ;
+        tilt = rad2deg(arrayfun(@(x) BEAMLINE{x}.Tilt,id(sid))) ;
+        ang = rad2deg(arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.Angle,BEAMLINE{x}.Slices)),id(sid))) ;
+        e1 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(1)}.EdgeCurvature(1),id(sid)) ;
+        e2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.EdgeCurvature(2),id(sid)) ;
+        BL = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.B(1),BEAMLINE{x}.Slices)),id(sid)) ;
+        B = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.B(1)/BEAMLINE{xx}.L,BEAMLINE{x}.Slices)),id(sid)) ;
+        L_this = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.L,BEAMLINE{x}.Slices)),id(sid)) ;
+        names_this = names(sid) ; names_this = regexprep(names_this,'(A|B)$','') ;
+        n=0; K1=zeros(1,sum(sid)); g=K1; gl=K1;
+        for iele=id(sid)
+          n=n+1;
+          if isscalar(BEAMLINE{iele}.B)
+            K1(n) = 0 ;
+            g(n) = 0 ;
+            gl(n) = 0 ;
+          else
+            Brho=physConsts.clight./(BEAMLINE{iele}.P*1e9);
+            K1(n) = Brho * ( sum(arrayfun(@(x) BEAMLINE{x}.B(2) / BEAMLINE{x}.L,BEAMLINE{iele}.Slices)) ) ;
+            gl(n) = sum(arrayfun(@(x) BEAMLINE{x}.B(2),BEAMLINE{iele}.Slices)) ;
+            g(n) = gl(n) / sum(arrayfun(@(x) BEAMLINE{x}.L,BEAMLINE{iele}.Slices)) ;
+          end
+        end
+        T_SBEN=table(id(sid)',names_this(:),sections(sid),pps(sid),racks(sid),girid(sid),psid(sid),types(sid),L_this(:),P(sid)',S(sid)',Zlen(:),gap(:),fint(:),tilt(:),ang(:),e1(:),e2(:),BL(:),B(:),K1(:),gl(:),g(:),Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',x2(:),y2(:),z2(:),xp2(:),yp2(:),zp2(:),'VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID'; 'PS ID'; 'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'Z Length [m]';'Gap [m]';'Field Integral';'Tilt [deg]';'Bend Angle [deg]';'E1 [deg]';'E2 [deg]';'BL [T.m]';'B [T]';'K1 [1/m^2]';'GL [T]';'G [T/m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+        writetable(T_SBEN,filename,'Sheet','SBEN');
+      end
+      % - QUAD Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','QUAD')) & ids1 ;
+      if any(sid)
+        L_this = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.L,BEAMLINE{x}.Slices)),id(sid)) ;
+        x2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(1),id(sid)) ; y2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(2),id(sid)) ; z2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(3),id(sid)) ;
+        xp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(1),id(sid)) ; yp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(2),id(sid)) ; zp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(3),id(sid)) ;
+        bore = arrayfun(@(x) max(BEAMLINE{x}.aper),id(sid)) + boreoffset ;
+        tilt = rad2deg(arrayfun(@(x) BEAMLINE{x}.Tilt,id(sid))) ;
+        Brho = physConsts.clight./(arrayfun(@(x) BEAMLINE{x}.P,id(sid)).*1e9);
+        g = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.B/BEAMLINE{xx}.L,BEAMLINE{x}.Slices)),id(sid)) ;
+        gl = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.B,BEAMLINE{x}.Slices)),id(sid)) ;
+        K1 = Brho .* gl ;
+        T_QUAD=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),psid(sid),types(sid),L_this(:),P(sid)',S(sid)',bore(:),tilt(:),K1(:),gl(:),g(:),Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',x2(:),y2(:),z2(:),xp2(:),yp2(:),zp2(:),'VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID'; 'PS ID'; 'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'Bore [m]';'Tilt [deg]';'K1 [1/m^2]';'GL [T]';'G [T/m]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+        writetable(T_QUAD,filename,'Sheet','QUAD');
+      end
+      % - SEXT Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','SEXT')) & ids1 ;
+      if any(sid)
+        L_this = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.L,BEAMLINE{x}.Slices)),id(sid)) ;
+        x2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(1),id(sid)) ; y2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(2),id(sid)) ; z2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(3),id(sid)) ;
+        xp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(1),id(sid)) ; yp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(2),id(sid)) ; zp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(3),id(sid)) ;
+        bore = arrayfun(@(x) max(BEAMLINE{x}.aper),id(sid)) + boreoffset ;
+        tilt = rad2deg(arrayfun(@(x) BEAMLINE{x}.Tilt,id(sid))) ;
+        Brho = physConsts.clight./(arrayfun(@(x) BEAMLINE{x}.P,id(sid)).*1e9);
+        g = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.B/BEAMLINE{xx}.L,BEAMLINE{x}.Slices)),id(sid)) ;
+        gl = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.B,BEAMLINE{x}.Slices)),id(sid)) ;
+        K2 = 0.5 .* Brho .* gl ;
+        T_SEXT=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),psid(sid),types(sid),L_this(:),P(sid)',S(sid)',bore(:),tilt(:),K2(:),gl(:),g(:),Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',x2(:),y2(:),z2(:),xp2(:),yp2(:),zp2(:),'VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID';'PS ID';'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'Bore [m]';'Tilt [deg]';'K2 [1/m^3]';'G''L [T/m]';'G'' [T/m^2]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+        writetable(T_SEXT,filename,'Sheet','SEXT');
+      end
+      % - SOLENOID Sheet
+      sid = ismember(id,findcells(BEAMLINE,'Class','SOLENOID')) & ids1 ;
+      if any(sid)
+        L_this = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.L,BEAMLINE{x}.Slices)),id(sid)) ;
+        x2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(1),id(sid)) ; y2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(2),id(sid)) ; z2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Coordf(3),id(sid)) ;
+        xp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(1),id(sid)) ; yp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(2),id(sid)) ; zp2 = arrayfun(@(x) BEAMLINE{BEAMLINE{x}.Slices(end)}.Anglef(3),id(sid)) ;
+        g = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.B/BEAMLINE{xx}.L,BEAMLINE{x}.Slices)),id(sid)) ;
+        gl = arrayfun(@(x) sum(arrayfun(@(xx) BEAMLINE{xx}.B,BEAMLINE{x}.Slices)),id(sid)) ;
+        Brho = physConsts.clight./(arrayfun(@(x) BEAMLINE{x}.P,id(sid)).*1e9);
+        KS = 0.5 .* Brho .* gl ;
+        T_SOL=table(id(sid)',names(sid)',sections(sid),pps(sid),racks(sid),girid(sid),psid(sid),types(sid),L_this(:),P(sid)',S(sid)',KS(:),gl(:),g(:),Xi(sid)',Yi(sid)',Zi(sid)',XPi(sid)',YPi(sid)',ZPi(sid)',x2(:),y2(:),z2(:),xp2(:),yp2(:),zp2(:),'VariableNames',...
+          {'Model ID'; 'Model Name'; 'Section Name'; 'PPS Zone'; 'RACK Zone'; 'Girder ID';'PS ID';'Engineering Type';'Path Length [m]';'E [GeV]';'S [m]';'KS [1/m]';'BL [T/m]';'B'' [T]';'X Coord (init) [m]';'Y Coord (init) [m]';'Z Coord (init) [m]';'X Angle (init) [rad]';'Y Angle (init) [rad]';'Z Angle (init) [rad]';'X Coord (fin) [m]';'Y Coord (fin) [m]';'Z Coord (fin) [m]';'X Angle (fin) [rad]';'Y Angle (fin) [rad]';'Z Angle (fin) [rad]'}) ;
+        writetable(T_SOL,filename,'Sheet','SOLENOID');
+      end
+      % - Type Sheet
+      ttab = obj.MagnetTypeData ;
+      % -- Write out other table sheets
+      if exist('T_COLL','var'); writetable(T_COLL,filename,'Sheet','COLL'); end
+      if exist('T_COR','var'); writetable(T_COR,filename,'Sheet','COR'); end
+      if exist('T_MONI','var'); writetable(T_MONI,filename,'Sheet','MONI'); end
+      if exist('T_WIRE','var'); writetable(T_WIRE,filename,'Sheet','WIRE'); end
+      if exist('T_PROF','var'); writetable(T_PROF,filename,'Sheet','PROF'); end
+      if exist('T_IMON','var'); writetable(T_IMON,filename,'Sheet','IMON'); end
+      if exist('T_BLMO','var'); writetable(T_BLMO,filename,'Sheet','BLMO'); end
+      if exist('T_INST','var'); writetable(T_INST,filename,'Sheet','INST'); end
+      if exist('T_MARK','var'); writetable(T_MARK,filename,'Sheet','MARK'); end
+      if ~isempty(ttab); writetable(ttab,filename,'Sheet','MagnetTypes'); end
+      % - "Cube Farm" sheet (list of each physical device and it's center location)
+      TypeList = ["T_QUAD" "T_SEXT" "T_LCAV" "T_SOL" "T_COLL" "T_COR" "T_MONI" "T_WIRE" "T_PROF" "T_IMON" "T_BLMO" "T_INST" "T_MARK"] ;
+      X_cent=zeros(0,3); mid=[]; mname=[]; X_ang=X_cent; snam=[];
+      for itype=1:length(TypeList)
+        if ~exist(TypeList(itype),'var'); continue; end
+        evalc(sprintf("T=%s",TypeList(itype))) ;
+        xc =  ([T.("X Coord (init) [m]") T.("Y Coord (init) [m]") T.("Z Coord (init) [m]")] + [T.("X Coord (fin) [m]") T.("Y Coord (fin) [m]") T.("Z Coord (fin) [m]")]) ./ 2 ;
+        X_cent = [X_cent;xc] ;
+        xa = [T.("X Angle (init) [rad]") T.("Y Angle (init) [rad]") T.("Z Angle (init) [rad]")] ;
+        X_ang = [X_ang; xa] ;
+        mid = [mid; T.("Model ID")]; mname=[mname;T.("Model Name")]; snam=[snam;T.("Section Name")];
+      end
+      for iben=1:height(T_SBEN)
+        id1 = BEAMLINE{T_SBEN{iben,"Model ID"}}.Slices(1) ;
+        mid = [mid; id1] ; mname=[mname;T_SBEN{iben,"Model Name"}]; snam=[snam;T_SBEN{iben,"Section Name"}];
+        X_cent = [X_cent;BEAMLINE{id1}.Coordf] ;
+        xa = BEAMLINE{id1}.Anglei;
+        if BEAMLINE{id1}.Tilt==0
+          xa(1)=xa(1)+BEAMLINE{id1}.EdgeAngle(1) ;
+        else
+          xa(2)=xa(2)+BEAMLINE{id1}.EdgeAngle(1) ;
+        end
+        X_ang = [X_ang; xa] ;
+      end
+      T_CUBE = table(mid,mname,snam,X_cent(:,1),X_cent(:,2),X_cent(:,3),X_ang(:,1),X_ang(:,2),X_ang(:,3),'VariableNames', {'Model ID'; 'Model Name'; 'Section Name'; 'X Coord (center) [m]'; 'Y Coord (center) [m]'; 'Z Coord (center) [m]'; 'X Angle (center) [m]'; 'Y Angle (center) [m]'; 'Z Angle (center) [m]' } ) ;
+      
+      writetable(T_CUBE,filename,'Sheet','AllGeom'); 
+      BEAMLINE=BL0; PS=PS0; GIRDER=GIR0; WF=WF0;
+    end
     function restoreLucretiaData(obj)
       % Restore original Lucretia data structures
       global BEAMLINE PS GIRDER
@@ -1847,7 +3225,7 @@ classdef DeckTool < handle
       obj.SetProps();
     end
     function splitMags(obj)
-      global BEAMLINE PS
+      global BEAMLINE PS GIRDER
       splitClass={'QUAD' 'SEXT' 'OCTU' 'MULT' 'SBEN' 'SOLENOID' 'XCOR' 'YCOR'};
       if obj.doSplitDrifts
         splitClass{end+1}='DRIF';
@@ -1856,7 +3234,7 @@ classdef DeckTool < handle
       while ibl<length(BEAMLINE)
         ibl=ibl+1;
         % Only split magnets which aren't already split
-        if ismember(BEAMLINE{ibl}.Class,splitClass) && (~isfield(BEAMLINE{ibl},'Slices') || length(BEAMLINE{ibl}.Slices)==1)
+        if ismember(BEAMLINE{ibl}.Class,splitClass) && (~isfield(BEAMLINE{ibl},'Slices') || isscalar(BEAMLINE{ibl}.Slices))
           if isfield(BEAMLINE{ibl},'B')
             BEAMLINE{ibl}.B=BEAMLINE{ibl}.B./2;
           end
@@ -1866,19 +3244,22 @@ classdef DeckTool < handle
           end
           if strcmp(BEAMLINE{ibl}.Class,'SBEN')
             BEAMLINE{ibl}.Angle=BEAMLINE{ibl}.Angle/2;
-            if length(BEAMLINE{ibl}.EdgeAngle)==1
+            if isscalar(BEAMLINE{ibl}.EdgeAngle)
               BEAMLINE{ibl}.EdgeAngle=[BEAMLINE{ibl}.EdgeAngle BEAMLINE{ibl}.EdgeAngle];
             end
-            if length(BEAMLINE{ibl}.EdgeCurvature)==1
+            if isscalar(BEAMLINE{ibl}.EdgeCurvature)
               BEAMLINE{ibl}.EdgeCurvature=[BEAMLINE{ibl}.EdgeCurvature BEAMLINE{ibl}.EdgeCurvature];
             end
-            if length(BEAMLINE{ibl}.FINT)==1
+            if isscalar(BEAMLINE{ibl}.FINT)
               BEAMLINE{ibl}.FINT=[BEAMLINE{ibl}.FINT BEAMLINE{ibl}.FINT];
             end
           end
           BEAMLINE=[BEAMLINE(1:ibl); BEAMLINE(ibl); BEAMLINE(ibl+1:end)];
           if isfield(BEAMLINE{ibl},'PS') && BEAMLINE{ibl}.PS>0
-            PS(BEAMLINE{ibl}.PS).Element=[ibl ibl+1];
+            PS(BEAMLINE{ibl}.PS).Element=[PS(BEAMLINE{ibl}.PS).Element ibl+1];
+          end
+          if isfield(BEAMLINE{ibl},'Girder') && BEAMLINE{ibl}.Girder
+            GIRDER{BEAMLINE{ibl}.Girder}.Element=[GIRDER{BEAMLINE{ibl}.Girder}.Element ibl+1];
           end
           BEAMLINE{ibl}.Slices=[ibl ibl+1]; BEAMLINE{ibl+1}.Slices=[ibl ibl+1];
           if strcmp(BEAMLINE{ibl}.Class,'SBEN')
@@ -1912,7 +3293,9 @@ classdef DeckTool < handle
       for ibl=1:length(BEAMLINE)
         if isfield(BEAMLINE{ibl},'Slices') && ismember(BEAMLINE{ibl}.Class,splitClass)
           sliceind=BEAMLINE{ibl}.Slices;
-          BEAMLINE{ibl}.B = sum(arrayfun(@(x) BEAMLINE{x}.B,sliceind)) ;
+          for ib=1:length(BEAMLINE{ibl}.B)
+            BEAMLINE{ibl}.B(ib) = sum(arrayfun(@(x) BEAMLINE{x}.B(ib),sliceind)) ;
+          end
           BEAMLINE{ibl}.L = sum(arrayfun(@(x) BEAMLINE{x}.L,sliceind)) ;
           if isfield(BEAMLINE{ibl},'Lrad')
             BEAMLINE{ibl}.Lrad = sum(arrayfun(@(x) BEAMLINE{x}.Lrad,sliceind)) ;
@@ -1930,16 +3313,16 @@ classdef DeckTool < handle
             end
           end
           BEAMLINE{ibl}=rmfield(BEAMLINE{ibl},'Slices');
-          if isfield(BEAMLINE{ibl},'PS') && BEAMLINE{ibl}.PS
-            PS(BEAMLINE{ibl}.PS).Element=ibl;
-          end
-          if isfield(BEAMLINE{ibl},'Girder') && BEAMLINE{ibl}.Girder
-            GIRDER(BEAMLINE{ibl}.Girder).Element=ibl;
-          end
           rmele=[rmele sliceind(2:end)];
         end
       end
       BEAMLINE(rmele)=[];
+      for ips=1:length(PS)
+        PS(ips).Element=PS(ips).Element(~ismember(PS(ips).Element,rmele));
+      end
+      for igir=1:length(GIRDER)
+        GIRDER{igir}.Element=GIRDER{igir}.Element(~ismember(GIRDER{igir}.Element,rmele));
+      end
       SetElementBlocks(1,length(BEAMLINE));
       SetElementSlices(1,length(BEAMLINE));
       SetSPositions(1,length(BEAMLINE),BEAMLINE{1}.S);
@@ -1950,37 +3333,6 @@ classdef DeckTool < handle
     end
   end
   methods(Static)
-    function WriteSpreadsheet()
-      global BEAMLINE
-      qele=findcells(BEAMLINE,'Class','QUAD');
-      Name={}; g=[]; L=[]; PMOD=[]; k=[]; aper_x=[]; aper_y=[]; type={};
-      clight=2.99792458e8; % speed of light (m/sec)
-      Cb=1e9/clight;       % rigidity conversion (T-m/GeV)
-      for iele=qele
-        if isfield(BEAMLINE{iele},'Slices') && length(BEAMLINE{iele}.Slices)>1 && iele~=BEAMLINE{iele}.Slices(1)
-          continue
-        end
-        PMOD(end+1)=BEAMLINE{iele}.P;
-        g(end+1)=GetTrueStrength(iele,1);
-        if isfield(BEAMLINE{iele},'Slices') && length(BEAMLINE{iele}.Slices)>1
-          L(end+1)=sum(arrayfun(@(x) BEAMLINE{x}.L,BEAMLINE{iele}.Slices));
-        else
-          L(end+1)=BEAMLINE{iele}.L;
-        end
-        k(end+1)=g(end)/(Cb*BEAMLINE{iele}.P)/L(end);
-        aper_x(end+1)=BEAMLINE{iele}.aper(1);
-        if length(BEAMLINE{iele}.aper)>1
-          aper_y(end+1)=BEAMLINE{iele}.aper(2);
-        else
-          aper_y(end+1)=aper_x(end);
-        end
-        type{end+1}=BEAMLINE{iele}.Type;
-        Name{end+1}=BEAMLINE{iele}.Name;
-      end
-      T=table(Name(:),type(:),L(:),g(:),k(:),PMOD(:),aper_x(:),aper_y(:),'VariableNames',...
-        {'ModelName';'Type';'Length';'FieldGradient';'K';'P';'APER_X';'APER_Y'});
-      writetable(T,'QuadData.xls');
-    end
     function FlipLattice
       %FLIPDECK Flip the order of the BEAMLINE lattice
       global BEAMLINE GIRDER
@@ -2065,16 +3417,16 @@ classdef DeckTool < handle
           end
           if strcmp(BL.Class,'SBEN')
             BL.Angle=BL.Angle./nsplit;
-            if length(BL.EdgeAngle)==1
+            if isscalar(BL.EdgeAngle)
               BL.EdgeAngle=ones(1,2).*BL.EdgeAngle;
             end
-            if length(BL.HGAP)==1
+            if isscalar(BL.HGAP)
               BL.HGAP=ones(1,2).*BL.HGAP;
             end
-            if length(BL.FINT)==1
+            if isscalar(BL.FINT)
               BL.FINT=ones(1,2).*BL.FINT;
             end
-            if length(BL.EdgeCurvature)==1
+            if isscalar(BL.EdgeCurvature)
               BL.EdgeCurvature=ones(1,2).*BL.EdgeCurvature;
             end
           end
@@ -2095,10 +3447,10 @@ classdef DeckTool < handle
               BL.FINT=[0 0];
               BL.EdgeCurvature=[0 0];
             end
-            BL_new{end+1}=BL; %#ok<AGROW>
+            BL_new{end+1}=BL;
           end
         else
-          BL_new{end+1}=BEAMLINE{iele}; %#ok<AGROW>
+          BL_new{end+1}=BEAMLINE{iele};
         end
       end
       BEAMLINE=BL_new(:);
@@ -2115,9 +3467,81 @@ classdef DeckTool < handle
       end
       fclose(fid);
     end
+    function tab = MagnetTypeData(ind1,ind2)
+      global BEAMLINE
+      if ~exist('ind1','var')
+        ind1=1; ind2=length(BEAMLINE);
+      end
+      SetElementSlices(ind1,ind2);
+      mele=findcells(BEAMLINE,'B',[],ind1,ind2);
+      types=string([]); minB=[]; maxB=[]; classes=types; count=[];
+      for imag=mele
+        if ~isfield(BEAMLINE{imag},'Type')
+          BEAMLINE{imag}.Type = sprintf('UNKNOWN_%s',BEAMLINE{imag}.Class) ;
+        end
+        if isfield(BEAMLINE{imag},'Slices') && imag~=BEAMLINE{imag}.Slices(end)
+          continue
+        end
+        Bact = GetTrueStrength(imag,1) ;
+        if isempty(types) || ~ismember(string(BEAMLINE{imag}.Type),types)
+          types(end+1)=string(BEAMLINE{imag}.Type);
+          classes(end+1)=string(BEAMLINE{imag}.Class);
+          count(end+1)=1;
+          minB(end+1)=Bact(1); maxB(end+1)=Bact(1);
+        else
+          itype=ismember(types,string(BEAMLINE{imag}.Type));
+          count(itype)=count(itype)+1;
+          if Bact(1) < minB(itype)
+            minB(itype) = Bact(1) ;
+          elseif Bact(1) > maxB(itype)
+            maxB(itype) = Bact(1) ;
+          end
+        end
+      end
+      tab=table(types(:),classes(:),count(:),minB(:),maxB(:),'VariableNames',{'Type','Class','Count','MinB [T.m^(1-n)]','MaxB [T.m^(1-n)]'});
+    end
+    function AssignCSR
+      %ASSIGNCSR Assign CSR tags to DRIFTs downstream of bends
+      global BEAMLINE
+      ele=sort([findcells(BEAMLINE,'Class','SBEN') findcells(BEAMLINE,'Class','DRIF')]); 
+      ndrift=0;
+      for iele=ele
+        if strcmp(BEAMLINE{iele}.Class,'SBEN')
+          % - how many downstream drifts to be set to CSRDRIFT type?
+          if isfield(BEAMLINE{iele}.TrackFlag,'CSR_DriftSplit') && BEAMLINE{iele}.TrackFlag.CSR_DriftSplit>0
+            R=BEAMLINE{iele}.L/BEAMLINE{iele}.Angle;
+            % - if no design bunch length provided, assume 1mm rms
+            if ~isfield(BEAMLINE{iele}.TrackFlag,'SIGZDES')
+              lDecay=3*(24*1e-3*R^2)^(1/3);
+            else
+              lDecay=3*(24*BEAMLINE{iele}.TrackFlag.SIGZDES*R^2)^(1/3);
+            end
+            ndrift=0;
+            if iele<length(BEAMLINE)
+              lsum=0; lsumd=0;
+              for iele2=iele+1:length(BEAMLINE)
+                if isfield(BEAMLINE{iele2},'L')
+                  lsum=lsum+BEAMLINE{iele2}.L;
+                end
+                if strcmp(BEAMLINE{iele2}.Class,'DRIF')
+                  lsumd=lsumd+BEAMLINE{iele2}.L;
+                  ndrift=ndrift+1;
+                  dz=lsumd/BEAMLINE{iele}.TrackFlag.CSR_DriftSplit;
+                  if lsum>lDecay
+                    break
+                  end
+                end
+              end
+            end
+          end
+        elseif ndrift>0
+          ndrift=ndrift-1;
+          BEAMLINE{iele}.TrackFlag.CSR=dz;
+        end
+      end
+    end
   end
-  methods(Static,Access=private)
-    
+  methods(Static,Access=private)    
     function varargout=collectPar(ele,varargin)
       npar=nargin-1;
       if npar<1; varargout{1}=[]; return; end
@@ -2129,14 +3553,14 @@ classdef DeckTool < handle
           switch varargin{ipar}
             case {'l','angle','e1','e2','tilt','h1','h2','hgap','fint','k2','deltae','phi0',...
                 'eloss','dx','dxp','dy','dyp','dz','kick','hkick','vkick','dpx','dpy','x','y','px','py',...
-                'alfx','alfy','mux','muy'}
+                'alphax','alphay','alpfx','alphy','mux','muy'}
               varargout{ipar}=0;
             case {'k1','hgapx','fintx','lrad','lfile','tfile','energy','gamma',...
                 'ex','ey','et','exn','eyn','sigt','sige'}
               varargout{ipar}=NaN;
-            case {'freq','xsize','ysize','betx','bety','npart','kbunch'}
+            case {'freq','xsize','ysize','betax','betay','betx','bety','npart','kbunch'}
               varargout{ipar}=1;
-            case 'type'
+            case {'type','group'}
               varargout{ipar}='UNKNOWN';
             case 'nbin'
               varargout{ipar}=10;

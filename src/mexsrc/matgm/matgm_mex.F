@@ -30,7 +30,7 @@ C                   Referenced FUNCTIONs
         real*8 ran1_gm
         integer*4 i, ierr
         real*8 tfid_x(MAX_S), tfid_y(MAX_S), seed, dt, which_model
-        INTEGER ID_TFx(MAX_S), ID_TFy(MAX_S), idtfx, idtfy
+        INTEGER*4 ID_TFx(MAX_S), ID_TFy(MAX_S), idtfx, idtfy
         mwpointer is_pr, iseed_pr, idt_pr, imodel_pr, idxout_pr
         mwpointer idyout_pr
         mwpointer mxGetPr

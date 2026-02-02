@@ -66,6 +66,9 @@ for count = 1:length(klyslist)
   for count = 1:length(PS(klysno).Element)
       elemno = PS(klysno).Element(count) ;
       PS_index = find(BEAMLINE{elemno}.PS == klysno) ;
+      if isempty(PS_index)
+        break
+      end
       PS_index = PS_index(1) ;
       B = BEAMLINE{elemno}.B(PS_index) ;
       if ( (B==0) & (length(BEAMLINE{elemno}.B)>1) )
@@ -78,6 +81,9 @@ for count = 1:length(klyslist)
           B = -B ;
       end
       V = [V B] ;
+  end
+  if isempty(V)
+    continue
   end
   
   [a,b] = max(abs(V)) ;

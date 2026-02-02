@@ -1,4 +1,4 @@
-function b = bfact(Beam,ibunch,dz,sf,zcut)
+function [k,b] = bfact(Beam,ibunch,dz,sf,zcut,doplot)
 %BFACT Calculate longitudinal bunching factor for provided bunch
 
 % Phys constants
@@ -20,7 +20,6 @@ else
 end
 zv=ed(1:end-1)+diff(ed(1:2))/2;
 qv=accumarray(BIN',Q');
-fprintf('nbins= %d\n',nbin);
 
 % Cut 1% charge beam tails
 ns=cumsum(qv); n1=find(ns<ns(end)*0.01,1,'last'); n2=find(ns>ns(end)*0.99,1);
@@ -36,14 +35,14 @@ else
 end
 
 % Only fit / calc bunching factor over zcut
-if ~exist('zcut','var')
+if ~exist('zcut','var') || isempty(zcut)
   zcut=[min(zv) max(zv)];
 end
 zi=zv>=zcut(1) & zv<=zcut(2) ;
 
 % De-trend data
 qvs=qvs(:)';
-[P,~,MU]=polyfit(zv(zi),qvs(zi),9);
+[P,~,MU]=polyfit(zv(zi),qvs(zi),19);
 qvf=polyval(P,zv(zi),[],MU);
 qvt=qvs(zi)-qvf;
 
@@ -63,12 +62,15 @@ b = (1/L) * sum( binwid .* It .* exp(-1i.*k.*zv(zi)),2 );
 
 
 % Diagnostics plots
-figure
-subplot(3,1,1)
-plot(zv,Iv,zv,Is,zv(zi),If);xlabel('Z [m]'); ylabel('I [A]'); grid on
-ax=axis;
-subplot(3,1,2)
-plot(zv(zi),It);xlabel('Z [m]'); ylabel('\DeltaI(z) [A]'); grid on
-ax2=axis; axis([ax(1:2) ax2(3:4)]);
-subplot(3,1,3)
-semilogx((2*pi)./k,abs(b));xlabel('\lambda [m]'); ylabel('Bunching factor |b(k)|'); grid on
+if exist('doplot','var') && doplot
+  fprintf('nbins= %d\n',nbin);
+  figure
+  subplot(3,1,1)
+  plot(zv,Iv,zv,Is,zv(zi),If);xlabel('Z [m]'); ylabel('I [A]'); grid on
+  ax=axis;
+  subplot(3,1,2)
+  plot(zv(zi),It);xlabel('Z [m]'); ylabel('\DeltaI(z) [A]'); grid on
+  ax2=axis; axis([ax(1:2) ax2(3:4)]);
+  subplot(3,1,3)
+  semilogx((2*pi)./k,abs(b));xlabel('\lambda [m]'); ylabel('Bunching factor |b(k)|'); grid on
+end

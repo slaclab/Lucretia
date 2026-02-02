@@ -50,10 +50,13 @@ barColor = [] ;
 nElem = 0 ; count = istart-1 ;
 
 % loop over elements
-
+isgradbend=false;
 while (count < iend)
 
-  count = count + 1 ;
+  if ~isgradbend
+    count = count + 1 ;
+  end
+
   height = 0 ;
   switch BEAMLINE{count}.Class
 
@@ -61,6 +64,13 @@ while (count < iend)
       height = ha ;
       color = ca ;
     case 'SBEN'
+      if ~isgradbend && length(BEAMLINE{count}.B)>1 && abs(BEAMLINE{count}.B(2))>0
+        isgradbend=true;
+        BEAMLINE{count}.Class='QUAD';
+        continue;
+      elseif isgradbend
+        isgradbend=false;
+      end
       height = hb ;
       color = cb ;
     case 'PLENS'
@@ -69,17 +79,23 @@ while (count < iend)
     case 'QUAD'
       height = hq ;
       color = cq ;
-      strength = BEAMLINE{count}.B ;
+      strength = BEAMLINE{count}.B(end) ;
       if (isfield(BEAMLINE{count},'PS'))
         ps = BEAMLINE{count}.PS ;
         if (ps > 0)
           strength = strength * PS(BEAMLINE{count}.PS).Ampl ;
         end
       end
+      if abs(BEAMLINE{count}.Tilt)>1.5 && abs(BEAMLINE{count}.Tilt)<1.6 % Account for skew-quad
+        strength=-strength;
+      end
       if (strength<0)
         barPolarity(nElem+1) = -1 ;
       else
         barPolarity(nElem+1) = 1 ;
+      end
+      if isgradbend
+        BEAMLINE{count}.Class='SBEN';
       end
     case 'SEXT'
       height = hs ;

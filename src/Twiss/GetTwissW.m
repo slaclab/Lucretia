@@ -35,6 +35,10 @@ for ibl=i1:i2
 end
 T.Wx=zeros(1,length(T)); T.Wy=T.Wx;
 for itw=1:length(T.betax)
+  p=polyfit([-de 0 de],[Tm.etax(itw) T.etax(itw) Tp.etax(itw)],1);
+  detax=p(1);
+  p=polyfit([-de 0 de],[Tm.etay(itw) T.etay(itw) Tp.etay(itw)],1);
+  detay=p(1);
   p=polyfit([-de 0 de],[Tm.betax(itw) T.betax(itw) Tp.betax(itw)],1);
   dbx=p(1);
   p=polyfit([-de 0 de],[Tm.betay(itw) T.betay(itw) Tp.betay(itw)],1);
@@ -45,4 +49,6 @@ for itw=1:length(T.betax)
   day=p(1);
   T.Wx(itw)=sqrt( (dax-(T.alphax(itw)/T.betax(itw))*dbx)^2 + (dbx/T.betax(itw))^2 ) ;
   T.Wy(itw)=sqrt( (day-(T.alphay(itw)/T.betay(itw))*dby)^2 + (dby/T.betay(itw))^2 ) ;
+  T.etax2(itw)=detax;
+  T.etay2(itw)=detay;
 end

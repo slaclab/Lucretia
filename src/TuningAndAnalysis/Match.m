@@ -884,9 +884,9 @@ classdef Match < handle & physConsts
                   F(itype)=mod(T.nuy(end),obj.matchTypeQualifiers{itype});
                 end
               case 'nu_x'
-                F(itype)=T.nux(end);
+                F(itype)=mod(T.nux(end),1);
               case 'nu_y'
-                F(itype)=T.nuy(end);
+                F(itype)=mod(T.nuy(end),1);
               case 'NEmit_x'
                 if ~exist('nx','var')
                   [nx,ny] = GetNEmitFromBeam( beamout ,1);

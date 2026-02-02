@@ -1,7 +1,7 @@
-function Tol=MagnetTolerances(Initial,demit,r0,i1,i2,verbose)
+function Tol=MagnetTolerances(Initial,demit,r0,i1,i2,sige,verbose)
 % MAGNETTOLERANCES - Calculate offset, roll, field error tolerances
 %
-% MagnetTolerances(Initial,demit,r0,i1, i2 [,verbose])
+% MagnetTolerances(Initial,demit,r0,i1, i2 [,sige,verbose])
 %
 % Inputs:
 % -------
@@ -16,6 +16,9 @@ function Tol=MagnetTolerances(Initial,demit,r0,i1,i2,verbose)
 % i1, i2: First and last BEAMLINE element to calculate tolerances over
 %
 % if verbose>0 then print out all tolerance data to screen (default: off)
+%
+% sige: if provided, must be same length as i1:i2 with energy spread in GeV,
+%       otherwise use value in Initial structure
 %
 % Outputs:
 % --------
@@ -96,14 +99,20 @@ for iele=findcells(BEAMLINE,'Class','SBEN',i1,i2)
 end
 
 % - Quad b2/b1
-for iele=findcells(BEAMLINE,'Class','QUAD',i1,i2)
+iben=findcells(BEAMLINE,'Class','SBEN',i1,i2);
+ibenquad=iben(arrayfun(@(x) length(BEAMLINE{x}.B)>1,iben)) ;
+for iele=[findcells(BEAMLINE,'Class','QUAD',i1,i2) ibenquad]
   if ~isfield(BEAMLINE{iele},'Slices'); BEAMLINE{iele}.Slices=iele; end
   if iele~=BEAMLINE{iele}.Slices(1)
     continue
   end
   emitx=Initial.x.NEmit/(BEAMLINE{iele}.P/0.511e-3);
   emity=Initial.y.NEmit/(BEAMLINE{iele}.P/0.511e-3);
-  deltaE=Initial.SigPUncorrel/BEAMLINE{iele}.P;
+  if exist('sige','var')
+    deltaE=sige(iele)/BEAMLINE{iele}.P;
+  else
+    deltaE=Initial.SigPUncorrel/BEAMLINE{iele}.P;
+  end
   betax=Twiss.betax(iele-i1+2);
   betay=Twiss.betay(iele-i1+2);
   ksix2=(Twiss.etax(iele-i1+2)^2*deltaE^2)/(betax*emitx);
@@ -127,7 +136,7 @@ for iele=findcells(BEAMLINE,'Class','QUAD',i1,i2)
     if isfield(BEAMLINE{isl},'BMAX')
       b1=b1+BEAMLINE{isl}.BMAX*r0;
     else
-      b1=b1+BEAMLINE{isl}.B*r0;
+      b1=b1+BEAMLINE{isl}.B(end)*r0;
       if isfield(BEAMLINE{iele},'PS') && BEAMLINE{iele}.PS>0
         b1=b1*PS(BEAMLINE{iele}.PS).Ampl;
       end
@@ -141,7 +150,7 @@ for iele=findcells(BEAMLINE,'Class','QUAD',i1,i2)
 end
 
 % - Quad offset + roll
-for iele=findcells(BEAMLINE,'Class','QUAD',i1,i2)
+for iele=[findcells(BEAMLINE,'Class','QUAD',i1,i2) ibenquad]
   if ~isfield(BEAMLINE{iele},'Slices'); BEAMLINE{iele}.Slices=iele; end
   if iele~=BEAMLINE{iele}.Slices(1)
     continue
@@ -157,7 +166,11 @@ for iele=findcells(BEAMLINE,'Class','QUAD',i1,i2)
   end
   emitx=Initial.x.NEmit/(BEAMLINE{iele}.P/0.511e-3);
   emity=Initial.y.NEmit/(BEAMLINE{iele}.P/0.511e-3);
-  deltaE=Initial.SigPUncorrel/BEAMLINE{iele}.P;
+  if exist('sige','var')
+    deltaE=sige(iele)/BEAMLINE{iele}.P;
+  else
+    deltaE=Initial.SigPUncorrel/BEAMLINE{iele}.P;
+  end
   [~,R]=RmatAtoB(iele,BEAMLINE{iele}.Slices(end));
   BEAMLINE=BL1; PS=PS1;
   fx=abs(1/R(2,1));
@@ -200,7 +213,11 @@ for iele=findcells(BEAMLINE,'Class','SEXT',i1,i2)
   l=sum(arrayfun(@(x) BEAMLINE{x}.L,BEAMLINE{iele}.Slices));
   emitx=Initial.x.NEmit/(BEAMLINE{iele}.P/0.511e-3);
   emity=Initial.y.NEmit/(BEAMLINE{iele}.P/0.511e-3);
-  deltaE=Initial.SigPUncorrel/BEAMLINE{iele}.P;
+  if exist('sige','var')
+    deltaE=sige(iele)/BEAMLINE{iele}.P;
+  else
+    deltaE=Initial.SigPUncorrel/BEAMLINE{iele}.P;
+  end
   if ksix2>=ksiy2
     ksi2=(Twiss.etax(iele-i1+2)^2*deltaE^2)/(betax*emitx);
     chi2 = (betay * emity) / (betax * emitx) ;

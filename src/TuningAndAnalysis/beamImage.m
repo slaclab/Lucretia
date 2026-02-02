@@ -261,16 +261,20 @@ v=accumarray(BIN,Q(idz));
 relgamma=mean(E(idz))/0.511e-3;
 relbeta=sqrt(1-relgamma^-2);
 v=1e-3.*v.*(1/(((u(2)-u(1))*1e-6)/(relbeta*299792458))); % y-axis Q->I (kA)
-if (asym)
-  [xfit,q]=agauss_fit(u,v,[],0);
-  xi=u;
-else
-  if dpk(2)
-    [q,~,~,xi,xfit]=peakfit([u v'],0,0,2,1,0,10,0,0,0,0);
-  else
-    [xfit,q]=gauss_fit(u,v,[],0);
+try
+  if (asym)
+    [xfit,q]=agauss_fit(u,v,[],0);
     xi=u;
+  else
+    if dpk(2)
+      [q,~,~,xi,xfit]=peakfit([u v'],0,0,2,1,0,10,0,0,0,0);
+    else
+      [xfit,q]=gauss_fit(u,v,[],0);
+      xi=u;
+    end
   end
+catch
+  xfit=[];
 end
 data.sigz=q(4);
 data.pkI=max(v);
@@ -280,9 +284,11 @@ if axhan(2)~=0
   bar(sh,u,v);
   h2=bar(sh,u,v);
   set(h2,'EdgeColor',[0,0,1],'FaceColor',[0,0,1])
-  hold(sh,'on')
-  plot(sh,xi,xfit,'r-')
-  hold(sh,'off');
+  if ~isempty(xfit)
+    hold(sh,'on')
+    plot(sh,xi,xfit,'r-')
+    hold(sh,'off');
+  end
   if ~dpk(2); title(sh,sprintf('\\sigma_z = %.3f um I(pk) = %.2f kA',abs(data.sigz),max(v))); end
   xlabel(sh,'z (\mum)')
   ylabel(sh,'I (kA)');

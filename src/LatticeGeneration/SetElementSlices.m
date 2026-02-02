@@ -14,11 +14,13 @@ function [stat,varargout] = SetElementSlices( istart, iend )
 % [stat,slices] = SetElementSlices( istart, iend ) returns all of the
 %    identified slice element lists in a cell array as well as a status.
 %
-% Version date:  09-Mar-2006.
+% Version date:  17-July-2025.
 
 % MOD:
 %      09-mar-2006, PT:
 %         support for TCAVs and solenoids.
+%      17-jul-2025, GW:
+%         fix bug which limited Slice count to 2 per element type
 
 %==========================================================================
 
@@ -89,7 +91,7 @@ function [stat,varargout] = SetElementSlices( istart, iend )
 % range, file the slice if it is valid.  Note that a slice with only one
 % element in it is not valid!
 
-          if ( (SliceOpen ==1) || (elemno <=iend) )
+          if SliceOpen == 1 || elemno == iend || elemno == AllOfClass(end)
               
             if (length(ThisSlice)>1)
               nslices = nslices + 1 ;

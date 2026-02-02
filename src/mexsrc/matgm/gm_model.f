@@ -1505,10 +1505,16 @@ c     > 	 ' idtfy=',idtfy,' idnx=',idnx,' idny=',idny
        end do
 c    added by A.S. 12/28/01
         s=-SBEG
-        call DXDY_PWK(tabs,dt,s,dxref,dyref,0,0,0,0,0,0)
+        idtfx=0
+        idtfy=0
+        idnx=0
+        idny=0
+        imx=0
+        imy=0
+        call DXDY_PWK(tabs,dt,s,dxref,dyref,idtfx,idtfy,idnx,idny,imx,0)
 c                                this is beginning of reflected beamline
         s=SBEG
-        call DXDY_PWK(tabs,dt,s,dxbeg,dybeg,0,0,0,0,0,0)
+        call DXDY_PWK(tabs,dt,s,dxbeg,dybeg,idtfx,idtfy,idnx,idny,imx,0)
 
 	if(is0.eq.1) then
 c	dx1=dx(1)

@@ -17,11 +17,11 @@ function Bact = GetTrueVoltage( indx , varargin )
   global BEAMLINE KLYSTRON ;
 
   do_slices = 0 ;
-  if (length(varargin) > 0)
+  if (~isempty(varargin))
     do_slices = varargin{1} ;
   end
   Bact = 0 ;
-  if ( (isfield(BEAMLINE{indx},'Slices')) & (do_slices == 1) )
+  if ( (isfield(BEAMLINE{indx},'Slices')) && (do_slices == 1) )
     for count = BEAMLINE{indx}.Slices
       Bact = Bact + BEAMLINE{count}.Volt ;
     end
@@ -31,4 +31,7 @@ function Bact = GetTrueVoltage( indx , varargin )
   if (isfield(BEAMLINE{indx},'Klystron')) && BEAMLINE{indx}.Klystron>0
     Ampl = KLYSTRON(BEAMLINE{indx}.Klystron).Ampl ;
     Bact = Bact * Ampl ;
+    if string(KLYSTRON(BEAMLINE{indx}.Klystron).Stat)~="ON"
+      Bact = 0 ;
+    end
   end

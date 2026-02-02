@@ -1,4 +1,4 @@
-function LucretiaInit(InstallDir,whichmex)
+verfunction LucretiaInit(InstallDir,whichmex)
 if ~isdeployed
   % Add Lucretia directories
   if ~exist(InstallDir,'dir') || ~exist(fullfile(InstallDir,'src'),'dir')
